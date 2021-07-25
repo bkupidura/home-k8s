@@ -1,0 +1,40 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: zigbee2mqtt
+  namespace: kube-system
+spec:
+  chart: zigbee2mqtt
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.zigbee2mqtt.chart }}
+  targetNamespace: smart-home
+  valuesContent: |-
+    env:
+      TZ: {{ manifest.timezone }}
+    image:
+      repository: {{ manifest.versions.zigbee2mqtt.image.repository }}
+      tag: {{ manifest.versions.zigbee2mqtt.image.tag }}
+    securityContext:
+      privileged: true
+    persistence:
+      data:
+        enabled: true
+        existingClaim: zigbee2mqtt
+      usb:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/ttyACM0
+    ingress:
+      main:
+        enabled: false
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: zigbee_controller
+                operator: In
+                values:
+                  - "true"
+    config: {}

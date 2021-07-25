@@ -1,0 +1,108 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager
+  namespace: kube-system
+spec:
+  repo: https://charts.jetstack.io
+  chart: cert-manager
+  version: {{ manifest.versions.certmanager.chart }}
+  targetNamespace: cert-manager
+  valuesContent: |-
+    image:
+      repository: {{ manifest.versions.certmanager.image.repository }}
+      tag: {{ manifest.versions.certmanager.image.tag }}
+    extraEnv:
+      - name: TZ
+        value: {{ manifest.timezone }}
+    extraArgs:
+      - "--dns01-recursive-nameservers-only"
+      - "--dns01-recursive-nameservers=8.8.8.8:53,1.1.1.1:53"
+    installCRDs: true
+    prometheus:
+      enabled: true
+      servicemonitor:
+        enabled: false
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager-webhook
+  namespace: kube-system
+spec:
+  chart: http://gostatic.home-infra:8043/cert-manager-webhook-ovh-0.0.tgz
+  targetNamespace: cert-manager
+  valuesContent: |-
+    groupName: acme.{{ manifest.domain }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-manager-webhook-ovh:secret-reader
+  namespace: cert-manager
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["ovh-credentials"]
+    verbs: ["get", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-manager-webhook-ovh:secret-reader
+  namespace: cert-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager-webhook-ovh:secret-reader
+subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: cert-manager-webhook-cert-manager-webhook-ovh
+    namespace: cert-manager
+
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: {{ manifest.mail }}
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+      - dns01:
+          webhook:
+            groupName: acme.{{ manifest.domain }}
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              applicationKey: {{ manifest.ovh.application_key }}
+              applicationSecretRef:
+                key: application_secret
+                name: ovh-credentials
+              consumerKey: {{ manifest.ovh.consumer_key }}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: tls-certificate
+  namespace: cert-manager
+  annotations: 
+    reflector.v1.k8s.emberstack.com/secret-reflection-allowed: "true"
+    reflector.v1.k8s.emberstack.com/secret-reflection-auto-enabled: "true"
+spec:
+  dnsNames:
+    - "{{ manifest.domain }}"
+    - "*.{{ manifest.domain }}"
+  issuerRef:
+    name: letsencrypt
+  secretName: {{ manifest.traefik.tls.secret_name }}

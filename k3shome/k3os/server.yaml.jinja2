@@ -1,0 +1,89 @@
+{%- macro render_write_file(write_file_def) -%}
+encoding: "b64"
+content: "{{ write_file_def.content | b64encode }}"
+path: "{{ write_file_def.path }}"
+{%- if write_file_def.owner is defined %}
+owner: "{{ write_file_def.owner }}"
+{%- endif %}
+{%- if write_file_def.permissions is defined %}
+permissions: "{{ write_file_def.permissions }}"
+{%- endif %}
+{%- endmacro %}
+{%- set server_detail = k3os.servers | selectattr('hostname', 'equalto', server_name) | first -%}
+{%- set master = k3os.servers | selectattr('role', 'equalto', 'master') | first -%}
+{%- set write_files = [] %}
+{%- if server_detail.write_files is defined %}
+{%- set write_files = server_detail['write_files'] %}
+{%- endif %}
+{%- if k3os.global_write_files is defined %}
+{%- set write_files = write_files + k3os.global_write_files %}
+{%- endif %}
+
+ssh_authorized_keys:
+  {%- for ssh_authorized_key in k3os.ssh_authorized_keys %}
+  - "{{ ssh_authorized_key }}"
+  {%- endfor %}
+hostname: "{{ server_detail.hostname }}"
+{%- if server_detail.boot_cmds is defined %}
+boot_cmd:
+  {%- for run_cmd in server_detail.boot_cmds %}
+  - "{{ run_cmd }}"
+  {%- endfor %}
+{%- endif %}
+{%- if server_detail.run_cmds is defined %}
+run_cmd:
+  {%- for run_cmd in server_detail.run_cmds %}
+  - "{{ run_cmd }}"
+  {%- endfor %}
+{%- endif %}
+password: "{{ k3os.rancher_user_password }}"
+{%- if write_files|length > 0 %}
+write_files:
+  {%- for write_file in write_files %}
+  - {{ render_write_file(write_file) | indent(4, false) }}
+  {%- endfor %}
+{%- endif %}
+k3os:
+  k3s_args:
+    - "server"
+    {%- if k3os.k3os_args is defined %}
+        {%- for k3os_arg in k3os.k3os_args %}
+    - "{{ k3os_arg }}"
+        {%- endfor %}
+    {%- endif %}
+    {%- if server_detail.role == 'master' %}
+    - "--cluster-init"
+    {%- else %}
+    - "--server"
+    - "https://{{ master.ip }}:6443"
+    {%- endif %}
+    - "--node-ip"
+    - "{{ server_detail.ip }}"
+    - "--bind-address"
+    - "{{ server_detail.ip }}"
+    - "--advertise-address"
+    - "{{ server_detail.ip }}"
+  {%- if server_detail.env is defined %}
+  environment:
+    {%- for key, value in server_detail.env.items() %}
+    {{ key }}: "{{ value }}"
+    {%- endfor %}
+  {%- endif %}
+  {%- if k3os.dns_servers is defined %}
+  dns_servers:
+    {%- for dns_server in k3os.dns_servers %}
+    - "{{ dns_server }}"
+    {%- endfor %}
+  {%- endif %}
+  {%- if k3os.ntp_servers is defined %}
+  ntp_servers:
+    {%- for ntp_server in k3os.ntp_servers %}
+    - "{{ ntp_server }}"
+    {%- endfor %}
+  {%- endif %}
+  {%- if server_detail.labels is defined %}
+  labels:
+    {%- for key, value in server_detail.labels.items() %}
+    {{ key }}: "{{ value }}"
+    {%- endfor %}
+  {%- endif %}

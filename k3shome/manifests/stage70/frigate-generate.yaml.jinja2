@@ -1,0 +1,124 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frigate
+  namespace: smart-home
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ manifest.frigate.volume.size }}
+  storageClassName: longhorn-standard
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: frigate
+  namespace: smart-home
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: Host(`frigate.{{ manifest.domain }}`)
+    kind: Rule
+    services:
+      - name: frigate
+        port: 5000
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+  tls:
+    secretName: {{ manifest.traefik.tls.secret_name }}
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: frigate
+  namespace: kube-system
+spec:
+  chart: http://gostatic.home-infra:8043/frigate-0.0.tgz
+  targetNamespace: smart-home
+  valuesContent: |-
+    nodeSelector:
+      video_processing: "true"     
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - recorder
+            topologyKey: kubernetes.io/hostname
+    replicaCount: 1
+    strategyType: Recreate
+    timezone: {{ manifest.timezone }}
+    image:
+      repository: {{ manifest.versions.frigate.repository }}
+      tag: {{ manifest.versions.frigate.tag }}
+    extraVolumes:
+      - name: frigate
+        persistentVolumeClaim:
+          claimName: frigate
+      - name: dev-dri-renderd128
+        hostPath:
+          path: /dev/dri/renderD128
+    extraVolumeMounts:
+      - mountPath: /media/frigate
+        name: frigate
+      - name: dev-dri-renderd128
+        mountPath: /dev/dri/renderD128
+        
+    shmSize: 500Mi
+    probes:
+      liveness:
+        enabled: true
+      readiness:
+        enabled: true
+    service:
+      port: 5000
+    ingress:
+      enabled: false
+    config: |
+      mqtt:
+        host: mosquitto.home-infra
+        port: 1883
+        topic_prefix: frigate
+        client_id: frigate
+        user: frigate
+        password: "{{ manifest.frigate.mqtt.password }}"
+        stats_interval: 60
+      ffmpeg:
+        hwaccel_args:
+          - -hwaccel
+          - vaapi
+          - -hwaccel_device
+          - /dev/dri/renderD128
+          - -hwaccel_output_format
+          - yuv420p
+      cameras:
+        {%- for key, value in manifest.frigate.cameras.items() %}
+        {{ key }}:
+          {{ value | to_nice_yaml | indent(10, false) }}
+        {%- endfor %}
+      objects:
+        track:
+          - person
+        filters:
+          person:
+            min_score: 0.6
+            threshold: 0.7
+      detect:
+        max_disappeared: 60
+      record:
+        enabled: false
+      detectors:
+        cpu1:
+          type: cpu
+        cpu2:
+          type: cpu

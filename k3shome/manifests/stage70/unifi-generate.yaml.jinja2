@@ -1,0 +1,43 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: unifi
+  namespace: kube-system
+spec:
+  chart: unifi
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.unifi.chart }}
+  targetNamespace: home-infra
+  valuesContent: |-
+    timezone: {{ manifest.timezone }}
+    image:
+      repository: {{ manifest.versions.unifi.image.repository }}
+      tag: {{ manifest.versions.unifi.image.tag }}
+    persistence:
+      enabled: true
+      existingClaim: unifi
+    controllerService:
+      type: LoadBalancer
+      loadBalancerIP: "{{ manifest.vips[1].ip }}"
+      externalTrafficPolicy: Local
+      annotations:
+        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
+    stunService:
+      type: LoadBalancer
+      loadBalancerIP: "{{ manifest.vips[1].ip }}"
+      externalTrafficPolicy: Local
+      annotations:
+        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
+    discoveryService:
+      type: LoadBalancer
+      loadBalancerIP: "{{ manifest.vips[1].ip }}"
+      externalTrafficPolicy: Local
+      annotations:
+        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
+    resources:
+      requests:
+        memory: 500Mi
+        cpu: 15m
+      limits:
+        memory: 1Gi

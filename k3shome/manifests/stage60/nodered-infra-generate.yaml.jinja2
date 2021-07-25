@@ -1,0 +1,117 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: node-red
+  namespace: smart-home
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn-standard-with-snapshots
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: node-red
+  namespace: smart-home
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`node-red.{{ manifest.domain }}`)
+    kind: Rule
+    services:
+      - name: node-red
+        port: 1880
+        namespace: smart-home
+  tls:
+    secretName: {{ manifest.traefik.tls.secret_name }}
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: node-red-restic-restore
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: node-red
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: node-red
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            args:
+            - "--repo"
+            - "{{ manifest.backup.restic.repo }}"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "node-red"
+            - "--target"
+            - "/data"
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: node-red-restic-backup
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "10 04 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: node-red
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: node-red
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              cd /data
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose backup .
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - node-red
+                  topologyKey: kubernetes.io/hostname
