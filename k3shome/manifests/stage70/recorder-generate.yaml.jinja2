@@ -166,6 +166,10 @@ spec:
                   key: mqtt_password
             - name: MQTT_TOPIC
               value: recorder
+            - name: FFMPEG_RECORD_CMD
+              value: "ffmpeg -rtsp_transport tcp -i %s -t %d -vcodec copy -acodec aac %s"
+            - name: FFMPEG_CONCAT_CMD
+              value: "nice -n 19 ffmpeg -f concat -safe 0 -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -i %s -vcodec h264_vaapi -acodec copy -preset veryfast -vf format=nv12|vaapi,hwupload %s"
             - name: SSH_STRING
               valueFrom:
                 secretKeyRef:
