@@ -21,7 +21,7 @@ spec:
       containers:
         - name: esphome
           image: {{ manifest.versions.esphome.image.repository }}:{{ manifest.versions.esphome.image.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /config
               name: config

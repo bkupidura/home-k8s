@@ -14,7 +14,7 @@ spec:
           containers:
           - name: battery-check
             image: {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             command:
             - "/bin/sh"
             - "-ec"
@@ -38,7 +38,7 @@ spec:
           containers:
           - name: batter-check
             image: {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             command:
             - "/bin/sh"
             - "-ec"

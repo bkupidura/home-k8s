@@ -21,7 +21,7 @@ spec:
       containers:
         - name: configure
           image: {{ manifest.versions.ubuntu.repository }}:{{ manifest.versions.ubuntu.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command:
           - "/bin/sh"
           - "-ec"
