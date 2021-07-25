@@ -3,7 +3,8 @@
 `brew install pip`  
 `brew install kubernetes-cli`  
 `brew install helm`  
-`pip3 install "jinja2-cli[yaml]"`
+`pip3 install "jinja2-cli[yaml]"`  
+`pip3 install jinja2-ansible-filters`  
 
 ## data/config.yaml file
 Encrypt file `gpg --symmetric data/config.yaml`
