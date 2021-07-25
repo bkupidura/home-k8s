@@ -1,0 +1,23 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`longhorn.{{ manifest.domain }}`)
+    kind: Rule
+    services:
+      - name: longhorn-frontend
+        port: 80
+        namespace: longhorn-system
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+      - name: x-forwarded-proto-https
+        namespace: traefik-system
+  tls:
+    secretName: {{ manifest.traefik.tls.secret_name }}

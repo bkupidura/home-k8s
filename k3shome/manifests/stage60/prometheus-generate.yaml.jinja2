@@ -1,0 +1,52 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: prometheus
+  namespace: kube-system
+spec:
+  chart: prometheus
+  repo: https://prometheus-community.github.io/helm-charts
+  version: {{ manifest.versions.prometheus.chart }}
+  targetNamespace: home-infra
+  valuesContent: |-
+    extraEnv:
+      TZ: {{ manifest.timezone }}
+    alertmanager:
+      enabled: false
+    pushgateway:
+      enabled: false
+    kubeStateMetrics:
+      enabled: true
+    nodeExporter:
+      enabled: true
+    server:
+      enabled: true
+      persistentVolume:
+        storageClass: longhorn-standard
+    extraScrapeConfigs: |
+      {{ manifest.prometheus.extrascrape | to_nice_yaml | indent(6, false) }}
+    serverFiles: 
+      {{ manifest.prometheus.serverfiles | to_nice_yaml | indent(6, false) }}
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus
+  namespace: home-infra
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`prometheus.{{ manifest.domain }}`)
+    kind: Rule
+    services:
+      - name: prometheus-server
+        port: 80
+        namespace: home-infra
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+  tls:
+    secretName: {{ manifest.traefik.tls.secret_name }}

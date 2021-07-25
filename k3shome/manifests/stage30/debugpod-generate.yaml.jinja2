@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debugpod
+  namespace: home-infra
+  labels:
+    app.kubernetes.io/name: debugpod
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: debugpod
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: debugpod
+    spec:
+      containers:
+      - name: debugpod
+        image: {{ manifest.versions.ubuntu.repository }}:{{ manifest.versions.ubuntu.tag }}
+        command:
+          - "/bin/sh"
+          - "-ec"
+          - |
+            apt update
+            apt install -y tcpdump python3 vim curl iputils-ping bind9-host
+            tail -f /dev/null
+        securityContext:
+          privileged: true
+      hostNetwork: true
+      terminationGracePeriodSeconds: 3
+      dnsPolicy: ClusterFirstWithHostNet
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - debugpod
+              topologyKey: kubernetes.io/hostname

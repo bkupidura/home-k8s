@@ -1,0 +1,26 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: home-assistant
+  namespace: kube-system
+spec:
+  chart: home-assistant
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.homeassistant.chart }}
+  targetNamespace: smart-home
+  valuesContent: |-
+    env:
+      TZ: {{ manifest.timezone }}
+    image:
+      repository: {{ manifest.versions.homeassistant.image.repository }}
+      tag: {{ manifest.versions.homeassistant.image.tag }}
+    persistence:
+      config:
+        enabled: true
+        existingClaim: home-assistant
+    hostNetwork: true
+    ingress:
+      main:
+        enabled: false
+    dnsPolicy: ClusterFirstWithHostNet
