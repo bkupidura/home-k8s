@@ -10,7 +10,6 @@ helm package --version=0.0 cert-manager-webhook-ovh/deploy/cert-manager-webhook-
 git clone https://github.com/blakeblackshear/billimek-charts.git || pushd billimek-charts && git pull && popd
 helm package --version=0.0 billimek-charts/charts/frigate/
 
-echo $KUBECONFIG
 kubectl delete configmap static-generated -n home-infra
 kubectl create configmap static-generated -n home-infra \
     --from-file=cert-manager-webhook-ovh-0.0.tgz=cert-manager-webhook-ovh-0.0.tgz \

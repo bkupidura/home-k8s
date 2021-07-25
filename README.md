@@ -30,7 +30,7 @@ Token can be found on master in `/var/lib/rancher/k3s/server/node-token`
 
 ##### Copy /etc/rancher/k3s/k3s.yaml
 Copy `/etc/rancher/k3s/k3s.yaml` from any node.  
-`export KUBECONFIG=~/k3s/k3s-access.yaml`
+`export KUBECONFIG=~/home-k8s/k3s-access.yaml`
 
 ## Render manifests
 `./scripts/render-template.sh`
