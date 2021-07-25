@@ -1,3 +1,12 @@
+global:
+  ntp_servers:
+    - "0.pl.pool.ntp.org"
+    - "1.pl.pool.ntp.org"
+  dns_servers:
+    - "1.1.1.1"
+    - "8.8.8.8"
+    - "1.0.0.1"
+    - "8.8.4.4"
 k3os:
   ssh_authorized_keys:
     - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee
@@ -12,11 +21,11 @@ k3os:
     - "default-not-ready-toleration-seconds=120"
   rancher_user_password: rancher
   ntp_servers:
-    - "0.pl.pool.ntp.org"
-    - "1.pl.pool.ntp.org"
+    - "{{ global.ntp_servers[0] }}"
+    - "{{ global.ntp_servers[1] }}"
   dns_servers:
-    - "1.1.1.1"
-    - "8.8.8.8"
+    - "{{ global.dns_servers[0] }}"
+    - "{{ global.dns_servers[1] }}"
   servers:
     - ip: 10.0.120.31
       hostname: k3s-bravo
@@ -28,7 +37,7 @@ k3os:
         - "ln -vs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime"
         - "echo 'Europe/Warsaw' > /etc/timezone"
       run_cmds:
-        - "connmanctl config ethernet_d8cb8ad15025_cable --ipv6 off --nameservers 1.1.1.1 8.8.8.8 --timeservers 0.pl.pool.ntp.org 1.pl.pool.ntp.org --ipv4 dhcp"
+        - "connmanctl config ethernet_d8cb8ad15025_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --timeservers {{ global.ntp_servers | join(' ') }} --ipv4 dhcp"
     - ip: 10.0.120.32
       hostname: k3s-charlie
       role: worker
@@ -38,7 +47,7 @@ k3os:
         - "ln -vs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime"
         - "echo 'Europe/Warsaw' > /etc/timezone"
       run_cmds:
-        - "connmanctl config ethernet_002324acfb8a_cable --ipv6 off --nameservers 1.1.1.1 8.8.8.8 --timeservers 0.pl.pool.ntp.org 1.pl.pool.ntp.org --ipv4 dhcp"
+        - "connmanctl config ethernet_002324acfb8a_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --timeservers {{ global.ntp_servers | join(' ') }} --ipv4 dhcp"
       env:
         K3S_TOKEN: <TOKEN>
     - ip: 10.0.120.33
@@ -53,7 +62,7 @@ k3os:
         - "echo 'Europe/Warsaw' > /etc/timezone"
         - "mkdir /srv/samba"
       run_cmds:
-        - "connmanctl config ethernet_685b35949584_cable --ipv6 off --nameservers 1.1.1.1 8.8.8.8 --timeservers 0.pl.pool.ntp.org 1.pl.pool.ntp.org --ipv4 dhcp"
+        - "connmanctl config ethernet_685b35949584_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --timeservers {{ global.ntp_servers | join(' ') }} --ipv4 dhcp"
       env:
         K3S_TOKEN: <TOKEN>
       write_files:
@@ -122,6 +131,9 @@ manifest:
       password: "<RESTIC_PASSWORD>"
       repo_samba: "<RESTIC_REPO>"
   versions:
+    chrony:
+      repository: geoffh1977/chrony
+      tag: latest
     restic:
       repository: restic/restic
       tag: 0.12.0

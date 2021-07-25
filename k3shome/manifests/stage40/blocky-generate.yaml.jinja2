@@ -44,10 +44,9 @@ spec:
         enable: true
       upstream:
         default:
-          - 1.1.1.1
-          - 1.0.0.1
-          - 8.8.8.8
-          - 8.8.4.4
+          {%- for dns_server in global.dns_servers %}
+          - {{ dns_server }}
+          {%- endfor %}
       conditional:
         mapping:
           {%- for key, value in manifest.blocky.conditional.mapping.items() %}
