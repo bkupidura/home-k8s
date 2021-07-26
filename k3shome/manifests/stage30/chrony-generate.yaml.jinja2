@@ -26,6 +26,8 @@ metadata:
   labels:
     app.kubernetes.io/name: chrony
 spec:
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       app.kubernetes.io/name: chrony
@@ -35,7 +37,7 @@ spec:
         app.kubernetes.io/name: chrony
     spec:
       containers:
-        - name: web
+        - name: chrony
           image: {{ manifest.versions.chrony.repository }}:{{ manifest.versions.chrony.tag }}
           imagePullPolicy: Always
           ports:
@@ -68,3 +70,17 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 60
             timeoutSeconds: 5
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: tzdata-config
+              mountPath: /etc/timezone
+              readOnly: true
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /etc/localtime
+        - name: tzdata-config
+          hostPath:
+            path: /etc/timezone

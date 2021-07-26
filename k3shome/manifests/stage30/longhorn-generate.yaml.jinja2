@@ -17,6 +17,7 @@ spec:
   targetNamespace: longhorn-system
   valuesContent: |-
     defaultSettings:
+      storageOverProvisioningPercentage: 100
       nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
     annotations:
       prometheus.io/scrape: 'true'
