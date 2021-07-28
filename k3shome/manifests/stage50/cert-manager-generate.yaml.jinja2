@@ -32,7 +32,7 @@ metadata:
   name: cert-manager-webhook
   namespace: kube-system
 spec:
-  chart: http://gostatic.home-infra:8043/cert-manager-webhook-ovh-0.0.tgz
+  chart: http://http.home-infra:8080/cert-manager-webhook-ovh-0.0.tgz
   targetNamespace: cert-manager
   valuesContent: |-
     groupName: acme.{{ manifest.domain }}

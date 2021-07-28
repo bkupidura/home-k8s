@@ -68,7 +68,7 @@ spec:
     kind: Rule
     services:
       - name: recorder
-        port: 8043
+        port: 8080
     middlewares:
       - name: basic-auth
         namespace: traefik-system
@@ -88,9 +88,9 @@ spec:
   publishNotReadyAddresses: false
   ports:
     - name: recorder
-      port: 8043
+      port: 8080
       protocol: TCP
-      targetPort: 8043
+      targetPort: 8080
   selector:
     app.kubernetes.io/name: recorder
 
@@ -117,18 +117,18 @@ spec:
       containers:
         - name: web
           image: {{ manifest.versions.recorder.web.repository }}:{{ manifest.versions.recorder.web.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
               path: /
-              port: gostatic
+              port: http
             initialDelaySeconds: 5
           ports:
-            - name: gostatic
-              containerPort: 8043
+            - name: http
+              containerPort: 8080
               protocol: TCP
           volumeMounts:
-            - mountPath: /srv/http
+            - mountPath: /web
               name: data
           env:
             - name: TZ
