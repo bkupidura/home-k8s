@@ -13,7 +13,23 @@ spec:
     extraEnv:
       TZ: {{ manifest.timezone }}
     alertmanager:
-      enabled: false
+      strategy:
+        type: Recreate
+      enabled: true
+      persistentVolume:
+        storageClass: longhorn-standard
+    alertmanagerFiles:
+      alertmanager.yml:
+        global: {}
+        receivers:
+          - name: default-receiver
+        route:
+          group_wait: 10s
+          group_interval: 5m
+          group_by:
+            - service
+          receiver: default-receiver
+          repeat_interval: 3h
     pushgateway:
       enabled: false
     kubeStateMetrics:
@@ -21,6 +37,8 @@ spec:
     nodeExporter:
       enabled: true
     server:
+      strategy:
+        type: Recreate
       enabled: true
       persistentVolume:
         storageClass: longhorn-standard
@@ -43,6 +61,28 @@ spec:
     kind: Rule
     services:
       - name: prometheus-server
+        port: 80
+        namespace: home-infra
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+  tls:
+    secretName: {{ manifest.traefik.tls.secret_name }}
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: alertmanager
+  namespace: home-infra
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`alertmanager.{{ manifest.domain }}`)
+    kind: Rule
+    services:
+      - name: prometheus-alertmanager
         port: 80
         namespace: home-infra
     middlewares:
