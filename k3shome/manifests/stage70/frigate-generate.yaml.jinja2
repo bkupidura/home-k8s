@@ -100,7 +100,7 @@ spec:
           - -hwaccel_device
           - /dev/dri/renderD128
           - -hwaccel_output_format
-          - yuv420p
+          - h264_vaapi
       cameras:
         {%- for key, value in manifest.frigate.cameras.items() %}
         {{ key }}:

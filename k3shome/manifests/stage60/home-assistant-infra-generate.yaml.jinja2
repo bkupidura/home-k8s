@@ -28,6 +28,9 @@ spec:
       - name: home-assistant
         port: 8123
         namespace: smart-home
+    middlewares:
+      - name: x-forwarded-proto-https
+        namespace: traefik-system
   tls:
     secretName: {{ manifest.traefik.tls.secret_name }}
 

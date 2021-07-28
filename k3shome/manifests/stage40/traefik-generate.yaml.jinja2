@@ -40,6 +40,7 @@ spec:
       - --log
       - --log.level=INFO
       - --metrics.prometheus=true
+      - --providers.kubernetescrd.allowCrossNamespace=true
     ports:
       traefik:
         expose: false
