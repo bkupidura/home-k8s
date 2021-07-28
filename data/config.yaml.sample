@@ -145,6 +145,9 @@ manifest:
       password: "<RESTIC_PASSWORD>"
       repo_samba: "<RESTIC_REPO>"
   versions:
+    http_server:
+      repository: halverneus/static-file-server
+      tag: v1.8.4
     chrony:
       repository: geoffh1977/chrony
       tag: latest
@@ -190,8 +193,8 @@ manifest:
         tag: v6.2.26
     recorder:
       web:
-        repository: "{{ manifest.versions.gostatic.repository }}"
-        tag: "{{ manifest.versions.gostatic.tag }}"
+        repository: "{{ manifest.versions.http_server.repository }}"
+        tag: "{{ manifest.versions.http_server.tag }}"
       cleanup:
         repository: "{{ manifest.versions.ubuntu.repository }}"
         tag: "{{ manifest.versions.ubuntu.tag }}"
@@ -210,9 +213,6 @@ manifest:
     ubuntu:
       repository: ubuntu
       tag: focal-20210713
-    gostatic:
-      repository: pierrezemb/gostatic
-      tag: latest
     blocky:
       chart: 7.1.0
       image:
