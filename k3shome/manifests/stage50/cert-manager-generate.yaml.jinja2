@@ -26,46 +26,6 @@ spec:
         enabled: false
 
 ---
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: cert-manager-webhook
-  namespace: kube-system
-spec:
-  chart: http://http.home-infra:8080/cert-manager-webhook-ovh-0.0.tgz
-  targetNamespace: cert-manager
-  valuesContent: |-
-    groupName: acme.{{ manifest.domain }}
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: cert-manager-webhook-ovh:secret-reader
-  namespace: cert-manager
-rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    resourceNames: ["ovh-credentials"]
-    verbs: ["get", "watch"]
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: cert-manager-webhook-ovh:secret-reader
-  namespace: cert-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: cert-manager-webhook-ovh:secret-reader
-subjects:
-  - apiGroup: ""
-    kind: ServiceAccount
-    name: cert-manager-webhook-cert-manager-webhook-ovh
-    namespace: cert-manager
-
----
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -79,16 +39,12 @@ spec:
       name: letsencrypt-account-key
     solvers:
       - dns01:
-          webhook:
-            groupName: acme.{{ manifest.domain }}
-            solverName: ovh
-            config:
-              endpoint: ovh-eu
-              applicationKey: {{ manifest.ovh.application_key }}
-              applicationSecretRef:
-                key: application_secret
-                name: ovh-credentials
-              consumerKey: {{ manifest.ovh.consumer_key }}
+          route53:
+            region: us-east-1
+            accessKeyID: {{ manifest.r53.access_key }}
+            secretAccessKeySecretRef:
+              key: secret_key
+              name: aws-credentials
 
 ---
 apiVersion: cert-manager.io/v1

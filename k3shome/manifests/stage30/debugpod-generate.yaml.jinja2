@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -7,6 +8,8 @@ metadata:
     app.kubernetes.io/name: debugpod
 spec:
   replicas: 0
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: debugpod
@@ -23,11 +26,13 @@ spec:
           - "-ec"
           - |
             apt update
-            apt install -y tcpdump python3 vim curl iputils-ping bind9-host
+            apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop
             tail -f /dev/null
         securityContext:
           privileged: true
+          runAsUser: 0
       hostNetwork: true
+      hostPID: true
       terminationGracePeriodSeconds: 3
       dnsPolicy: ClusterFirstWithHostNet
       affinity:

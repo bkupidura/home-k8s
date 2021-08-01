@@ -156,12 +156,12 @@ manifest:
       tag: 0.12.0
     samba:
       repository: mbentley/timemachine
-      tag: smb
+      tag: smb-20210731
     nut:
       chart: 4.1.0
       image:
         repository: ghcr.io/k8s-at-home/network-ups-tools
-        tag: v2.7.4-2474-gb4a58380
+        tag: v2.7.4-2481-g4b243d10
     zigbee2mqtt:
       chart: 8.3.0
       image:
@@ -531,7 +531,6 @@ manifest:
         "node-red.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
         "z2m.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
         "{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
-  ovh:
-    application_secret: <APPLICATION_SECRET>
-    application_key: <APPLICATION_KEY>
-    consumer_key: <CONSUMER_KEY>
+  r53:
+    access_key: <ACCESS_KEY>
+    secret_key: <SECRET_KEY>

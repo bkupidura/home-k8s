@@ -136,7 +136,7 @@ spec:
       containers:
         - name: samba
           image: {{ manifest.versions.samba.repository }}:{{ manifest.versions.samba.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: tcp-445
               containerPort: 445
@@ -153,6 +153,14 @@ spec:
               value: {{ manifest.samba.password }}
             - name: SMB_VFS_OBJECTS
               value: 'acl_xattr fruit streams_xattr'
+          readinessProbe:
+            tcpSocket:
+              port: 445
+            initialDelaySeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 445
+            initialDelaySeconds: 10
       volumes:
         - name: data
           hostPath:
