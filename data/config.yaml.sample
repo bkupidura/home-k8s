@@ -236,8 +236,10 @@ manifest:
     prometheus:
       chart: 14.4.1
     frigate:
-      repository: blakeblackshear/frigate
-      tag: 0.8.4-amd64
+      chart: 5.0.0
+      image:
+        repository: blakeblackshear/frigate
+        tag: 0.8.4-amd64
   samba:
     password: "<SAMBA_PASSWORD>"
   nut:

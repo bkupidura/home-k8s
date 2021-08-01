@@ -40,11 +40,11 @@ metadata:
   name: frigate
   namespace: kube-system
 spec:
-  chart: http://http.home-infra:8080/frigate-0.0.tgz
+  chart: frigate
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.frigate.chart }}
   targetNamespace: smart-home
   valuesContent: |-
-    nodeSelector:
-      video_processing: "true"     
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -55,35 +55,48 @@ spec:
                   values:
                     - recorder
             topologyKey: kubernetes.io/hostname
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: video_processing
+                operator: In
+                values:
+                  - "true"
     replicaCount: 1
     strategyType: Recreate
-    timezone: {{ manifest.timezone }}
+    env:
+      TZ: {{ manifest.timezone }}
     image:
-      repository: {{ manifest.versions.frigate.repository }}
-      tag: {{ manifest.versions.frigate.tag }}
-    extraVolumes:
-      - name: frigate
-        persistentVolumeClaim:
-          claimName: frigate
-      - name: dev-dri-renderd128
-        hostPath:
-          path: /dev/dri/renderD128
-    extraVolumeMounts:
-      - mountPath: /media/frigate
-        name: frigate
-      - name: dev-dri-renderd128
-        mountPath: /dev/dri/renderD128
-        
-    shmSize: 500Mi
-    probes:
-      liveness:
-        enabled: true
-      readiness:
-        enabled: true
+      repository: {{ manifest.versions.frigate.image.repository }}
+      tag: {{ manifest.versions.frigate.image.tag }}
     service:
-      port: 5000
+      main:
+        ports:
+          http:
+            port: 5000
+            enabled: true
+          rtmp:
+            enabled: false
     ingress:
-      enabled: false
+      main:
+        enabled: false
+    securityContext:
+      privileged: true
+    persistence:
+      media:
+        enabled: true
+        existingClaim: frigate
+      usb:
+        enabled: true
+        type: hostPath
+        hostPath: /dev/dri/renderD128
+      cache:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 500Mi
+        mountPath: /dev/shm
     config: |
       mqtt:
         host: mosquitto.home-infra
