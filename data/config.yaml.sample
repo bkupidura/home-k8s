@@ -19,6 +19,8 @@ k3os:
     - "default-unreachable-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "default-not-ready-toleration-seconds=120"
+    - "--kube-apiserver-arg"
+    - "feature-gates=EphemeralContainers=true"
   rancher_user_password: rancher
   ntp_servers:
     - "{{ global.ntp_servers[0] }}"
@@ -36,8 +38,12 @@ k3os:
       boot_cmds:
         - "ln -vs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime"
         - "echo 'Europe/Warsaw' > /etc/timezone"
+        - "mount -o remount,noatime /dev/sda2 /"
+        - "mount -o remount,noatime /dev/sda2 /boot"
+        - "mount -o remount,noatime /dev/sda2 /k3os/system"
       run_cmds:
         - "connmanctl config ethernet_d8cb8ad15025_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
+        - "service crond start"
     - ip: 10.0.120.32
       hostname: k3s-charlie
       role: worker
@@ -46,8 +52,12 @@ k3os:
       boot_cmds:
         - "ln -vs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime"
         - "echo 'Europe/Warsaw' > /etc/timezone"
+        - "mount -o remount,noatime /dev/sda2 /"
+        - "mount -o remount,noatime /dev/sda2 /boot"
+        - "mount -o remount,noatime /dev/sda2 /k3os/system"
       run_cmds:
         - "connmanctl config ethernet_002324acfb8a_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
+        - "service crond start"
       env:
         K3S_TOKEN: <TOKEN>
     - ip: 10.0.120.33
@@ -60,16 +70,20 @@ k3os:
       boot_cmds:
         - "ln -vs /usr/share/zoneinfo/Europe/Warsaw /etc/localtime"
         - "echo 'Europe/Warsaw' > /etc/timezone"
+        - "mount -o remount,noatime /dev/sda2 /"
+        - "mount -o remount,noatime /dev/sda2 /boot"
+        - "mount -o remount,noatime /dev/sda2 /k3os/system"
         - "mkdir /srv/samba"
       run_cmds:
         - "connmanctl config ethernet_685b35949584_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
+        - "service crond start"
       env:
         K3S_TOKEN: <TOKEN>
       write_files:
         - content: |
             /dev/cdrom   /media/cdrom iso9660 noauto,ro 0 0
             /dev/usbdisk /media/usb   vfat    noauto,ro 0 0
-            /dev/sdb     /srv/samba   ext4    defaults  0 2
+            /dev/sdb     /srv/samba   ext4    defaults,noatime 0 2
           owner: root
           path: /etc/fstab
           permissions: '0644'
@@ -145,6 +159,8 @@ manifest:
       password: "<RESTIC_PASSWORD>"
       repo_samba: "<RESTIC_REPO>"
   versions:
+    k8s_dashboard:
+      chart: 4.3.2
     http_server:
       repository: halverneus/static-file-server
       tag: v1.8.4
@@ -522,6 +538,7 @@ manifest:
         home: udp:10.0.120.1
     custom_dns:
       mapping:
+        "k8s.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
         "grafana.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
         "longhorn.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"
         "traefik.{{ manifest.domain }}": "{{ manifest.vips[2].ip }}"

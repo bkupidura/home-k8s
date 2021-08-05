@@ -8,7 +8,7 @@ spec:
   repo: https://k8s-at-home.com/charts/
   chart: mosquitto
   version: {{ manifest.versions.mosquitto.chart }}
-  targetNamespace: home-infra
+  targetNamespace: smart-home
   valuesContent: |-
     image:
       repository: {{ manifest.versions.mosquitto.image.repository }}
