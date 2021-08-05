@@ -26,15 +26,22 @@ spec:
           - "-ec"
           - |
             apt update
-            apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop
+            apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat
             tail -f /dev/null
         securityContext:
           privileged: true
           runAsUser: 0
+        volumeMounts:
+          - mountPath: /host/log
+            name: log
       hostNetwork: true
       hostPID: true
       terminationGracePeriodSeconds: 3
       dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: log
+          hostPath:
+            path: /var/log
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
