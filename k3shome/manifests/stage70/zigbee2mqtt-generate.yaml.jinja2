@@ -1,4 +1,48 @@
 ---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: zigbee-firmware-upgrade
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: upgrade
+            image: marthoc/deconz:2.12.03
+            command:
+              - "/bin/sh"
+              - "-ec"
+              - |
+                curl 'https://deconz.dresden-elektronik.de/deconz-firmware/deCONZ_ConBeeII_0x266f0700.bin.GCF' -o deCONZ_ConBeeII_0x266f0700.bin.GCF
+                curl 'https://deconz.dresden-elektronik.de/deconz-firmware/deCONZ_ConBeeII_0x266f0700.bin.GCF.md5' -o deCONZ_ConBeeII_0x266f0700.bin.GCF.md5
+                md5sum -c deCONZ_ConBeeII_0x266f0700.bin.GCF.md5 || exit
+                /usr/bin/GCFFlasher_internal -f deCONZ_ConBeeII_0x266f0700.bin.GCF -d /dev/ttyACM0
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /dev/ttyACM0
+              name: zigbee
+          volumes:
+            - name: zigbee
+              hostPath:
+                path: /dev/ttyACM0
+          restartPolicy: OnFailure
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: zigbee_controller
+                      operator: In
+                      values:
+                        - "true"
+---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
