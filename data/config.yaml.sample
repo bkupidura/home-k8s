@@ -169,41 +169,41 @@ manifest:
       tag: latest
     restic:
       repository: restic/restic
-      tag: 0.12.0
+      tag: 0.12.1
     samba:
       repository: mbentley/timemachine
-      tag: smb-20210731
+      tag: smb-20210808
     nut:
       chart: 4.1.0
       image:
         repository: ghcr.io/k8s-at-home/network-ups-tools
-        tag: v2.7.4-2481-g4b243d10
+        tag: v2.7.4-2482-g6466c70a
     zigbee2mqtt:
       chart: 8.3.0
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.20.0
+        tag: 1.21.0
     esphome:
       image:
         repository: esphome/esphome
-        tag: 1.19.4
+        tag: 1.20.4
     grafana:
-      chart: 6.13.10
+      chart: 6.15.0
       image:
         repository: grafana/grafana
-        tag: 8.0.5
+        tag: 8.1.0
     homeassistant:
-      chart: 9.3.0
+      chart: 9.3.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.7.4
+        tag: 2021.8.4
     nodered:
       chart: 8.1.0
       image:
         repository: nodered/node-red
-        tag: 2.0.4-12
+        tag: 2.0.5-14
     unifi:
-      chart: 2.0.4
+      chart: 3.1.0
       image:
         repository: jacobalberty/unifi
         tag: v6.2.26
@@ -228,12 +228,12 @@ manifest:
       chart: 1.1.2
     ubuntu:
       repository: ubuntu
-      tag: focal-20210713
+      tag: focal-20210723
     blocky:
-      chart: 7.1.0
+      chart: 7.1.1
       image:
         repository: spx01/blocky
-        tag: v0.14
+        tag: v0.15
     traefik:
       chart: 10.1.1
       image:
@@ -250,7 +250,7 @@ manifest:
         repository: eclipse-mosquitto
         tag: 2.0.11
     prometheus:
-      chart: 14.4.1
+      chart: 14.5.0
     frigate:
       chart: 5.0.0
       image:
