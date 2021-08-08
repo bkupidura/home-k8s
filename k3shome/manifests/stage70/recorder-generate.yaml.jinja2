@@ -135,7 +135,7 @@ spec:
               value: {{ manifest.timezone }}
         - name: recorder
           image: {{ manifest.versions.recorder.repository }}:{{ manifest.versions.recorder.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
               name: data

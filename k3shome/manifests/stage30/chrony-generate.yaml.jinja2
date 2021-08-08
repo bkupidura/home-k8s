@@ -39,7 +39,7 @@ spec:
       containers:
         - name: chrony
           image: {{ manifest.versions.chrony.repository }}:{{ manifest.versions.chrony.tag }}
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: chrony
               containerPort: 123
@@ -47,13 +47,22 @@ spec:
           env:
             - name: TZ
               value: {{ manifest.timezone }}
-            - name: ALLOW_CIDR
-              value: 0.0.0.0/0
-            - name: NTP_SERVER
+            - name: CHRONY_ALLOW
+              value: 10.0.120.0/24,10.0.150.0/24
+            - name: CHRONY_POOL
               value: {{ global.ntp_servers[0] }}
+            - name: CHRONY_SYNC_RTC
+              value: "true"
           securityContext:
             capabilities:
               add: ["SYS_TIME"]
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: tzdata-config
+              mountPath: /etc/timezone
+              readOnly: true
           readinessProbe:
             exec:
               command:
@@ -70,13 +79,6 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 60
             timeoutSeconds: 5
-          volumeMounts:
-            - name: tz-config
-              mountPath: /etc/localtime
-              readOnly: true
-            - name: tzdata-config
-              mountPath: /etc/timezone
-              readOnly: true
       volumes:
         - name: tz-config
           hostPath:

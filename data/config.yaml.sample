@@ -165,8 +165,8 @@ manifest:
       repository: halverneus/static-file-server
       tag: v1.8.4
     chrony:
-      repository: geoffh1977/chrony
-      tag: latest
+      repository: bkupidura/chrony
+      tag: 0.0.1
     restic:
       repository: restic/restic
       tag: 0.12.1
@@ -215,7 +215,7 @@ manifest:
         repository: "{{ manifest.versions.ubuntu.repository }}"
         tag: "{{ manifest.versions.ubuntu.tag }}"
       repository: bkupidura/recorder
-      tag: latest
+      tag: 0.0.1
     metallb:
       chart: 0.10.2
       controller:
