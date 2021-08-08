@@ -71,7 +71,7 @@ spec:
               persistentVolumeClaim:
                 claimName: esphome
           containers:
-          - name: restore
+          - name: backup
             image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
             command:
             - "/bin/sh"
