@@ -14,15 +14,16 @@ spec:
         spec:
           containers:
           - name: upgrade
-            image: marthoc/deconz:2.12.03
+            image: {{ manifest.versions.deconz.image.repository }}:{{ manifest.versions.deconz.image.tag }}
+            imagePullPolicy: IfNotPresent
             command:
               - "/bin/sh"
               - "-ec"
               - |
-                curl 'https://deconz.dresden-elektronik.de/deconz-firmware/deCONZ_ConBeeII_0x266f0700.bin.GCF' -o deCONZ_ConBeeII_0x266f0700.bin.GCF
-                curl 'https://deconz.dresden-elektronik.de/deconz-firmware/deCONZ_ConBeeII_0x266f0700.bin.GCF.md5' -o deCONZ_ConBeeII_0x266f0700.bin.GCF.md5
-                md5sum -c deCONZ_ConBeeII_0x266f0700.bin.GCF.md5 || exit
-                /usr/bin/GCFFlasher_internal -f deCONZ_ConBeeII_0x266f0700.bin.GCF -d /dev/ttyACM0
+                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}' -o {{ manifest.versions.deconz.firmware.name }}
+                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}.md5' -o {{ manifest.versions.deconz.firmware.name }}.md5
+                md5sum -c {{ manifest.versions.deconz.firmware.name }}.md5 || exit
+                /usr/bin/GCFFlasher_internal -f {{ manifest.versions.deconz.firmware.name }} -d /dev/ttyACM0
             securityContext:
               privileged: true
             volumeMounts:
@@ -34,6 +35,15 @@ spec:
                 path: /dev/ttyACM0
           restartPolicy: OnFailure
           affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - zigbee2mqtt
+                  topologyKey: kubernetes.io/hostname
             nodeAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
                 nodeSelectorTerms:

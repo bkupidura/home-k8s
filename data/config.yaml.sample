@@ -159,6 +159,13 @@ manifest:
       password: "<RESTIC_PASSWORD>"
       repo_samba: "<RESTIC_REPO>"
   versions:
+    deconz:
+      firmware:
+        url: https://deconz.dresden-elektronik.de/deconz-firmware/
+        name: deCONZ_ConBeeII_0x266f0700.bin.GCF
+      image:
+        repository: marthoc/deconz
+        tag: 2.12.03
     k8s_dashboard:
       chart: 4.3.2
     http_server:
@@ -166,7 +173,7 @@ manifest:
       tag: v1.8.4
     chrony:
       repository: bkupidura/chrony
-      tag: 0.0.1
+      tag: 14082021
     restic:
       repository: restic/restic
       tag: 0.12.1

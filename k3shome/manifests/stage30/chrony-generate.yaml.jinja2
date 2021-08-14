@@ -9,6 +9,7 @@ metadata:
 spec:
   type: LoadBalancer
   loadBalancerIP: "{{ manifest.vips[5].ip }}"
+  externalTrafficPolicy: Local
   publishNotReadyAddresses: false
   ports:
     - name: chrony
