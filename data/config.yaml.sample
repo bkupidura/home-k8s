@@ -159,6 +159,8 @@ manifest:
       password: "<RESTIC_PASSWORD>"
       repo_samba: "<RESTIC_REPO>"
   versions:
+    reflector:
+      chart: 5.4.7
     deconz:
       firmware:
         url: https://deconz.dresden-elektronik.de/deconz-firmware/
