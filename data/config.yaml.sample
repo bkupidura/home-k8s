@@ -44,6 +44,7 @@ k3os:
       run_cmds:
         - "connmanctl config ethernet_d8cb8ad15025_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
         - "service crond start"
+        - "service watchdog start"
     - ip: 10.0.120.32
       hostname: k3s-charlie
       role: worker
@@ -58,6 +59,7 @@ k3os:
       run_cmds:
         - "connmanctl config ethernet_002324acfb8a_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
         - "service crond start"
+        - "service watchdog start"
       env:
         K3S_TOKEN: <TOKEN>
     - ip: 10.0.120.33
@@ -76,7 +78,9 @@ k3os:
         - "mkdir /srv/samba"
       run_cmds:
         - "connmanctl config ethernet_685b35949584_cable --ipv6 off --nameservers {{ global.dns_servers[0] }} {{ global.dns_servers[1] }} --ipv4 dhcp"
+        - "modprobe softdog"
         - "service crond start"
+        - "service watchdog start"
       env:
         K3S_TOKEN: <TOKEN>
       write_files:
@@ -88,6 +92,12 @@ k3os:
           path: /etc/fstab
           permissions: '0644'
   global_write_files:
+    - content: |
+        WATCHDOG_OPTS="-t 20 -T 60"
+        WATCHDOG_DEV="/dev/watchdog"
+      owner: root
+      path: /etc/conf.d/watchdog
+      permissions: '0644'
     - content: |
         [global]
         OfflineMode=false
