@@ -283,6 +283,22 @@ manifest:
       hass: "<HASS_PASSWORD>"
   grafana:
     password: "<GRAFANA_PASSWORD>"
+  alertmanager:
+    receivers:
+      - name: 'default-receiver'
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal:
+          - service
+      - source_match:
+          severity: warning
+        target_match:
+          severity: info
+        equal:
+          - service
   prometheus:
     serverfiles:
       alerting_rules.yml:
@@ -294,6 +310,7 @@ manifest:
                 for: 2m
                 labels:
                   service: system
+                  severity: warning
                 annotations:
                   summary: "{% raw %}High load avg from 1m on {{ $labels.kubernetes_node }}{% endraw %}"
               - alert: 5MLoadHigh
@@ -301,6 +318,7 @@ manifest:
                 for: 5m
                 labels:
                   service: system
+                  severity: warning
                 annotations:
                   summary: "{% raw %}High load avg from 5m on {{ $labels.kubernetes_node }}{% endraw %}"
               - alert: HighMemory
@@ -308,30 +326,35 @@ manifest:
                 for: 5m
                 labels:
                   service: system
+                  severity: warning
                 annotations:
                   summary: "{% raw %}High memory usage on {{ $labels.kubernetes_node }}{% endraw %}"
               - alert: CertInvalidShortly
-                expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 5
+                expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 21
                 labels:
                   service: certmanager
+                  severity: info
                 annotations:
                   summary: "Certificate will expire soon"
               - alert: BlockyErrorsIncreasing
                 expr: increase(blocky_error_total[10m]) > 0
                 labels:
                   service: blocky
+                  severity: info
                 annotations:
                   summary: "{% raw %}Errors increasing on {{ $labels.kubernetes_pod_name }}{% endraw %}"
               - alert: MetalLbBGPDown
                 expr: max_over_time(metallb_bgp_session_up[1d]) - metallb_bgp_session_up != 0
                 labels:
                   service: metallb
+                  severity: warning
                 annotations:
                   summary: "{% raw %}BGP sessions down on {{ $labels.instance }}{% endraw %}"
               - alert: LowDisk
                 expr: min by (device, instance) (node_filesystem_free_bytes{device=~"/dev/[a-z]d[a-z][0-9]*"} / node_filesystem_size_bytes) < 0.3
                 labels:
                   service: system
+                  severity: warning
                 annotations:
                   summary: "{% raw %}High disk usage on {{ $labels.kubernetes_node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}{% endraw %}"
           - name: prometheus
@@ -341,15 +364,49 @@ manifest:
                 for: 5m
                 labels:
                   service: prometheus
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{% endraw %}"
           - name: k8s
             rules:
+              - alert: NodeNotReady
+                expr: kube_node_status_condition{condition="Ready",status="true"} != 1
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: critical
+                annotations:
+                  summary: "{% raw %}{{ $labels.node }} is unready{% endraw %}"
+              - alert: NodeReadinesFlapping
+                expr: sum by (node) (changes(kube_node_status_condition{status="true",condition="Ready"}[10m])) > 2
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{% raw %}{{ $labels.node }} is readiness is flapping {% endraw %}"
+              - alert: PodCPUThrotling
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.25
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{% raw %}{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}{% endraw %}"
+              - alert: NodeUnschedulable
+                expr: kube_node_spec_unschedulable != 0
+                for: 2m
+                labels:
+                  service: k8s
+                  severity: critical
+                annotations:
+                  summary: "{% raw %}K8s node {{ $labels.node }} is unschedulable{% endraw %}"
               - alert: JobIsNotCompleted
                 expr: kube_job_spec_completions - kube_job_status_succeeded > 0
                 for: 2h
                 labels:
                   service: k8s
+                  severity: info
                 annotations:
                   summary: "{% raw %}Job {{ $labels.job_name }} is not done for last 2h{% endraw %}"
               - alert: JobFailed
@@ -357,6 +414,7 @@ manifest:
                 for: 5m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Job {{ $labels.job_name }} is in failed state{% endraw %}"
               - alert: PodsRestarts
@@ -364,6 +422,7 @@ manifest:
                 for: 1m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Pod {{ $labels.pod }} was restarted more than 2 times in last 30m{% endraw %}"
               - alert: PodsWaiting
@@ -371,6 +430,7 @@ manifest:
                 for: 10m
                 labels:
                   service: k8s
+                  severity: info
                 annotations:
                   summary: "{% raw %}Pod {{ $labels.pod }} is in waiting state for last 10m{% endraw %}"
               - alert: DaemonSetUnavailable
@@ -378,6 +438,7 @@ manifest:
                 for: 10m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Daemonset {{ $labels.daemonset }} has unavailable copies for last 10m{% endraw %}"
               - alert: WrongNumberOfDaemonSet
@@ -385,6 +446,7 @@ manifest:
                 for: 10m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Daemonset {{ $labels.daemonset }} has wrong number of copies{% endraw %}"
               - alert: EndpointNotReady
@@ -392,6 +454,7 @@ manifest:
                 for: 5m
                 labels:
                   service: k8s
+                  severity: info
                 annotations:
                   summary: "{% raw %}Endpoint {{ $labels.endpoint }} is not ready for last 5m{% endraw %}"
               - alert: PendingPods
@@ -399,6 +462,7 @@ manifest:
                 for: 5m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Pending pods on {{ $labels.kubernetes_io_hostname }} in queue {{ $labels.queue }}{% endraw %}"
               - alert: RunningPodsFlapping
@@ -406,6 +470,7 @@ manifest:
                 for: 20m
                 labels:
                   service: k8s
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Flapping pods on {{ $labels.kubernetes_io_hostname }}{% endraw %}"
           - name: longhorn
@@ -415,18 +480,21 @@ manifest:
                 for: 10m
                 labels:
                   service: longhorn
+                  severity: warning
                 annotations:
                   summary: "{% raw %}Volume {{ $labels.volume }} is not healthy {% endraw %}"
               - alert: LowDisk
                 expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.7
                 labels:
                   service: longhorn
+                  severity: info
                 annotations:
                   summary: "{% raw %}High disk usage on {{ $labels.node }}{% endraw %}"
               - alert: LonghornNodeDown
                 expr: longhorn_node_status != 1
                 labels:
                   service: longhorn
+                  severity: critical
                 annotations:
                   summary: "{% raw %}Node {{ $labels.node }} is unhealthy ({{ $labels.condition }}){% endraw %}"
     extrascrape:
