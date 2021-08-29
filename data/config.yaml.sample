@@ -179,13 +179,13 @@ manifest:
         repository: marthoc/deconz
         tag: 2.12.03
     k8s_dashboard:
-      chart: 4.3.2
+      chart: 5.0.0
     http_server:
       repository: halverneus/static-file-server
       tag: v1.8.4
     chrony:
       repository: bkupidura/chrony
-      tag: 14082021
+      tag: 28082021
     restic:
       repository: restic/restic
       tag: 0.12.1
@@ -193,10 +193,10 @@ manifest:
       repository: mbentley/timemachine
       tag: smb-20210808
     nut:
-      chart: 4.1.0
+      chart: 5.0.0
       image:
         repository: ghcr.io/k8s-at-home/network-ups-tools
-        tag: v2.7.4-2482-g6466c70a
+        tag: v2.7.4-2486-gaa0b3d1d
     zigbee2mqtt:
       chart: 8.3.0
       image:
@@ -207,22 +207,22 @@ manifest:
         repository: esphome/esphome
         tag: 1.20.4
     grafana:
-      chart: 6.15.0
+      chart: 6.16.2
       image:
         repository: grafana/grafana
-        tag: 8.1.0
+        tag: 8.1.2
     homeassistant:
-      chart: 9.3.1
+      chart: 10.0.0
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.8.4
+        tag: 2021.8.8
     nodered:
       chart: 8.1.0
       image:
         repository: nodered/node-red
         tag: 2.0.5-14
     unifi:
-      chart: 3.1.0
+      chart: 4.0.0
       image:
         repository: jacobalberty/unifi
         tag: v6.2.26
@@ -249,29 +249,29 @@ manifest:
       repository: ubuntu
       tag: focal-20210723
     blocky:
-      chart: 7.1.1
+      chart: 8.0.0
       image:
         repository: spx01/blocky
         tag: v0.15
     traefik:
-      chart: 10.1.1
+      chart: 10.3.2
       image:
         repository: traefik
-        tag: 2.4.13
+        tag: v2.5.1
     certmanager:
       chart: v1.4.3
       image:
         repository: quay.io/jetstack/cert-manager-controller
         tag: v1.4.3
     mosquitto:
-      chart: 3.3.0
+      chart: 4.0.0
       image:
         repository: eclipse-mosquitto
         tag: 2.0.11
     prometheus:
-      chart: 14.5.0
+      chart: 14.6.0
     frigate:
-      chart: 5.0.0
+      chart: 6.0.0
       image:
         repository: blakeblackshear/frigate
         tag: 0.8.4-amd64
@@ -322,7 +322,7 @@ manifest:
                 annotations:
                   summary: "{% raw %}High load avg from 5m on {{ $labels.kubernetes_node }}{% endraw %}"
               - alert: HighMemory
-                expr: node_memory_MemFree_bytes / node_memory_MemTotal_bytes > 0.7
+                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.3
                 for: 5m
                 labels:
                   service: system

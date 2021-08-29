@@ -15,26 +15,31 @@ spec:
       repository: {{ manifest.versions.unifi.image.repository }}
       tag: {{ manifest.versions.unifi.image.tag }}
     persistence:
-      enabled: true
-      existingClaim: unifi
-    controllerService:
-      type: LoadBalancer
-      loadBalancerIP: "{{ manifest.vips[1].ip }}"
-      externalTrafficPolicy: Local
-      annotations:
-        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
-    stunService:
-      type: LoadBalancer
-      loadBalancerIP: "{{ manifest.vips[1].ip }}"
-      externalTrafficPolicy: Local
-      annotations:
-        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
-    discoveryService:
-      type: LoadBalancer
-      loadBalancerIP: "{{ manifest.vips[1].ip }}"
-      externalTrafficPolicy: Local
-      annotations:
-        metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
+      data:
+        enabled: true
+        existingClaim: unifi
+    service:
+      main:
+        type: LoadBalancer
+        loadBalancerIP: "{{ manifest.vips[1].ip }}"
+        externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[1].ip }}"
+        ports:
+          controller:
+            enabled: true
+          stun:
+            enabled: true
+          discovery:
+            enabled: true
+          syslog:
+            enabled: false
+          portal-http:
+            enabled: false
+          portal-https:
+            enabled: false
+          speedtest:
+            enabled: false
     resources:
       requests:
         memory: 500Mi

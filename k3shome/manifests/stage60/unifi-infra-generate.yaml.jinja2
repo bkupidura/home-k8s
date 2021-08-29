@@ -25,7 +25,7 @@ spec:
   - match: Host(`unifi.{{ manifest.domain }}`)
     kind: Rule
     services:
-      - name: unifi-gui
+      - name: unifi
         port: 8443
         namespace: home-infra
         scheme: https

@@ -58,6 +58,15 @@ spec:
   version: {{ manifest.versions.nut.chart }}
   targetNamespace: home-infra
   valuesContent: |-
+    lifecycle:
+      postStart:
+        exec:
+          command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              sleep 30
+              /usr/local/ups/bin/upscmd -u admin -p '{{ manifest.nut.auth.admin }}' apc@127.0.0.1 beeper.disable
     image:
       repository: {{ manifest.versions.nut.image.repository }}
       tag: {{ manifest.versions.nut.image.tag }}
