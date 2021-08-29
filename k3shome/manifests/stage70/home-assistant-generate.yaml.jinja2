@@ -32,7 +32,36 @@ spec:
       config:
         enabled: true
         existingClaim: home-assistant
-    hostNetwork: true
+    service:
+      main:
+        ports:
+          http:
+            enabled: true
+            port: 8123
+      vip-udp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "{{ manifest.vips[6].ip }}"
+        externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[6].ip }}"
+        ports:
+          shelly-coap:
+            enabled: true
+            port: 5683
+            protocol: UDP
+      vip-tcp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "{{ manifest.vips[6].ip }}"
+        externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/allow-shared-ip: "{{ manifest.vips[6].ip }}"
+        ports:
+          sonos:
+            enabled: true
+            port: 1400
+            protocol: TCP
     ingress:
       main:
         enabled: false
