@@ -244,7 +244,7 @@ manifest:
         repository: metallb/speaker
         tag: v0.10.2
     longhorn:
-      chart: 1.1.2
+      chart: 1.2.0
     ubuntu:
       repository: ubuntu
       tag: focal-20210723
