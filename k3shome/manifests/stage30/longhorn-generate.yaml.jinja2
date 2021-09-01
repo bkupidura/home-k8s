@@ -19,6 +19,8 @@ spec:
     defaultSettings:
       storageOverProvisioningPercentage: 100
       nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+      replicaAutoBalance: best-effort
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
     annotations:
       prometheus.io/scrape: 'true'
       prometheus.io/port: '9500'

@@ -13,6 +13,10 @@ spec:
     extraEnv:
       TZ: {{ manifest.timezone }}
     alertmanager:
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        runAsGroup: 0
       baseURL: https://alertmanager.{{ manifest.domain }}
       podLabels:
         app.kubernetes.io/name: alertmanager
@@ -54,6 +58,10 @@ spec:
     nodeExporter:
       enabled: true
     server:
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        runAsGroup: 0
       baseURL: https://prometheus.{{ manifest.domain }}
       podLabels:
         app.kubernetes.io/name: prometheus
