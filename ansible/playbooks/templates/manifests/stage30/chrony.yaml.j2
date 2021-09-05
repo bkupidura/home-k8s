@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chrony
+  namespace: home-infra
+  labels:
+    app.kubernetes.io/name: chrony
+spec:
+  type: LoadBalancer
+  loadBalancerIP: "{{ global.vips[5].ip }}"
+  externalTrafficPolicy: Local
+  publishNotReadyAddresses: false
+  ports:
+    - name: chrony
+      port: 123
+      protocol: UDP
+  selector:
+    app.kubernetes.io/name: chrony
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: chrony
+  namespace: home-infra
+  labels:
+    app.kubernetes.io/name: chrony
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chrony
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chrony
+    spec:
+      containers:
+        - name: chrony
+          image: {{ manifest.versions.chrony.repository }}:{{ manifest.versions.chrony.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: chrony
+              containerPort: 123
+              protocol: UDP
+          env:
+            - name: TZ
+              value: {{ global.timezone }}
+            - name: CHRONY_ALLOW
+              value: 10.0.120.0/24,10.0.150.0/24
+            - name: CHRONY_POOL
+              value: {{ global.ntp.servers[0] }}
+            - name: CHRONY_SYNC_RTC
+              value: "true"
+          securityContext:
+            capabilities:
+              add: ["SYS_TIME"]
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+              readOnly: true
+            - name: tzdata-config
+              mountPath: /etc/timezone
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - chronyc
+                - tracking
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+              - chronyc
+              - tracking
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 5
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /etc/localtime
+        - name: tzdata-config
+          hostPath:
+            path: /etc/timezone

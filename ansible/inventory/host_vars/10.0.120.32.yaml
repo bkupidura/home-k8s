@@ -1,0 +1,8 @@
+os:
+  primary_interface: eno1
+  hostname: k3s-charlie
+watchdog:
+  module: iTCO_wdt
+k3s:
+  labels:
+    video_processing: "true"

@@ -1,0 +1,9 @@
+os:
+  primary_interface: eno1
+  hostname: k3s-bravo
+watchdog:
+  module: iTCO_wdt
+k3s:
+  labels:
+    video_processing: "true"
+    zigbee_controller: "true"

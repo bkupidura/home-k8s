@@ -1,5 +1,3 @@
-k3s-access.yaml
-static_generated
-*-generate.yaml
-config.yaml
-config-tmp.yaml
+kube-config.yaml
+manifests/*
+ansible/.vault_password

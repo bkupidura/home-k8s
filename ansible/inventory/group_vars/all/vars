@@ -1,0 +1,523 @@
+ansible_user: ansible
+global:
+  domain: placeholder
+  mail: placeholder
+  vips:
+    - ip: 10.0.10.40
+    - ip: 10.0.10.41
+    - ip: 10.0.10.42
+    - ip: 10.0.10.43
+    - ip: 10.0.10.44
+    - ip: 10.0.10.45
+    - ip: 10.0.10.46
+  timezone: "Europe/Warsaw"
+  ntp:
+    servers:
+    - "0.pl.pool.ntp.org"
+    - "1.pl.pool.ntp.org"
+  dns:
+    servers:
+    - "1.1.1.1"
+    - "8.8.8.8"
+    - "1.0.0.1"
+    - "8.8.4.4"
+os:
+  ssh_keys:
+    - user: root
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
+    - user: ansible
+      key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
+
+k3s:
+  version: "v1.20.7+k3s1"
+  args:
+    - "--disable"
+    - "traefik"
+    - "--disable"
+    - "servicelb"
+    - "--kube-apiserver-arg"
+    - "default-unreachable-toleration-seconds=120"
+    - "--kube-apiserver-arg"
+    - "default-not-ready-toleration-seconds=120"
+    - "--kube-apiserver-arg"
+    - "feature-gates=EphemeralContainers=true"
+
+manifest:
+  backup:
+    restic:
+      repo: placeholder
+      password: placeholder
+      repo_samba: placeholder
+  versions:
+    reflector:
+      chart: 5.4.7
+    deconz:
+      firmware:
+        url: https://deconz.dresden-elektronik.de/deconz-firmware/
+        name: deCONZ_ConBeeII_0x266f0700.bin.GCF
+      image:
+        repository: marthoc/deconz
+        tag: 2.12.03
+    k8s_dashboard:
+      chart: 5.0.0
+    http_server:
+      repository: halverneus/static-file-server
+      tag: v1.8.4
+    chrony:
+      repository: bkupidura/chrony
+      tag: 04092021
+    restic:
+      repository: restic/restic
+      tag: 0.12.1
+    samba:
+      repository: mbentley/timemachine
+      tag: smb-20210905
+    nut:
+      chart: 5.0.0
+      image:
+        repository: ghcr.io/k8s-at-home/network-ups-tools
+        tag: v2.7.4-2486-gaa0b3d1d
+    zigbee2mqtt:
+      chart: 8.3.0
+      image:
+        repository: koenkk/zigbee2mqtt
+        tag: 1.21.0
+    esphome:
+      image:
+        repository: esphome/esphome
+        tag: 1.20.4
+    grafana:
+      chart: 6.16.2
+      image:
+        repository: grafana/grafana
+        tag: 8.1.2
+    homeassistant:
+      chart: 10.0.0
+      image:
+        repository: homeassistant/home-assistant
+        tag: 2021.8.8
+    nodered:
+      chart: 8.1.0
+      image:
+        repository: nodered/node-red
+        tag: 2.0.5-14
+    unifi:
+      chart: 4.0.0
+      image:
+        repository: jacobalberty/unifi
+        tag: v6.2.26
+    recorder:
+      repository: bkupidura/recorder
+      tag: 0.0.1
+    metallb:
+      chart: 0.10.2
+      controller:
+        repository: metallb/controller
+        tag: v0.10.2
+      speaker:
+        repository: metallb/speaker
+        tag: v0.10.2
+    longhorn:
+      chart: 1.2.0
+    ubuntu:
+      repository: ubuntu
+      tag: focal-20210723
+    blocky:
+      chart: 8.0.0
+      image:
+        repository: spx01/blocky
+        tag: v0.15
+    traefik:
+      chart: 10.3.2
+      image:
+        repository: traefik
+        tag: v2.5.1
+    certmanager:
+      chart: v1.4.3
+      image:
+        repository: quay.io/jetstack/cert-manager-controller
+        tag: v1.4.3
+    mosquitto:
+      chart: 4.0.0
+      image:
+        repository: eclipse-mosquitto
+        tag: 2.0.11
+    prometheus:
+      chart: 14.6.0
+    frigate:
+      chart: 6.0.0
+      image:
+        repository: blakeblackshear/frigate
+        tag: 0.8.4-amd64
+  samba:
+    password: placeholder
+  nut:
+    auth:
+      admin: placeholder
+      hass: placeholder
+  grafana:
+    password: placeholder
+  alertmanager:
+    receivers:
+      - name: 'default-receiver'
+    inhibit_rules:
+      - source_match:
+          severity: critical
+        target_match:
+          severity: warning
+        equal:
+          - service
+      - source_match:
+          severity: warning
+        target_match:
+          severity: info
+        equal:
+          - service
+  prometheus:
+    serverfiles:
+      alerting_rules.yml:
+        groups:
+          - name: infra
+            rules:
+              - alert: 1MLoadHigh
+                expr: node_load1 > machine_cpu_cores * 1.3
+                for: 2m
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}High load avg from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+              - alert: 5MLoadHigh
+                expr: node_load5 > machine_cpu_cores * 0.8
+                for: 5m
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}High load avg from 5m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+              - alert: HighMemory
+                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.3
+                for: 5m
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}High memory usage on {{ $labels.kubernetes_node }}{%- endraw -%}"
+              - alert: CertInvalidShortly
+                expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 21
+                labels:
+                  service: certmanager
+                  severity: info
+                annotations:
+                  summary: "Certificate will expire soon"
+              - alert: BlockyErrorsIncreasing
+                expr: increase(blocky_error_total[10m]) > 0
+                labels:
+                  service: blocky
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}Errors increasing on {{ $labels.kubernetes_pod_name }}{%- endraw -%}"
+              - alert: MetalLbBGPDown
+                expr: max_over_time(metallb_bgp_session_up[1d]) - metallb_bgp_session_up != 0
+                labels:
+                  service: metallb
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}BGP sessions down on {{ $labels.instance }}{%- endraw -%}"
+              - alert: LowDisk
+                expr: min by (device, instance) (node_filesystem_free_bytes{device=~"/dev/[a-z]d[a-z][0-9]*"} / node_filesystem_size_bytes) < 0.3
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}High disk usage on {{ $labels.kubernetes_node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}{%- endraw -%}"
+          - name: prometheus
+            rules:
+              - alert: InstanceDown
+                expr: up == 0
+                for: 5m
+                labels:
+                  service: prometheus
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{%- endraw -%}"
+          - name: k8s
+            rules:
+              - alert: NodeNotReady
+                expr: kube_node_status_condition{condition="Ready",status="true"} != 1
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}{{ $labels.node }} is unready{%- endraw -%}"
+              - alert: NodeReadinesFlapping
+                expr: sum by (node) (changes(kube_node_status_condition{status="true",condition="Ready"}[10m])) > 2
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}{{ $labels.node }} is readiness is flapping{%- endraw -%}"
+              - alert: PodCPUThrotling
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.25
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}{%- endraw -%}"
+              - alert: NodeUnschedulable
+                expr: kube_node_spec_unschedulable != 0
+                for: 2m
+                labels:
+                  service: k8s
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}K8s node {{ $labels.node }} is unschedulable{%- endraw -%}"
+              - alert: JobIsNotCompleted
+                expr: kube_job_spec_completions - kube_job_status_succeeded > 0
+                for: 2h
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}Job {{ $labels.job_name }} is not done for last 2h{%- endraw -%}"
+              - alert: JobFailed
+                expr: kube_job_status_failed > 0
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Job {{ $labels.job_name }} is in failed state{%- endraw -%}"
+              - alert: PodsRestarts
+                expr: delta(kube_pod_container_status_restarts_total[30m]) > 2
+                for: 1m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Pod {{ $labels.pod }} was restarted more than 2 times in last 30m{%- endraw -%}"
+              - alert: PodsWaiting
+                expr: kube_pod_container_status_waiting > 0
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}Pod {{ $labels.pod }} is in waiting state for last 10m{%- endraw -%}"
+              - alert: DaemonSetUnavailable
+                expr: kube_daemonset_status_number_unavailable != 0
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Daemonset {{ $labels.daemonset }} has unavailable copies for last 10m{%- endraw -%}"
+              - alert: WrongNumberOfDaemonSet
+                expr: (kube_daemonset_status_current_number_scheduled / kube_daemonset_status_desired_number_scheduled != 1) or (kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled != 1)
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Daemonset {{ $labels.daemonset }} has wrong number of copies{%- endraw -%}"
+              - alert: EndpointNotReady
+                expr: kube_endpoint_address_not_ready != 0
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}Endpoint {{ $labels.endpoint }} is not ready for last 5m{%- endraw -%}"
+              - alert: PendingPods
+                expr: scheduler_pending_pods{job="kubernetes-nodes"} > 0
+                for: 5m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Pending pods on {{ $labels.kubernetes_io_hostname }} in queue {{ $labels.queue }}{%- endraw -%}"
+              - alert: RunningPodsFlapping
+                expr: abs(delta(kubelet_running_pods{job="kubernetes-nodes"}[1h])) > 2
+                for: 20m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Flapping pods on {{ $labels.kubernetes_io_hostname }}{%- endraw -%}"
+          - name: longhorn
+            rules:
+              - alert: WrongVolumeRobustness
+                expr: longhorn_volume_robustness != 1
+                for: 10m
+                labels:
+                  service: longhorn
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Volume {{ $labels.volume }} is not healthy{%- endraw -%}"
+              - alert: LowDisk
+                expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.7
+                labels:
+                  service: longhorn
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}High disk usage on {{ $labels.node }}{%- endraw -%}"
+              - alert: LonghornNodeDown
+                expr: longhorn_node_status != 1
+                labels:
+                  service: longhorn
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Node {{ $labels.node }} is unhealthy ({{ $labels.condition }}){%- endraw -%}"
+    extrascrape:
+      - job_name: 'home-assistant'
+        scrape_interval: 10s
+        metrics_path: /api/prometheus
+        bearer_token: 'placeholder'
+        scheme: http
+        static_configs:
+          - targets: ['home-assistant.smart-home:8123']
+        metric_relabel_configs:
+          - regex: 'friendly_name'
+            action: 'labeldrop'
+          - source_labels: [entity]
+            regex: '.*\.(.*)'
+            replacement: '${1}'
+            target_label: 'entity_name'
+  metallb:
+    config:
+      peers:
+        - peer-address: 10.0.120.1
+          peer-asn: 64501
+          my-asn: 64500
+      address-pools:
+        - name: default
+          protocol: bgp
+          addresses:
+            - 10.0.10.0/24
+  recorder:
+    volume:
+      size: 30Gi
+    secret:
+      mqtt_password: placeholder
+      ssh_string: placeholder
+      id_rsa: |
+        -----BEGIN RSA PRIVATE KEY-----
+        placeholder
+        -----END RSA PRIVATE KEY-----
+  frigate:
+    mqtt:
+      password: placeholder
+    volume:
+      size: 1Gi
+    cameras:
+      cam1_kitchen:
+        ffmpeg:
+          inputs:
+            - path: "rtsp://placeholder:placeholder@10.0.150.25:554/Streaming/Channels/102?transportmode=unicast&profile=Profile_1&tcp"
+              roles:
+                - detect
+        width: 480
+        height: 640
+        fps: 5
+        snapshots:
+          enabled: true
+          bounding_box: true
+          crop: true
+          retain:
+            default: 1
+            objects:
+              person: 2
+        rtmp:
+          enabled: false
+      cam2_office:
+        ffmpeg:
+          inputs:
+            - path: "rtsp://placeholder:placeholder@10.0.150.26:554/Streaming/Channels/102?transportmode=unicast&profile=Profile_1&tcp"
+              roles:
+                - detect
+        width: 640
+        height: 480
+        fps: 5
+        snapshots:
+          enabled: true
+          bounding_box: true
+          crop: true
+          retain:
+            default: 1
+            objects:
+              person: 2
+        rtmp:
+          enabled: false
+  mosquitto:
+    htaccess:
+      - 'placeholder'
+  traefik:
+    htaccess:
+      - 'placeholder'
+  blocky:
+    blocking:
+      client_group:
+        default:
+          - malware
+          - ads
+          - privacy
+      blacklist:
+        malware:
+          - http://hole.cert.pl/domains/domains_hosts.txt
+          - https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt
+          - https://curben.gitlab.io/malware-filter/urlhaus-filter-hosts-online.txt
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/KADhosts.txt
+          - https://blocklistproject.github.io/Lists/abuse.txt
+          - https://blocklistproject.github.io/Lists/malware.txt
+          - https://blocklistproject.github.io/Lists/phishing.txt
+          - https://blocklistproject.github.io/Lists/ransomware.txt
+        ads:
+          - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/Ad_filter_list_by_Disconnect.txt
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/hostfile.txt
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adguard_mobile_host.txt
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adservers.txt
+          - https://blocklistproject.github.io/Lists/ads.txt
+          - https://blocklistproject.github.io/Lists/fraud.txt
+          - https://blocklistproject.github.io/Lists/scam.txt
+        privacy:
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/NoTrack_Tracker_Blocklist.txt
+          - https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/easy_privacy_host.txt
+          - https://blocklistproject.github.io/Lists/tracking.txt
+    conditional:
+      mapping:
+        home: udp:10.0.120.1
+    custom_dns:
+      mapping:
+      - domain: "k8s.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "grafana.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "longhorn.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "traefik.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "alertmanager.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "prometheus.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "mqtt.{{ global.domain }}"
+        ip: "{{ global.vips[3].ip }}"
+      - domain: "frigate.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "recorder.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "unifi.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "node-red.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "z2m.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+  r53:
+    access_key: placeholder
+    secret_key: placeholder

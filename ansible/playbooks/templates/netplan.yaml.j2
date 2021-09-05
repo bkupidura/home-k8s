@@ -1,0 +1,12 @@
+network:
+  ethernets:
+    {{ primary_interface }}:
+      dhcp4: true
+      dhcp4-overrides:
+        use-dns: false
+      nameservers:
+        addresses:
+{% for s in dns_servers %}
+        - {{ s }}
+{% endfor %}
+  version: 2

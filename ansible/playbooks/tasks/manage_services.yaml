@@ -1,0 +1,42 @@
+- name: Disable services
+  service:
+    name: "{{ item }}"
+    enabled: false
+    masked: true
+    state: stopped
+  with_items: "{{ disable }}"
+  when: disable is defined
+  become: true
+
+- name: Enable services
+  service:
+    name: "{{ item }}"
+    enabled: true
+    masked: false
+    state: started
+  with_items: "{{ enable }}"
+  when: enable is defined
+  become: true
+
+- name: Create custom systemd services
+  vars:
+    after: "{{ item.value.after }}"
+    exec_start: "{{ item.value.exec_start }}"
+    wanted_by: "{{ item.value.wanted_by }}"
+  template:
+    src: templates/systemd-custom.service.j2
+    dest: "/etc/systemd/system/{{ item.key }}.service"
+  with_dict: "{{ create }}"
+  when: create is defined
+  register: create_service
+  become: true
+
+- name: Start custom systemd services
+  systemd:
+    name: "{{ item.key }}"
+    daemon_reload: true
+    enabled: true
+    state: started
+  with_dict: "{{ create }}"
+  when: create_service.changed
+  become: true

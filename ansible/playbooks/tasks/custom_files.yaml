@@ -1,0 +1,17 @@
+- name: Create destination directory for custom files
+  file:
+    path: "{{ item.value.dst | dirname }}"
+    state: directory
+    mode: 0755
+  with_dict: "{{ create }}"
+  when: create is defined
+  become: true
+
+- name: Create custom files
+  template:
+    src: "{{ item.value.src }}"
+    dest: "{{ item.value.dst }}"
+    mode: "{{ item.value.permission }}"
+  with_dict: "{{ create }}"
+  when: create is defined
+  become: true

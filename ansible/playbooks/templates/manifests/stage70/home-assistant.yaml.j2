@@ -1,0 +1,68 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: home-assistant
+  namespace: kube-system
+spec:
+  chart: home-assistant
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.homeassistant.chart }}
+  targetNamespace: smart-home
+  valuesContent: |-
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - node-red
+                      - zigbee2mqtt
+              topologyKey: kubernetes.io/hostname
+    env:
+      TZ: {{ global.timezone }}
+    image:
+      repository: {{ manifest.versions.homeassistant.image.repository }}
+      tag: {{ manifest.versions.homeassistant.image.tag }}
+    persistence:
+      config:
+        enabled: true
+        existingClaim: home-assistant
+    service:
+      main:
+        ports:
+          http:
+            enabled: true
+            port: 8123
+      vip-udp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "{{ global.vips[6].ip }}"
+        externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/allow-shared-ip: "{{ global.vips[6].ip }}"
+        ports:
+          shelly-coap:
+            enabled: true
+            port: 5683
+            protocol: UDP
+      vip-tcp:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "{{ global.vips[6].ip }}"
+        externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/allow-shared-ip: "{{ global.vips[6].ip }}"
+        ports:
+          sonos:
+            enabled: true
+            port: 1400
+            protocol: TCP
+    ingress:
+      main:
+        enabled: false
+    dnsPolicy: ClusterFirstWithHostNet
