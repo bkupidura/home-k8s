@@ -1,0 +1,39 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: node-red
+  namespace: kube-system
+spec:
+  chart: node-red
+  repo: https://k8s-at-home.com/charts/
+  version: {{ manifest.versions.nodered.chart }}
+  targetNamespace: smart-home
+  valuesContent: |-
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - home-assistant
+                      - zigbee2mqtt
+              topologyKey: kubernetes.io/hostname
+    env:
+      TZ: {{ global.timezone }}
+    image:
+      repository: {{ manifest.versions.nodered.image.repository }}
+      tag: {{ manifest.versions.nodered.image.tag }}
+    persistence:
+      data:
+        enabled: true
+        existingClaim: node-red
+    ingress:
+      main:
+        enabled: false
+    podSecurityContext:
+      fsGroup: 1000

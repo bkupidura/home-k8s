@@ -1,0 +1,21 @@
+os:
+  primary_interface: enp1s0f0
+  hostname: k3s-delta
+  additional_mounts:
+    - path: /srv/samba
+      opts: defaults,noatime
+      src: /dev/sdb
+      fstype: ext4
+watchdog:
+  module: softdog
+k3s:
+  labels:
+    video_processing: "true"
+    ups_controller: "true"
+    samba_controller: "true"
+service:
+  create:
+    custom-setpci:
+      after: network.service
+      exec_start: setpci -s 00:1f.0 0xa4.b=0
+      wanted_by: default.target

@@ -1,0 +1,32 @@
+- name: Update all packages to their latest version
+  apt:
+    name: "*"
+    state: latest
+    update_cache: true
+  become: true
+
+- name: Install packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+  become: true
+  with_items: "{{ install }}"
+  when: install is defined
+
+- name: Remove packages
+  apt:
+    name: "{{ item }}"
+    state: absent
+    autoremove: true
+    purge: true
+  become: true
+  with_items: "{{ remove }}"
+  when: remove is defined
+
+- name: Upgrade dist
+  apt:
+    upgrade: dist
+  become: true
+  when:
+    - upgrade is defined
+    - upgrade is true

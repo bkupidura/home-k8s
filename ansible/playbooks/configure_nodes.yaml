@@ -1,0 +1,77 @@
+---
+- name: Configure k8s master
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  gather_facts: true
+  tasks:
+    - name: Base config
+      vars:
+        timezone: "{{ global.timezone }}"
+        hostname: "{{ os.hostname }}"
+        swap_file: "{{ os.swap_file }}"
+        ssh_keys: "{{ os.ssh_keys }}"
+      include_tasks: tasks/base_config.yaml
+
+    - name: Configure networking
+      vars:
+        primary_interface: "{{ os.primary_interface }}"
+        dns_servers: "{{ global.dns.servers }}"
+      include_tasks: tasks/configure_networking.yaml
+
+    - name: Mount additional disks
+      vars:
+        additional_mounts: "{{ os.additional_mounts | default([]) }}"
+      include_tasks: tasks/additional_mounts.yaml
+
+    - name: Enforce performance cpu governor
+      copy:
+        dest: /etc/default/cpufrequtils
+        content: |
+          GOVERNOR="performance"
+      become: true
+
+    - name: Manage packages
+      vars:
+        install: "{{ package.install | default([]) }}"
+        remove: "{{ package.remove | default([]) }}"
+      include_tasks: tasks/manage_packages.yaml
+
+    - name: Manage services
+      vars:
+        disable: "{{ service.disable | default([]) }}"
+        enable: "{{ service.enable | default([]) }}"
+        create: "{{ service.create | default({}) }}"
+      include_tasks: tasks/manage_services.yaml
+
+    - name: Configure watchdog
+      vars:
+        module: "{{ watchdog.module }}"
+        device: "{{ watchdog.device | default('/dev/watchdog') }}"
+        interval: "{{ watchdog.interval | default(10) }}"
+        realtime: "{{ watchdog.realtime | default(true) }}"
+      include_tasks: tasks/configure_watchdog.yaml
+
+- name: Upgrade k8s master
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  gather_facts: true
+  serial: 1
+  tasks:
+    - block:
+      - name: Upgrade
+        vars:
+          upgrade: true
+        include_tasks: tasks/manage_packages.yaml
+
+      - name: Reboot
+        reboot:
+          post_reboot_delay: 120
+          reboot_timeout: 300
+        become: true
+
+      when:
+      - operation is defined
+      - operation == 'upgrade'
+      any_errors_fatal: true

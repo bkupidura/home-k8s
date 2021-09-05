@@ -1,0 +1,120 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zigbee2mqtt
+  namespace: smart-home
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn-standard-with-snapshots
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: zigbee2mqtt
+  namespace: smart-home
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`z2m.{{ global.domain }}`)
+    kind: Rule
+    services:
+      - name: zigbee2mqtt
+        port: 8080
+        namespace: smart-home
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+  tls:
+    secretName: "{{ global.domain | replace('.', '-') }}-tls"
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: zigbee2mqtt-restic-restore
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: zigbee2mqtt
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: zigbee2mqtt
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            args:
+            - "--repo"
+            - "{{ manifest.backup.restic.repo }}"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "zigbee2mqtt"
+            - "--target"
+            - "/data"
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: zigbee2mqtt-restic-backup
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "50 04 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: zigbee2mqtt
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: zigbee2mqtt
+          containers:
+          - name: backup
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              cd /data
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose backup .
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - zigbee2mqtt
+                  topologyKey: kubernetes.io/hostname

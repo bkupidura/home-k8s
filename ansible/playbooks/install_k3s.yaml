@@ -1,0 +1,115 @@
+---
+- name: Gather facts
+  hosts: k8s_master
+  gather_facts: yes
+
+- name: Configre k8s master primary
+  hosts: k8s_master_primary
+  tasks:
+    - block:
+      - fail:
+          msg: "Only one node can be primary"
+        when: groups['k8s_master_primary'] | length > 1
+
+      - name: Get primary interface IP
+        set_fact:
+          primary_ip: "{{ hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address }}"
+
+      - name: Prepare K3s exec env
+        set_fact:
+          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address {{ primary_ip }} --advertise-address {{ primary_ip }} --cluster-init"
+
+      - name: Add labels to exec env
+        set_fact:
+          k3s_exec: "{{ k3s_exec }} --node-label {{ item.key }}={{ item.value }}"
+        when: k3s.labels is defined
+        with_dict: "{{ k3s.labels }}"
+
+      - name: Install K3s
+        vars:
+          env: 
+            INSTALL_K3S_VERSION: "{{ k3s.version }}"
+            INSTALL_K3S_EXEC: "{{ k3s_exec }}"
+        include_tasks: tasks/install_k3s.yaml
+
+      - name: Cat k3s token
+        command: cat /var/lib/rancher/k3s/server/node-token
+        register: cat_token
+        become: true
+
+      - name: Set k3s token
+        set_fact:
+          k3s:
+            token: "{{ cat_token.stdout }}"
+        when: k3s.token is not defined
+
+      - fail:
+          msg: "Unknown k3s token!"
+        when: k3s.token is not defined
+
+      - name: Fetch kube-config
+        fetch:
+          src: /etc/rancher/k3s/k3s.yaml
+          dest: ../../kube-config.yaml
+          flat: true
+        become: true
+
+      when:
+      - operation is defined
+      - operation == 'deploy'
+
+- name: Configre k8s master
+  hosts: k8s_master
+  serial: 1
+  gather_facts: yes
+  tasks:
+    - block:
+      - name: Get primary master IP
+        set_fact:
+          primary_node_ip: "{{ item.value['ansible_' + item.value.os.primary_interface].ipv4.address }}"
+        with_dict: "{{ hostvars }}"
+        when:
+          - primary_node_ip is not defined
+          - '"k8s_master_primary" in item.value.group_names'
+
+      - fail:
+          msg: "Unknown primary_node_ip"
+        when: primary_node_ip is not defined
+
+      - name: Get primary interface IP
+        set_fact:
+          primary_ip: "{{ hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address }}"
+
+      - name: Prepare K3s exec env
+        set_fact:
+          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address {{ primary_ip }} --advertise-address {{ primary_ip }} --server https://{{ primary_node_ip }}:6443"
+
+      - name: Add labels to exec env
+        set_fact:
+          k3s_exec: "{{ k3s_exec }} --node-label {{ item.key }}={{ item.value }}"
+        when: k3s.labels is defined
+        with_dict: "{{ k3s.labels }}"
+
+      - name: Discover token
+        set_fact:
+          token: "{{ item.value.k3s.token }}"
+        with_dict: "{{ hostvars }}"
+        when: 
+          - token is not defined
+          - '"k8s_master_primary" in item.value.group_names'
+
+      - fail:
+          msg: "Unknown k3s token!"
+        when: token is not defined
+
+      - name: Install K3s
+        vars:
+          env:
+            INSTALL_K3S_VERSION: "{{ k3s.version }}"
+            INSTALL_K3S_EXEC: "{{ k3s_exec }}"
+            K3S_TOKEN: "{{ token }}"
+        include_tasks: tasks/install_k3s.yaml
+
+      when:
+      - operation is defined
+      - operation == 'deploy'

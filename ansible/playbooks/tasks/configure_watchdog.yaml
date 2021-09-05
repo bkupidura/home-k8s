@@ -1,0 +1,16 @@
+- name: watchdog configure
+  template:
+    src: "templates/{{ item.src }}"
+    dest: "{{ item.dst }}"
+  register: watchdog_config
+  become: true
+  with_items:
+    - {"src": "default_watchdog.j2", "dst": "/etc/default/watchdog"}
+    - {"src": "watchdog.conf.j2", "dst": "/etc/watchdog.conf"}
+
+- name: watchdog restart
+  systemd:
+    name: watchdog
+    state: restarted
+  when: watchdog_config.changed
+  become: true

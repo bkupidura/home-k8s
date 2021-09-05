@@ -1,0 +1,32 @@
+---
+- name: Render manifests
+  hosts: localhost
+  tasks:
+    - name: Find all manifests
+      find:
+        paths: "templates/manifests/"
+        file_type: file
+        recurse: true
+      register: manifest_files_dict
+
+    - name: Prepare empty manifest list
+      set_fact:
+        manifest_files: []
+
+    - name: Append manifests
+      set_fact:
+        manifest_files: "{{ manifest_files + [ item.path ] }}"
+      with_items: "{{ manifest_files_dict.files }}"
+
+    - name: Prepare list for changed manifests
+      set_fact:
+        changed_manifests: []
+
+    - name: Render manifests
+      include_tasks: tasks/render_manifest.yaml
+      with_items: "{{ manifest_files }}"
+
+    - name: Return changed manifests
+      debug:
+        msg: "{{ changed_manifests }}"
+      when: changed_manifests | length > 0

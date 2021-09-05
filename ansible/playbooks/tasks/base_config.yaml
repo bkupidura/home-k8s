@@ -1,0 +1,87 @@
+- name: Set timezone
+  timezone:
+    name: "{{ timezone }}"
+  become: true
+
+- name: Set hostname
+  hostname:
+    name: "{{ hostname }}"
+  become: true
+
+- name: Get orchestrator time
+  set_fact:
+    orch_date: "{{ ansible_date_time }}"
+  delegate_to: localhost
+  delegate_facts: true
+
+- name: Sync time
+  service:
+    name: systemd-timesyncd
+    enabled: false
+    masked: false
+    state: started
+  become: true
+  when: ((hostvars['localhost'].orch_date.epoch|int - ansible_date_time.epoch|int) | abs) > 5
+
+- name: Update /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ".*{{ item }}$"
+    line: "{{ hostvars[item]['ansible_' + hostvars[item].os.primary_interface].ipv4.address }} {{ hostvars[item].os.hostname }}"
+    state: present
+  with_items: "{{ groups['all'] }}"
+  become: true
+
+- name: Remove swap from fstab
+  mount:
+    src: "{{ swap_file }}"
+    state: absent
+    path: none
+  become: true
+  register: disable_swap
+
+- name: Disable swap
+  command: swapoff -a
+  when: disable_swap.changed
+  become: true
+
+- name: Remove swap file
+  file:
+    path: "{{ swap_file }}"
+    state: absent
+  become: true
+
+- name: Find root disk
+  set_fact:
+    root_disk: "{{ ansible_facts['mounts'] | selectattr('mount', 'equalto', '/') | first }}"
+
+- name: Set noatime for /
+  mount:
+    path: /
+    opts: defaults,noatime
+    src: "/dev/disk/by-uuid/{{ root_disk.uuid }}"
+    fstype: "{{ root_disk.fstype }}"
+    passno: 1
+    state: mounted
+  become: true
+
+- name: Set ssh keys
+  authorized_key:
+    user: "{{ item.user }}"
+    key: "{{ item.key }}"
+  with_items: "{{ ssh_keys }}"
+  become: true
+
+- name: sshd configure
+  template:
+    src: templates/sshd_config.j2
+    dest: /etc/ssh/sshd_config
+  register: sshd_config
+  become: true
+
+- name: sshd restart
+  systemd:
+    name: sshd
+    state: restarted
+  when: sshd_config.changed
+  become: true

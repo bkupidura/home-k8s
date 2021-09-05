@@ -1,0 +1,177 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: samba-restic-restore
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: samba
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            args:
+            - "--repo"
+            - "{{ manifest.backup.restic.repo_samba }}"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "samba"
+            - "--target"
+            - "/data"
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          volumes:
+            - name: data
+              hostPath:
+                path: /srv/samba
+                type: Directory
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: samba_controller
+                      operator: In
+                      values:
+                        - "true"
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: samba-restic-backup
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "00 05 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: samba
+          containers:
+          - name: backup
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              cd /data
+              restic --repo "{{ manifest.backup.restic.repo_samba }}" --verbose backup .
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          volumes:
+            - name: data
+              hostPath:
+                path: /srv/samba
+                type: Directory
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: samba_controller
+                      operator: In
+                      values:
+                        - "true"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: samba
+  namespace: home-infra
+  labels:
+    app.kubernetes.io/name: samba
+spec:
+  type: LoadBalancer
+  publishNotReadyAddresses: false
+  loadBalancerIP: "{{ global.vips[4].ip }}"
+  externalTrafficPolicy: Local
+  ports:
+    - name: tcp-445
+      port: 445
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: samba
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: samba
+  namespace: home-infra
+  labels:
+    app.kubernetes.io/name: samba
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: samba
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: samba
+    spec:
+      containers:
+        - name: samba
+          image: {{ manifest.versions.samba.repository }}:{{ manifest.versions.samba.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: tcp-445
+              containerPort: 445
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/timemachine
+              name: data
+          env:
+            - name: TZ
+              value: {{ global.timezone }}
+            - name: MIMIC_MODEL
+              value: 'TimeCapsule8,119'
+            - name: PASSWORD
+              value: {{ manifest.samba.password }}
+            - name: SMB_VFS_OBJECTS
+              value: 'acl_xattr fruit streams_xattr'
+          readinessProbe:
+            tcpSocket:
+              port: 445
+            initialDelaySeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 445
+            initialDelaySeconds: 10
+      volumes:
+        - name: data
+          hostPath:
+            path: /srv/samba
+            type: Directory
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: samba_controller
+                  operator: In
+                  values:
+                    - "true"
