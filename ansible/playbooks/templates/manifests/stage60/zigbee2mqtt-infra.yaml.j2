@@ -35,7 +35,7 @@ spec:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: zigbee2mqtt-restic-restore
@@ -75,7 +75,7 @@ spec:
           restartPolicy: OnFailure
 
 ---
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: zigbee2mqtt-restic-backup
@@ -118,3 +118,58 @@ spec:
                         values:
                           - zigbee2mqtt
                   topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: zigbee-firmware-upgrade
+  namespace: smart-home
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: upgrade
+            image: {{ manifest.versions.deconz.image.repository }}:{{ manifest.versions.deconz.image.tag }}
+            imagePullPolicy: IfNotPresent
+            command:
+              - "/bin/sh"
+              - "-ec"
+              - |
+                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}' -o {{ manifest.versions.deconz.firmware.name }}
+                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}.md5' -o {{ manifest.versions.deconz.firmware.name }}.md5
+                md5sum -c {{ manifest.versions.deconz.firmware.name }}.md5 || exit
+                /usr/bin/GCFFlasher_internal -f {{ manifest.versions.deconz.firmware.name }} -d /dev/ttyACM0
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /dev/ttyACM0
+              name: zigbee
+          volumes:
+            - name: zigbee
+              hostPath:
+                path: /dev/ttyACM0
+          restartPolicy: OnFailure
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - zigbee2mqtt
+                  topologyKey: kubernetes.io/hostname
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    - key: zigbee_controller
+                      operator: In
+                      values:
+                        - "true"
