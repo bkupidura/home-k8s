@@ -33,7 +33,7 @@
         include_tasks: tasks/install_k3s.yaml
 
       - name: Cat k3s token
-        command: cat /var/lib/rancher/k3s/server/node-token
+        command: cat /var/lib/rancher/k3s/server/token
         register: cat_token
         become: true
 

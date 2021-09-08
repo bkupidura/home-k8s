@@ -26,7 +26,7 @@ spec:
           - "-ec"
           - |
             apt update
-            apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat
+            apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat powertop
             tail -f /dev/null
         securityContext:
           privileged: true
