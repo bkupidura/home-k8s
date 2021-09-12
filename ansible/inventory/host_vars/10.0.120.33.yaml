@@ -16,6 +16,7 @@ k3s:
 service:
   create:
     custom-setpci:
+      wants: network-online.target
       after: network.service
       exec_start: setpci -s 00:1f.0 0xa4.b=0
       wanted_by: default.target
