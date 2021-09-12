@@ -4,6 +4,7 @@ service:
   disable:
     - atd
     - multipathd
+    - ondemand
     - systemd-timesyncd
     - accounts-daemon
     - networkd-dispatcher
