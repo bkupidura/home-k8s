@@ -7,6 +7,8 @@ network:
       nameservers:
         addresses:
 {% for s in dns_servers %}
+{% if loop.index < 3 %}
         - {{ s }}
+{% endif %}
 {% endfor %}
   version: 2

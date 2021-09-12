@@ -1,6 +1,14 @@
+#managed by ansible
 [Unit]
-After={{ after }}
+After={{ data.after }}
+Wants={{ data.wants }}
 [Service]
-ExecStart={{ exec_start }}
+ExecStart={{ data.exec_start }}
+{% if data.environment_file is defined %}
+EnvironmentFile={{ data.environment_file }}
+{% endif %}
+{% if data.user is defined %}
+User={{ data.user }}
+{% endif %}
 [Install]
-WantedBy={{ wanted_by }}
+WantedBy={{ data.wanted_by }}
