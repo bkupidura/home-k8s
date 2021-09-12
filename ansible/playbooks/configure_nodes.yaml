@@ -31,6 +31,20 @@
           GOVERNOR="performance"
       become: true
 
+    - name: Set GRUB_CMDLINE_LINUX_DEFAULT
+      lineinfile:
+        state: present
+        dest: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+        line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance intel_pstate=disable"
+      become: true
+      register: grub_config
+
+    - name: Update grub config
+      command: update-grub
+      when: grub_config.changed
+      become: true
+
     - name: Manage packages
       vars:
         install: "{{ package.install | default([]) }}"
