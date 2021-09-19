@@ -13,6 +13,28 @@ spec:
   storageClassName: longhorn-standard
 
 ---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: esphome
+  namespace: smart-home
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - match: Host(`esphome.{{ global.domain }}`)
+    kind: Rule
+    services:
+      - name: esphome
+        port: 6052
+        namespace: smart-home
+    middlewares:
+      - name: basic-auth
+        namespace: traefik-system
+  tls:
+    secretName: "{{ global.domain | replace('.', '-') }}-tls"
+
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:

@@ -1,9 +1,11 @@
 ---
 - name: Gather facts
-  hosts: k8s_master
+  hosts:
+    - k8s_master
+    - k8s_master_primary
   gather_facts: yes
 
-- name: Configre k8s master primary
+- name: Configre k8s master primary (k3s)
   hosts: k8s_master_primary
   tasks:
     - block:
@@ -58,7 +60,7 @@
       - operation is defined
       - operation == 'deploy'
 
-- name: Configre k8s master
+- name: Configre k8s master (k3s)
   hosts: k8s_master
   serial: 1
   gather_facts: yes
