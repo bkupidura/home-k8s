@@ -41,7 +41,6 @@ k3s:
     - "default-not-ready-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "feature-gates=EphemeralContainers=true"
-
 manifest:
   backup:
     restic:
@@ -65,7 +64,7 @@ manifest:
       tag: v1.8.4
     chrony:
       repository: bkupidura/chrony
-      tag: 04092021
+      tag: 18092021
     restic:
       repository: restic/restic
       tag: 0.12.1
@@ -83,6 +82,7 @@ manifest:
         repository: koenkk/zigbee2mqtt
         tag: 1.21.1
     esphome:
+      chart: 8.0.1
       image:
         repository: esphome/esphome
         tag: 2021.8.2
@@ -179,8 +179,24 @@ manifest:
         groups:
           - name: infra
             rules:
+              - alert: OOMKill
+                expr: delta(node_vmstat_oom_kill[30m]) > 2
+                for: 1m
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Out of memory kill observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
+              - alert: HighMaxErrorTimeDrift
+                expr: node_timex_maxerror_seconds > 0.5
+                for: 5m
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}High max error time drift observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 1MLoadHigh
-                expr: node_load1 > machine_cpu_cores * 1.3
+                expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.3
                 for: 2m
                 labels:
                   service: system
@@ -188,7 +204,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}High load avg from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 5MLoadHigh
-                expr: node_load5 > machine_cpu_cores * 0.8
+                expr: node_load5 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.8
                 for: 5m
                 labels:
                   service: system
@@ -500,6 +516,8 @@ manifest:
         home: udp:10.0.120.1
     custom_dns:
       mapping:
+      - domain: "esphome.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
       - domain: "k8s.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
       - domain: "grafana.{{ global.domain }}"
