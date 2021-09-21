@@ -10,7 +10,9 @@ spec:
   version: {{ manifest.versions.unifi.chart }}
   targetNamespace: home-infra
   valuesContent: |-
-    timezone: {{ global.timezone }}
+    env:
+      TZ: {{ global.timezone }}
+      JVM_MAX_HEAP_SIZE: 768M
     image:
       repository: {{ manifest.versions.unifi.image.repository }}
       tag: {{ manifest.versions.unifi.image.tag }}
@@ -64,4 +66,4 @@ spec:
         cpu: 15m
       limits:
         memory: 1Gi
-        cpu: 100m
+        cpu: 400m

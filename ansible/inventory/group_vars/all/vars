@@ -123,10 +123,10 @@ manifest:
       repository: ubuntu
       tag: focal-20210827
     blocky:
-      chart: 8.0.0
+      chart: 9.0.3
       image:
         repository: spx01/blocky
-        tag: v0.15
+        tag: v0.16
     traefik:
       chart: 10.3.2
       image:
@@ -197,7 +197,7 @@ manifest:
                   summary: "{%- raw -%}High max error time drift observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 1MLoadHigh
                 expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.3
-                for: 2m
+                for: 5m
                 labels:
                   service: system
                   severity: warning
@@ -212,7 +212,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}High load avg from 5m on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: HighMemory
-                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.3
+                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.2
                 for: 5m
                 labels:
                   service: system
@@ -259,6 +259,14 @@ manifest:
                   summary: "{%- raw -%}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{%- endraw -%}"
           - name: k8s
             rules:
+              - alert: HighMemoryPodUsage
+                expr: max by (pod, namespace) (container_memory_usage_bytes{pod!=""} / container_spec_memory_limit_bytes < Inf) > 0.85
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}POD {{ $labels.pod }} is using more than 85% of memory limit{%- endraw -%}"
               - alert: ClusterRunningDifferentK8sVersionComponets
                 expr: count (count by (git_version) (kubernetes_build_info)) > 1
                 for: 10m
@@ -284,7 +292,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}{{ $labels.node }} is readiness is flapping{%- endraw -%}"
               - alert: PodCPUThrotling
-                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.25
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3
                 for: 5m
                 labels:
                   service: k8s
