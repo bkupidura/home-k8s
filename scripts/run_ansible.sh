@@ -11,21 +11,23 @@ fi
 
 show_help() {
     cat << EOF
-Usage: ./run_ansible.sh [-hv] [-e var_name=var_value] [-l | -s <node_name|group_name> | -f <node_name|group_name> | -r playbook.yaml]
+Usage: ./run_ansible.sh [-hv] [-H all] [-e var_name=var_value] [-l | -s | -f | -r playbook.yaml | -c command]
 Simple bash wrapper around ansible.
 
 -h      Display help
 -v      Enable verbose mode
 -e      Extra vars
+-H      Host group (used for -s, -f -c)
 -l      List available playbooks
 -s      Show variables for given node
 -f      Show facts for given node
 -r      Run specific playbook
+-c      Run command
 EOF
 }
 
 
-args=$(getopt hve:ls:f:r: $*)
+args=$(getopt hve:H:lsfr:c: $*)
 if [ $? != 0 ]; then
     show_help
     exit 2
@@ -34,6 +36,7 @@ fi
 set -- $args
 
 EXTRA_VARS=()
+HOST_GROUP=all
 
 for i; do
     case "${i}" in
@@ -47,22 +50,27 @@ for i; do
             EXTRA_VARS+=(${2})
             shift
             shift;;
+        -H)
+            HOST_GROUP=${2}
+            shift
+            shift;;
         -l)
             ACTION="list_playbooks"
             shift;;
         -s)
             ACTION="show_vars"
-            HOST=${2}
-            shift
             shift;;
         -f)
             ACTION="show_facts"
-            HOST=${2}
-            shift
             shift;;
         -r)
             ACTION="run_playbook"
             PLAYBOOK=${2}
+            shift
+            shift;;
+        -c)
+            ACTION="run_command"
+            COMMAND=${2}
             shift
             shift;;
         --)
@@ -84,12 +92,15 @@ case "${ACTION}" in
         find playbooks/ -type f -maxdepth 1 -exec basename {} \;
         ;;
     show_vars)
-        ansible ${ANSIBLE_ARGS} ${HOST} -m debug -a "var=hostvars[inventory_hostname]"
+        ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -m debug -a "var=hostvars[inventory_hostname]"
         ;;
     show_facts)
-        ansible ${ANSIBLE_ARGS} ${HOST} -m setup
+        ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -m setup
+        ;;
+    run_command)
+        ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -a "${COMMAND}"
         ;;
     *)
-        echo "please provide one of available actions: -l, -s, -f, -r"
+        echo "please provide one of available actions: -l, -s, -f, -r, -c"
         ;;
 esac
