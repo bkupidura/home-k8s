@@ -12,7 +12,7 @@ spec:
   valuesContent: |-
     env:
       TZ: {{ global.timezone }}
-      JVM_MAX_HEAP_SIZE: 768M
+      JVM_MAX_HEAP_SIZE: 512M
     image:
       repository: {{ manifest.versions.unifi.image.repository }}
       tag: {{ manifest.versions.unifi.image.tag }}
@@ -60,6 +60,7 @@ spec:
             port: 10001
             enabled: true
             protocol: UDP
+    priorityClassName: normal-priority
     resources:
       requests:
         memory: 500Mi
