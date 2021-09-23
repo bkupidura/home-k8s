@@ -92,10 +92,10 @@ manifest:
         repository: grafana/grafana
         tag: 8.1.3
     homeassistant:
-      chart: 10.1.0
+      chart: 11.0.3
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.9.4
+        tag: 2021.9.7
     nodered:
       chart: 9.0.0
       image:
@@ -196,21 +196,21 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}High max error time drift observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 1MLoadHigh
-                expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.3
+                expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.5
                 for: 5m
                 labels:
                   service: system
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}High load avg from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
-              - alert: 5MLoadHigh
-                expr: node_load5 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.8
-                for: 5m
+              - alert: 15MLoadHigh
+                expr: node_load15 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.9
+                for: 20m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High load avg from 5m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High load avg from 15m on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: HighMemory
                 expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.2
                 for: 5m
@@ -259,14 +259,44 @@ manifest:
                   summary: "{%- raw -%}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{%- endraw -%}"
           - name: k8s
             rules:
-              - alert: HighMemoryPodUsage
-                expr: max by (pod, namespace) (container_memory_usage_bytes{pod!=""} / container_spec_memory_limit_bytes < Inf) > 0.85
-                for: 10m
+              - alert: HighCPUHVLimit
+                expr: sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) /
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)")
+                    > 1
+                for: 30m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} have higher CPU limits than total HV capacity{%- endraw -%}"
+              - alert: HighMemoryHVUsage
+                expr: sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) /
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
+                  > 0.7
+                for: 30m
                 labels:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}POD {{ $labels.pod }} is using more than 85% of memory limit{%- endraw -%}"
+                  summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} are using 70% of HV total memory{%- endraw -%}"
+              - alert: HighMemoryHVLimit
+                expr: sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) /
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
+                  > 0.9
+                for: 30m
+                labels:
+                  service: k8s
+                  severity: info
+                annotations:
+                  summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory{%- endraw -%}"
+              - alert: HighMemoryPodUsage
+                expr: max by (pod, namespace) (container_memory_working_set_bytes{pod!=""} / container_spec_memory_limit_bytes < Inf) > 0.90
+                for: 15m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}POD {{ $labels.pod }} is using more than 90% of memory limit{%- endraw -%}"
               - alert: ClusterRunningDifferentK8sVersionComponets
                 expr: count (count by (git_version) (kubernetes_build_info)) > 1
                 for: 10m
@@ -332,7 +362,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}Pod {{ $labels.pod }} was restarted more than 2 times in last 30m{%- endraw -%}"
               - alert: PodsWaiting
-                expr: kube_pod_container_status_waiting > 0
+                expr: max by (pod) (kube_pod_container_status_waiting) > 0
                 for: 10m
                 labels:
                   service: k8s
