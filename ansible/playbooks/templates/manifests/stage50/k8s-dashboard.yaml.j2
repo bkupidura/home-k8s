@@ -49,3 +49,11 @@ spec:
   repo: https://kubernetes.github.io/dashboard/
   version: {{ manifest.versions.k8s_dashboard.chart }}
   targetNamespace: kube-system
+  valuesContent: |-
+    resources:
+      requests:
+        cpu: 50m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

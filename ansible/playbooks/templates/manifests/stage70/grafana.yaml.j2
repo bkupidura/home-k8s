@@ -10,6 +10,13 @@ spec:
   version: {{ manifest.versions.grafana.chart }}
   targetNamespace: home-infra
   valuesContent: |-
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 30m
+      limits:
+        memory: 128Mi
+        cpu: 50m
     image:
       repository: {{ manifest.versions.grafana.image.repository }}
       tag: {{ manifest.versions.grafana.image.tag }}

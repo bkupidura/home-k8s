@@ -10,6 +10,13 @@ spec:
   version: {{ manifest.versions.nodered.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    resources:
+      requests:
+        memory: 512Mi
+        cpu: 500m
+      limits:
+        memory: 512Mi
+        cpu: 500m
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:

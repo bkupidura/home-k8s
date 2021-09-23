@@ -41,6 +41,13 @@ spec:
         - name: chrony
           image: {{ manifest.versions.chrony.repository }}:{{ manifest.versions.chrony.tag }}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: 8Mi
+              cpu: 100m
+            limits:
+              memory: 16Mi
+              cpu: 200m
           ports:
             - name: chrony
               containerPort: 123

@@ -58,6 +58,13 @@ spec:
   version: {{ manifest.versions.nut.chart }}
   targetNamespace: home-infra
   valuesContent: |-
+    resources:
+      requests:
+        memory: 8Mi
+        cpu: 5m
+      limits:
+        memory: 16Mi
+        cpu: 10m
     lifecycle:
       postStart:
         exec:

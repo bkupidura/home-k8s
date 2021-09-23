@@ -10,6 +10,13 @@ spec:
   version: {{ manifest.versions.zigbee2mqtt.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 128Mi
+        cpu: 100m
     env:
       TZ: {{ global.timezone }}
     image:

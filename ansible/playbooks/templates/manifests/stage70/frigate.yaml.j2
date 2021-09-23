@@ -45,6 +45,13 @@ spec:
   version: {{ manifest.versions.frigate.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 500m
+      limits:
+        memory: 512Mi
+        cpu: 2000m
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
