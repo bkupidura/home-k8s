@@ -137,6 +137,13 @@ spec:
         - name: samba
           image: {{ manifest.versions.samba.repository }}:{{ manifest.versions.samba.tag }}
           imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 200m
+              memory: 2Gi
           ports:
             - name: tcp-445
               containerPort: 445

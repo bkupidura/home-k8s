@@ -10,6 +10,13 @@ spec:
   version: {{ manifest.versions.traefik.chart }}
   targetNamespace: traefik-system
   valuesContent: |-
+    resources:
+      requests:
+        cpu: 50m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
     image:
       name: {{ manifest.versions.traefik.image.repository }}
       tag: {{ manifest.versions.traefik.image.tag }}

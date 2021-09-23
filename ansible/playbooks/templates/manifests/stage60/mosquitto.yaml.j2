@@ -10,6 +10,13 @@ spec:
   version: {{ manifest.versions.mosquitto.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    resources:
+      requests:
+        memory: 32Mi
+        cpu: 50m
+      limits:
+        memory: 32Mi
+        cpu: 50m
     image:
       repository: {{ manifest.versions.mosquitto.image.repository }}
       tag: {{ manifest.versions.mosquitto.image.tag }}
