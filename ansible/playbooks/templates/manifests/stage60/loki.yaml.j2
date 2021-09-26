@@ -1,0 +1,30 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: loki
+  namespace: kube-system
+spec:
+  chart: loki-stack
+  repo: https://grafana.github.io/helm-charts
+  version: 2.4.1
+  targetNamespace: home-infra
+  valuesContent: |-
+    loki:
+      enabled: true
+      persistence:
+        enabled: true
+        size: 10Gi
+        storageClassName: longhorn-standard
+    promtail:
+      enabled: true
+    fluent-bit:
+      enabled: false
+    grafana:
+      enabled: false
+    prometheus:
+      enabled: false
+    filebeat:
+      enabled: false
+    logstash:
+      enabled: false
