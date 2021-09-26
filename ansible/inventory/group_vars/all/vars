@@ -53,6 +53,8 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    loki:
+      chart: 2.4.1
     ceph:
       chart: v1.7.4
     reflector:

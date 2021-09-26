@@ -7,15 +7,14 @@ metadata:
 spec:
   chart: loki-stack
   repo: https://grafana.github.io/helm-charts
-  version: 2.4.1
+  version: {{ manifest.versions.loki.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     loki:
       enabled: true
       persistence:
         enabled: true
-        size: 10Gi
-        storageClassName: {{ global.k8s.storage.class.default }}
+        existingClaim: loki
     promtail:
       enabled: true
     fluent-bit:
