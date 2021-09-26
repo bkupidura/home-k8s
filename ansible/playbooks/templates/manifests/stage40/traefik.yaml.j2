@@ -12,10 +12,10 @@ spec:
   valuesContent: |-
     resources:
       requests:
-        cpu: 50m
-        memory: 32Mi
+        cpu: 200m
+        memory: 128Mi
       limits:
-        cpu: 100m
+        cpu: 200m
         memory: 128Mi
     image:
       name: {{ manifest.versions.traefik.image.repository }}
