@@ -10,7 +10,7 @@ spec:
   resources:
     requests:
       storage: {{ manifest.recorder.volume.size }}
-  storageClassName: longhorn-standard
+  storageClassName: {{ global.k8s.storage.class.default }}
 
 ---
 apiVersion: batch/v1

@@ -50,7 +50,7 @@ spec:
         type: Recreate
       enabled: true
       persistentVolume:
-        storageClass: longhorn-standard
+        storageClass: {{ global.k8s.storage.class.default }}
     alertmanagerFiles:
       alertmanager.yml:
         global: {}
@@ -109,7 +109,7 @@ spec:
         type: Recreate
       enabled: true
       persistentVolume:
-        storageClass: longhorn-standard
+        storageClass: {{ global.k8s.storage.class.default }}
     extraScrapeConfigs: |
       {{ manifest.prometheus.extrascrape | to_nice_yaml | indent(6, false) }}
     serverFiles: 
