@@ -50,7 +50,7 @@ spec:
         type: Recreate
       enabled: true
       persistentVolume:
-        storageClass: {{ global.k8s.storage.class.default }}
+        existingClaim: alertmanager
     alertmanagerFiles:
       alertmanager.yml:
         global: {}
@@ -109,52 +109,8 @@ spec:
         type: Recreate
       enabled: true
       persistentVolume:
-        storageClass: {{ global.k8s.storage.class.default }}
+        existingClaim: prometheus-server
     extraScrapeConfigs: |
       {{ manifest.prometheus.extrascrape | to_nice_yaml | indent(6, false) }}
     serverFiles: 
       {{ manifest.prometheus.serverfiles | to_nice_yaml | indent(6, false) }}
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: prometheus
-  namespace: home-infra
-spec:
-  entryPoints:
-  - websecure
-  routes:
-  - match: Host(`prometheus.{{ global.domain }}`)
-    kind: Rule
-    services:
-      - name: prometheus-server
-        port: 80
-        namespace: home-infra
-    middlewares:
-      - name: basic-auth
-        namespace: traefik-system
-  tls:
-    secretName: "{{ global.domain | replace('.', '-') }}-tls"
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: alertmanager
-  namespace: home-infra
-spec:
-  entryPoints:
-  - websecure
-  routes:
-  - match: Host(`alertmanager.{{ global.domain }}`)
-    kind: Rule
-    services:
-      - name: prometheus-alertmanager
-        port: 80
-        namespace: home-infra
-    middlewares:
-      - name: basic-auth
-        namespace: traefik-system
-  tls:
-    secretName: "{{ global.domain | replace('.', '-') }}-tls"
