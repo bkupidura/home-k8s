@@ -15,7 +15,7 @@ spec:
       persistence:
         enabled: true
         size: 10Gi
-        storageClassName: longhorn-standard
+        storageClassName: {{ global.k8s.storage.class.default }}
     promtail:
       enabled: true
     fluent-bit:

@@ -31,7 +31,7 @@ spec:
             secretName: mosquitto
       data:
         enabled: true
-        storageClass: longhorn-standard
+        storageClass: {{ global.k8s.storage.class.default }}
         size: 1Gi
         type: pvc
         accessMode: ReadWriteOnce

@@ -1,5 +1,10 @@
 ansible_user: ansible
 global:
+  k8s:
+    storage:
+      service: rook-ceph
+      class:
+        default: ceph-block
   domain: placeholder
   mail: placeholder
   vips:
@@ -48,6 +53,8 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    ceph:
+      chart: v1.7.4
     reflector:
       chart: 5.4.17
     deconz:
@@ -409,6 +416,128 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}Flapping pods on {{ $labels.kubernetes_io_hostname }}{%- endraw -%}"
+          - name: ceph
+            rules:
+              - alert: CephMdsMissingReplicas
+                expr: sum(ceph_mds_metadata == 1) < 2
+                for: 5m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: Insufficient replicas for storage metadata service
+              - alert: CephMonQuorumAtRisk
+                expr: count(ceph_mon_quorum_status == 1) <= (floor(count(ceph_mon_metadata) / 2) + 1)
+                for: 5m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: Storage quorum at risk
+              - alert: CephOSDCriticallyFull
+                expr: (ceph_osd_metadata * on (ceph_daemon) group_right(device_class,hostname) (ceph_osd_stat_bytes_used / ceph_osd_stat_bytes)) > 0.80
+                for: 5m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Back-end storage device is critically full on {{ $labels.ceph_daemon }}{%- endraw -%}"
+              - alert: CephOSDFlapping
+                expr: changes(ceph_osd_up[5m]) > 3
+                for: 5m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Ceph storage osd flapping on {{ $labels.ceph_daemon }}{%- endraw -%}"
+              - alert: CephOSDSlowOps
+                expr: ceph_healthcheck_slow_ops > 0
+                for: 1m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Slow ops detected in ceph cluster{%- endraw -%}"
+              - alert: CephPGNotClean
+                expr: ceph_pg_clean != ceph_pg_total
+                for: 1h
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Not clean PGs detected in cluster{%- endraw -%}"
+              - alert: CephPGNotActive
+                expr: ceph_pg_active != ceph_pg_total
+                for: 1h
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Not active PGs detected in cluster{%- endraw -%}"
+              - alert: CephPGUndersized
+                expr: ceph_pg_undersized > 0
+                for: 30m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}PGs data recovery is slow{%- endraw -%}"
+              - alert: CephPGInconsistent
+                expr: ceph_pg_inconsistent > 0
+                for: 30m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Inconsistent PGs detected in cluster{%- endraw -%}"
+              - alert: CephClusterErrorState
+                expr: ceph_health_status > 1
+                for: 5m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Storage cluster is in error state{%- endraw -%}"
+              - alert: CephClusterWarningState
+                expr: ceph_health_status == 1
+                for: 20m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Storage cluster is in warning state{%- endraw -%}"
+              - alert: CephOSDVersionMismatch
+                expr: count(count(ceph_osd_metadata) by (ceph_version)) > 1
+                for: 10m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}There are multiple versions of storage services running{%- endraw -%}"
+              - alert: CephMonVersionMismatch
+                expr: count(count(ceph_mon_metadata) by (ceph_version)) > 1
+                for: 10m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}There are multiple versions of storage services running{%- endraw -%}"
+              - alert: CephClusterCriticallyFull
+                expr: ceph_cluster_total_used_raw_bytes / ceph_cluster_total_bytes > 0.75
+                for: 30m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                   summary: "{%- raw -%}Storage cluster is critically full{%- endraw -%}"
+              - alert: CephClusterReadOnly
+                expr: ceph_cluster_total_used_raw_bytes / ceph_cluster_total_bytes >= 0.85
+                for: 1m
+                labels:
+                  service: ceph
+                  severity: critical
+                annotations:
+                   summary: "{%- raw -%}Storage cluster is in read only mode{%- endraw -%}"
           - name: longhorn
             rules:
               - alert: WrongVolumeRobustness
@@ -560,7 +689,7 @@ manifest:
         ip: "{{ global.vips[2].ip }}"
       - domain: "grafana.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
-      - domain: "longhorn.{{ global.domain }}"
+      - domain: "storage.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
       - domain: "traefik.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"

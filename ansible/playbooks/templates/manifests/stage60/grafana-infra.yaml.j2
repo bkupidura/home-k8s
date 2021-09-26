@@ -29,7 +29,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: longhorn-standard
+  storageClassName: {{ global.k8s.storage.class.default }}
 
 ---
 apiVersion: batch/v1

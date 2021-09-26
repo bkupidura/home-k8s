@@ -10,7 +10,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: longhorn-standard-with-snapshots
+  storageClassName: {{ global.k8s.storage.class.default }}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1

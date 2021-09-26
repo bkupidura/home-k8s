@@ -1,0 +1,206 @@
+{%- if global.k8s.storage.service == 'longhorn' -%}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: longhorn-system
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: longhorn
+  namespace: kube-system
+spec:
+  chart: longhorn
+  repo: https://charts.longhorn.io
+  version: {{ manifest.versions.longhorn.chart }}
+  targetNamespace: longhorn-system
+  valuesContent: |-
+    defaultSettings:
+      storageOverProvisioningPercentage: 100
+      nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+      replicaAutoBalance: best-effort
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '9500'
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-standard
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+mountOptions:
+  - noatime
+parameters:
+  numberOfReplicas: "2"
+  staleReplicaTimeout: "2880" # 48 hours in minutes
+  fromBackup: ""
+
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-standard-with-snapshots
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+mountOptions:
+  - noatime
+parameters:
+  numberOfReplicas: "2"
+  staleReplicaTimeout: "2880" # 48 hours in minutes
+  fromBackup: ""
+  recurringJobs: '[
+    { 
+      "name":"snap", 
+      "task":"snapshot", 
+      "cron":"15 */6 * * *", 
+      "retain": 8
+    }
+  ]'
+{%- elif global.k8s.storage.service == 'rook-ceph' -%}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rook-ceph
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: rook-ceph
+  namespace: kube-system
+spec:
+  chart: rook-ceph
+  repo: https://charts.rook.io/release
+  version: {{ manifest.versions.ceph.chart }}
+  targetNamespace: rook-ceph
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: rook-ceph-cluster
+  namespace: kube-system
+spec:
+  chart: rook-ceph-cluster
+  repo: https://charts.rook.io/release
+  version: {{ manifest.versions.ceph.chart }}
+  targetNamespace: rook-ceph
+  valuesContent: |-
+    cephClusterSpec:
+      dashboard:
+        enabled: true
+      crashCollector:
+        disable: false
+        daysToRetain: 30
+    cephBlockPools:
+      - name: ceph-blockpool
+        spec:
+          failureDomain: host
+          replicated:
+            size: 2
+        storageClass:
+          enabled: true
+          name: ceph-block
+          isDefault: false
+          reclaimPolicy: Delete
+          allowVolumeExpansion: true
+          parameters:
+            imageFormat: "2"
+            imageFeatures: layering
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+            csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+            csi.storage.k8s.io/fstype: ext4
+    cephFileSystems:
+      - name: ceph-filesystem
+        spec:
+          metadataPool:
+            replicated:
+              size: 2
+          dataPools:
+            - failureDomain: host
+              replicated:
+                size: 2
+          metadataServer:
+            activeCount: 1
+            activeStandby: true
+        storageClass:
+          enabled: true
+          isDefault: false
+          name: ceph-filesystem
+          reclaimPolicy: Delete
+          parameters:
+            csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
+            csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+            csi.storage.k8s.io/controller-expand-secret-namespace: rook-ceph
+            csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+            csi.storage.k8s.io/node-stage-secret-namespace: rook-ceph
+            csi.storage.k8s.io/fstype: ext4
+    cephObjectStores: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rook-ceph-tools
+  namespace: rook-ceph
+  labels:
+    app: rook-ceph-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rook-ceph-tools
+  template:
+    metadata:
+      labels:
+        app: rook-ceph-tools
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: rook-ceph-tools
+        image: rook/ceph:v1.7.3
+        command: ["/tini"]
+        args: ["-g", "--", "/usr/local/bin/toolbox.sh"]
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: ROOK_CEPH_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: rook-ceph-mon
+                key: ceph-username
+          - name: ROOK_CEPH_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: rook-ceph-mon
+                key: ceph-secret
+        volumeMounts:
+          - mountPath: /etc/ceph
+            name: ceph-config
+          - name: mon-endpoint-volume
+            mountPath: /etc/rook
+      volumes:
+        - name: mon-endpoint-volume
+          configMap:
+            name: rook-ceph-mon-endpoints
+            items:
+            - key: data
+              path: mon-endpoints
+        - name: ceph-config
+          emptyDir: {}
+      tolerations:
+        - key: "node.kubernetes.io/unreachable"
+          operator: "Exists"
+          effect: "NoExecute"
+          tolerationSeconds: 5
+{%- endif -%}

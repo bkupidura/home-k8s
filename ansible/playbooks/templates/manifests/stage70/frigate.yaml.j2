@@ -10,7 +10,7 @@ spec:
   resources:
     requests:
       storage: {{ manifest.frigate.volume.size }}
-  storageClassName: longhorn-standard
+  storageClassName: {{ global.k8s.storage.class.default }}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
