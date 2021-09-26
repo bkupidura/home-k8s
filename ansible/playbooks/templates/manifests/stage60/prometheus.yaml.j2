@@ -15,28 +15,22 @@ spec:
         resources:
           requests:
             memory: 16Mi
-            cpu: 50m
           limits:
             memory: 32Mi
-            cpu: 50m
       prometheus:
         resources:
           requests:
             memory: 16Mi
-            cpu: 50m
           limits:
             memory: 32Mi
-            cpu: 50m
     extraEnv:
       TZ: {{ global.timezone }}
     alertmanager:
       resources:
         requests:
           memory: 32Mi
-          cpu: 30m
         limits:
           memory: 64Mi
-          cpu: 50m
       baseURL: https://alertmanager.{{ global.domain }}
       podLabels:
         app.kubernetes.io/name: alertmanager
@@ -78,27 +72,21 @@ spec:
       resources:
         requests:
           memory: 32Mi
-          cpu: 100m
         limits:
           memory: 64Mi
-          cpu: 200m
     nodeExporter:
       enabled: true
       resources:
         requests:
           memory: 32Mi
-          cpu: 300m
         limits:
           memory: 64Mi
-          cpu: 500m
     server:
       resources:
         requests:
           memory: 2Gi
-          cpu: 500m
         limits:
-          memory: 3Gi
-          cpu: 700m
+          memory: 2Gi
       global:
         external_labels:
           cluster: k3s

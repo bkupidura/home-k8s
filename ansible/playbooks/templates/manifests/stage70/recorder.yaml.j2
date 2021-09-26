@@ -120,11 +120,9 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              memory: 32Mi
-              cpu: 50m
+              memory: 16Mi
             limits:
               memory: 32Mi
-              cpu: 50m
           livenessProbe:
             httpGet:
               path: /
@@ -145,11 +143,9 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              memory: 1280Mi
-              cpu: 1800m
+              memory: 512Mi
             limits:
-              memory: 1280Mi
-              cpu: 1800m
+              memory: 1Gi
           volumeMounts:
             - mountPath: /data
               name: data

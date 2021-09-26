@@ -85,7 +85,7 @@ manifest:
       chart: 8.0.1
       image:
         repository: esphome/esphome
-        tag: 2021.8.2
+        tag: 2021.9.1
     grafana:
       chart: 6.16.4
       image:
@@ -180,7 +180,7 @@ manifest:
           - name: infra
             rules:
               - alert: OOMKill
-                expr: delta(node_vmstat_oom_kill[30m]) > 2
+                expr: delta(node_vmstat_oom_kill[30m]) > 0
                 for: 1m
                 labels:
                   service: system
@@ -227,7 +227,7 @@ manifest:
                 annotations:
                   summary: "Certificate will expire soon"
               - alert: BlockyErrorsIncreasing
-                expr: increase(blocky_error_total[10m]) > 0
+                expr: increase(blocky_error_total[10m]) > 10
                 labels:
                   service: blocky
                   severity: info
@@ -272,7 +272,7 @@ manifest:
               - alert: HighMemoryHVUsage
                 expr: sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) /
                   on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
-                  > 0.7
+                  > 0.8
                 for: 30m
                 labels:
                   service: k8s
@@ -282,7 +282,7 @@ manifest:
               - alert: HighMemoryHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) /
                   on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
-                  > 0.9
+                  > 1
                 for: 30m
                 labels:
                   service: k8s
