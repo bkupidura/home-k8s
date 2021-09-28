@@ -65,6 +65,15 @@
     state: mounted
   become: true
 
+- name: Add fstrim cron
+  cron:
+    name: fstrim
+    minute: "0"
+    hour: "18"
+    weekday: "3"
+    job: "/usr/sbin/fstrim -a"
+  become: true
+
 - name: Set ssh keys
   authorized_key:
     user: "{{ item.user }}"
