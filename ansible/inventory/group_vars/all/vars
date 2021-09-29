@@ -268,6 +268,30 @@ manifest:
                   summary: "{%- raw -%}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{%- endraw -%}"
           - name: k8s
             rules:
+              - alert: StatefulSetUnhealthy
+                expr: "kube_statefulset_status_replicas_ready / kube_statefulset_status_replicas < 0.7"
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}StatefulSet {{ $labels.statefulset }} have less than 70% of available replicas ready{%- endraw -%}"
+              - alert: DeploymentUnavailable
+                expr: "(kube_deployment_status_replicas_unavailable / kube_deployment_status_replicas > 0.75) or (kube_deployment_status_replicas_available == 1 and kube_deployment_status_replicas > 1)"
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Deployment {{ $labels.deployment }} have more than 75% of replicas in uhealthy state or only one replica in healthy state{%- endraw -%}"
+              - alert: DeploymentUnhealthy
+                expr: "kube_deployment_status_replicas_unavailable / kube_deployment_status_replicas > 0.3"
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Deployment {{ $labels.deployment }} have more than 30% of replicas in uhealthy state{%- endraw -%}"
               - alert: HighCPUHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) /
                   on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)")
@@ -492,6 +516,14 @@ manifest:
                   severity: warning
                 annotations:
                    summary: "{%- raw -%}Inconsistent PGs detected in cluster{%- endraw -%}"
+              - alert: MissingCephHealthStatus
+                expr: absent(ceph_health_status) == 1
+                for: 10m
+                labels:
+                  service: ceph
+                  severity: warning
+                annotations:
+                  summary: "Missing ceph_health_status metric"
               - alert: CephClusterErrorState
                 expr: ceph_health_status > 1
                 for: 5m
@@ -508,22 +540,14 @@ manifest:
                   severity: warning
                 annotations:
                    summary: "{%- raw -%}Storage cluster is in warning state{%- endraw -%}"
-              - alert: CephOSDVersionMismatch
-                expr: count(count(ceph_osd_metadata) by (ceph_version)) > 1
+              - alert: CephServiceVersionMismatch
+                expr: count(count by(ceph_version) ({__name__=~"^ceph_(osd|mgr|mds|mon)_metadata$"})) > 1
                 for: 10m
                 labels:
                   service: ceph
                   severity: warning
                 annotations:
-                   summary: "{%- raw -%}There are multiple versions of storage services running{%- endraw -%}"
-              - alert: CephMonVersionMismatch
-                expr: count(count(ceph_mon_metadata) by (ceph_version)) > 1
-                for: 10m
-                labels:
-                  service: ceph
-                  severity: warning
-                annotations:
-                   summary: "{%- raw -%}There are multiple versions of storage services running{%- endraw -%}"
+                   summary: "{%- raw -%}There are multiple versions of services running{%- endraw -%}"
               - alert: CephClusterCriticallyFull
                 expr: ceph_cluster_total_used_raw_bytes / ceph_cluster_total_bytes > 0.75
                 for: 30m
