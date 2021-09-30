@@ -57,6 +57,9 @@ manifest:
       chart: 2.4.1
     ceph:
       chart: v1.7.4
+      image:
+        repository: quay.io/ceph/ceph
+        tag: v16.2.6-20210927
     reflector:
       chart: 5.4.17
     deconz:
@@ -206,28 +209,28 @@ manifest:
                   summary: "{%- raw -%}High max error time drift observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 1MLoadHigh
                 expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.5
-                for: 5m
+                for: 10m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High load avg from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: 15MLoadHigh
-                expr: node_load15 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.9
-                for: 20m
+                expr: node_load15 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.95
+                for: 30m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High load avg from 15m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 15m on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: HighMemory
-                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.2
-                for: 5m
+                expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.1
+                for: 10m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High memory usage on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}Low free memory {{ humanize $value }} on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: CertInvalidShortly
                 expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 21
                 labels:
@@ -266,8 +269,49 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}{%- endraw -%}"
+              - alert: PrometheusBadConfig
+                expr: max_over_time(prometheus_config_last_reload_successful[5m]) == 0
+                for: 10m
+                labels:
+                  service: prometheus
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Failed Prometheus configuration reload{%- endraw -%}"
+              - alert: PrometheusErrorSendingAlertsToAnyAlertmanager
+                expr: min without(alertmanager) (rate(prometheus_notifications_errors_total[5m]) /
+                    rate(prometheus_notifications_sent_total[5m])) * 100 > 3
+                for: 15m
+                labels:
+                  service: prometheus
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Prometheus encounters more than 3% errors sending alerts to any Alertmanager{%- endraw -%}"
+              - alert: PrometheusNotIngestingSamples
+                expr: rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
+                for: 10m
+                labels:
+                  service: prometheus
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Prometheus is not ingesting samples{%- endraw -%}"
+              - alert: PrometheusRuleFailures
+                expr: increase(prometheus_rule_evaluation_failures_total[5m]) > 0
+                for: 15m
+                labels:
+                  service: prometheus
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Prometheus is failing rule evaluations{%- endraw -%}"
           - name: k8s
             rules:
+              - alert: VolumeUsageHigh
+                expr: kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / kubelet_volume_stats_capacity_bytes > 0.75
+                for: 10m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 75% os available storage{%- endraw -%}"
               - alert: StatefulSetUnhealthy
                 expr: "kube_statefulset_status_replicas_ready / kube_statefulset_status_replicas < 0.7"
                 for: 10m
@@ -276,22 +320,14 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}StatefulSet {{ $labels.statefulset }} have less than 70% of available replicas ready{%- endraw -%}"
-              - alert: DeploymentUnavailable
-                expr: "(kube_deployment_status_replicas_unavailable / kube_deployment_status_replicas > 0.75) or (kube_deployment_status_replicas_available == 1 and kube_deployment_status_replicas > 1)"
-                for: 10m
-                labels:
-                  service: k8s
-                  severity: critical
-                annotations:
-                  summary: "{%- raw -%}Deployment {{ $labels.deployment }} have more than 75% of replicas in uhealthy state or only one replica in healthy state{%- endraw -%}"
               - alert: DeploymentUnhealthy
-                expr: "kube_deployment_status_replicas_unavailable / kube_deployment_status_replicas > 0.3"
+                expr: "kube_deployment_status_replicas_available / kube_deployment_status_replicas < 0.7"
                 for: 10m
                 labels:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Deployment {{ $labels.deployment }} have more than 30% of replicas in uhealthy state{%- endraw -%}"
+                  summary: "{%- raw -%}Deployment {{ $labels.deployment }} have less than 70% of available replicas ready{%- endraw -%}"
               - alert: HighCPUHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) /
                   on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)")
@@ -329,7 +365,7 @@ manifest:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}POD {{ $labels.pod }} is using more than 90% of memory limit{%- endraw -%}"
+                  summary: "{%- raw -%}POD {{ $labels.pod }} is using {{ humanize $value }} of memory limit{%- endraw -%}"
               - alert: ClusterRunningDifferentK8sVersionComponets
                 expr: count (count by (git_version) (kubernetes_build_info)) > 1
                 for: 10m
@@ -355,8 +391,16 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}{{ $labels.node }} is readiness is flapping{%- endraw -%}"
               - alert: PodCPUThrotling
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5
+                for: 15m
+                labels:
+                  service: k8s
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}{%- endraw -%}"
+              - alert: PodCPUThrotling
                 expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3
-                for: 5m
+                for: 20m
                 labels:
                   service: k8s
                   severity: info
@@ -393,7 +437,7 @@ manifest:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Pod {{ $labels.pod }} was restarted more than 2 times in last 30m{%- endraw -%}"
+                  summary: "{%- raw -%}Pod {{ $labels.pod }} was restarted {{ humanize $value }} times in last 30m{%- endraw -%}"
               - alert: PodsWaiting
                 expr: max by (pod) (kube_pod_container_status_waiting) > 0
                 for: 10m
@@ -467,7 +511,7 @@ manifest:
                   service: ceph
                   severity: warning
                 annotations:
-                   summary: "{%- raw -%}Back-end storage device is critically full on {{ $labels.ceph_daemon }}{%- endraw -%}"
+                   summary: "{%- raw -%}Back-end storage device is critically full ({{ humanize $value }}) on {{ $labels.ceph_daemon }}{%- endraw -%}"
               - alert: CephOSDFlapping
                 expr: changes(ceph_osd_up[5m]) > 3
                 for: 5m
