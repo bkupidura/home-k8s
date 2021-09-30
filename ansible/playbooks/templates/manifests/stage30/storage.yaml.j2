@@ -113,7 +113,7 @@ spec:
       enabled: true
     cephClusterSpec:
       cephVersion:
-        image: quay.io/ceph/ceph:v16.2.6-20210927
+        image: {{ manifest.versions.ceph.image.repository }}:{{ manifest.versions.ceph.image.tag }}
       mgr:
         count: 1
       resources:
