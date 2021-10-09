@@ -31,10 +31,10 @@ spec:
             secretName: mosquitto
       data:
         enabled: true
-        storageClass: {{ global.k8s.storage.class.default }}
+        storageClass: {{ global.k8s.storage.class.default.name }}
         size: 1Gi
         type: pvc
-        accessMode: ReadWriteOnce
+        accessMode: {{ global.k8s.storage.class.default.mode }}
     service:
       main:
         type: LoadBalancer

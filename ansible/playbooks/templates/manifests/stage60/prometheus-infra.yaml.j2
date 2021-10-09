@@ -6,11 +6,11 @@ metadata:
   namespace: home-infra
 spec:
   accessModes:
-  - ReadWriteOnce
+  - {{ global.k8s.storage.class.default.mode }}
   resources:
     requests:
       storage: 8Gi
-  storageClassName: {{ global.k8s.storage.class.default }}
+  storageClassName: {{ global.k8s.storage.class.default.name }}
 
 ---
 apiVersion: v1
@@ -20,11 +20,11 @@ metadata:
   namespace: home-infra
 spec:
   accessModes:
-  - ReadWriteOnce
+  - {{ global.k8s.storage.class.default.mode }}
   resources:
     requests:
       storage: 1Gi
-  storageClassName: {{ global.k8s.storage.class.default }}
+  storageClassName: {{ global.k8s.storage.class.default.name }}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1

@@ -6,11 +6,11 @@ metadata:
   namespace: smart-home
 spec:
   accessModes:
-  - ReadWriteOnce
+  - {{ global.k8s.storage.class.default.mode }}
   resources:
     requests:
       storage: {{ manifest.frigate.volume.size }}
-  storageClassName: {{ global.k8s.storage.class.default }}
+  storageClassName: {{ global.k8s.storage.class.default.name }}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1

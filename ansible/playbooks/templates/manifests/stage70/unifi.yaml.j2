@@ -12,7 +12,8 @@ spec:
   valuesContent: |-
     env:
       TZ: {{ global.timezone }}
-      JVM_MAX_HEAP_SIZE: 512M
+      JVM_MAX_HEAP_SIZE: 448M
+      JVM_MAX_THREAD_STACK_SIZE: 1M
     image:
       repository: {{ manifest.versions.unifi.image.repository }}
       tag: {{ manifest.versions.unifi.image.tag }}
