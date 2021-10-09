@@ -4,7 +4,9 @@ global:
     storage:
       service: rook-ceph
       class:
-        default: ceph-block
+        default:
+          name: ceph-filesystem
+          mode: ReadWriteMany
   domain: placeholder
   mail: placeholder
   vips:

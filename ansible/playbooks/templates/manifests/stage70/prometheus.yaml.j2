@@ -62,7 +62,7 @@ spec:
           group_by:
             - service
           receiver: default-receiver
-          repeat_interval: 6h
+          repeat_interval: 24h
         inhibit_rules:
           {{ manifest.alertmanager.inhibit_rules | to_nice_yaml | indent(10, false) }}
     pushgateway:

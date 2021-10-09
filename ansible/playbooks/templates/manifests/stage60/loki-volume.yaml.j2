@@ -6,8 +6,8 @@ metadata:
   namespace: home-infra
 spec:
   accessModes:
-  - ReadWriteOnce
+  - {{ global.k8s.storage.class.default.mode }}
   resources:
     requests:
       storage: 10Gi
-  storageClassName: {{ global.k8s.storage.class.default }}
+  storageClassName: {{ global.k8s.storage.class.default.name }}
