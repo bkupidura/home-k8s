@@ -94,3 +94,11 @@
     state: restarted
   when: sshd_config.changed
   become: true
+
+- name: Set sysctl
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+  become: true
+  with_dict: "{{ sysctl }}"

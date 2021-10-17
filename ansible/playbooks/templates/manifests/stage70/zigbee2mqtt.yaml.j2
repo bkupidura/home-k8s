@@ -10,6 +10,14 @@ spec:
   version: {{ manifest.versions.zigbee2mqtt.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    podSecurityContext:
+      sysctls:
+        - name: "net.ipv4.tcp_keepalive_intvl"
+          value: "5"
+        - name: "net.ipv4.tcp_keepalive_probes"
+          value: "3"
+        - name: "net.ipv4.tcp_keepalive_time"
+          value: "30"
     resources:
       requests:
         memory: 128Mi
