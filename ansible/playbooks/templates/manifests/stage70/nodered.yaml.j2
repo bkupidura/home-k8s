@@ -44,3 +44,10 @@ spec:
         enabled: false
     podSecurityContext:
       fsGroup: 1000
+      sysctls:
+        - name: "net.ipv4.tcp_keepalive_intvl"
+          value: "5"
+        - name: "net.ipv4.tcp_keepalive_probes"
+          value: "3"
+        - name: "net.ipv4.tcp_keepalive_time"
+          value: "30"

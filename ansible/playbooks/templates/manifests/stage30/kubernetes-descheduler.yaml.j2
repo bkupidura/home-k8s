@@ -1,0 +1,48 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: kubernetes-descheduler
+  namespace: kube-system
+spec:
+  repo: https://kubernetes-sigs.github.io/descheduler/
+  chart: descheduler
+  version: {{ manifest.versions.descheduler.chart }}
+  targetNamespace: kube-system
+  valuesContent: |-
+    schedule: "*/5 * * * *"
+    deschedulerPolicy:
+      strategies:
+        RemoveDuplicates:
+          enabled: false
+        RemovePodsViolatingNodeTaints:
+          enabled: false
+        RemovePodsViolatingNodeAffinity:
+          enabled: false
+        RemovePodsViolatingInterPodAntiAffinity:
+          enabled: true
+          params:
+            nodeFit: true
+        LowNodeUtilization:
+          enabled: true
+          params:
+            nodeFit: true
+            nodeResourceUtilizationThresholds:
+              thresholds:
+                cpu: 20
+                memory: 20
+                pods: 15
+              targetThresholds:
+                cpu: 50
+                memory: 60
+                pods: 25
+        PodLifeTime:
+          enabled: true
+          params:
+            podLifeTime:
+              maxPodLifeTimeSeconds: 172800
+            podStatusPhases:
+              - "Running"
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: unifi

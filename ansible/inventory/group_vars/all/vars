@@ -48,6 +48,8 @@ k3s:
     - "default-not-ready-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "feature-gates=EphemeralContainers=true"
+    - "--kubelet-arg"
+    - "allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
 manifest:
   backup:
     restic:
@@ -55,6 +57,8 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    descheduler:
+      chart: 0.21.0
     loki:
       chart: 2.5.0
     ceph:
