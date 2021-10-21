@@ -36,7 +36,7 @@ os:
       key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
 
 k3s:
-  version: "v1.21.4+k3s1"
+  version: "v1.21.5+k3s2"
   args:
     - "--disable"
     - "traefik"
@@ -50,6 +50,12 @@ k3s:
     - "feature-gates=EphemeralContainers=true"
     - "--kubelet-arg"
     - "allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
+    - "--kubelet-arg"
+    - "image-gc-high-threshold=60"
+    - "--kubelet-arg"
+    - "image-gc-low-threshold=50"
+    - "--kubelet-arg"
+    - "node-status-max-images=-1"
 manifest:
   backup:
     restic:
@@ -57,8 +63,10 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    kubefledged:
+      chart: v0.8.2
     descheduler:
-      chart: 0.21.0
+      chart: 0.22.0
     loki:
       chart: 2.5.0
     ceph:
@@ -197,6 +205,14 @@ manifest:
         groups:
           - name: infra
             rules:
+              - alert: TraefikServiceErrors
+                expr: sum by (service, method, protocol, code) (delta(traefik_service_requests_total{code=~"(4|5).."}[15m])) > 20
+                for: 5m
+                labels:
+                  service: traefik
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Traefik service requests error increase for {{ $labels.service }}, code {{ $labels.code }}{%- endraw -%}"
               - alert: OOMKill
                 expr: delta(node_vmstat_oom_kill[30m]) > 0
                 for: 1m
