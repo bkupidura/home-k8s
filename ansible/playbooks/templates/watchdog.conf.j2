@@ -1,3 +1,7 @@
 interval = {{ interval }}
 watchdog-device = {{ device }}
 realtime = {{ realtime }}
+{% if k3s_health is defined and k3s_health -%}
+file = /var/run/k3s.health
+change = 150
+{% endif -%}
