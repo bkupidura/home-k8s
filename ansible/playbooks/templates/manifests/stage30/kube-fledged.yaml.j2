@@ -16,6 +16,8 @@ spec:
   version: {{ manifest.versions.kubefledged.chart }}
   targetNamespace: kube-fledged
   valuesContent: |-
+    args:
+      controllerImageCacheRefreshFrequency: 60m
     resources:
       requests:
         cpu: 50m

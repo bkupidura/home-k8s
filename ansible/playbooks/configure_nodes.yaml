@@ -58,14 +58,6 @@
         create: "{{ service.create | default({}) }}"
       include_tasks: tasks/manage_services.yaml
 
-    - name: Configure watchdog
-      vars:
-        module: "{{ watchdog.module }}"
-        device: "{{ watchdog.device | default('/dev/watchdog') }}"
-        interval: "{{ watchdog.interval | default(10) }}"
-        realtime: "{{ watchdog.realtime | default(true) }}"
-      include_tasks: tasks/configure_watchdog.yaml
-
 - name: Upgrade k8s master
   hosts:
     - k8s_master_primary

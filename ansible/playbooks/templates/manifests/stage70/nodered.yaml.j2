@@ -13,10 +13,10 @@ spec:
     resources:
       requests:
         memory: 512Mi
-        cpu: 500m
+        cpu: 600m
       limits:
         memory: 512Mi
-        cpu: 500m
+        cpu: 600m
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
@@ -51,3 +51,14 @@ spec:
           value: "3"
         - name: "net.ipv4.tcp_keepalive_time"
           value: "30"
+    probes:
+      liveness:
+        enabled: true
+        custom: true
+        spec:
+          periodSeconds: 10
+          failureThreshold: 3
+          initialDelaySeconds: 60
+          httpGet:
+            path: /dead-man-switch
+            port: 1880

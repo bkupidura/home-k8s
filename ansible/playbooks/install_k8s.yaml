@@ -5,6 +5,34 @@
     - k8s_master_primary
   gather_facts: yes
 
+- name: Configure watchdog
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  tasks:
+    - name: Configure watchdog
+      vars:
+        module: "{{ watchdog.module }}"
+        device: "{{ watchdog.device | default('/dev/watchdog') }}"
+        interval: "{{ watchdog.interval | default(10) }}"
+        realtime: "{{ watchdog.realtime | default('yes') }}"
+      include_tasks: tasks/configure_watchdog.yaml
+    - name: Create k3s health check file
+      vars:
+        create:
+          health-check:
+            dst: /usr/sbin/k3s-health.sh
+            src: templates/k3s-health.sh
+            permission: "0755"
+      include_tasks: tasks/custom_files.yaml
+    - name: Add k3s healthcheck
+      cron:
+        name: k3s-health
+        minute: "*"
+        hour: "*"
+        job: "/usr/sbin/k3s-health.sh"
+      become: true
+
 - name: Configre k8s master primary (k3s)
   hosts: k8s_master_primary
   tasks:
@@ -115,3 +143,17 @@
       when:
       - operation is defined
       - operation == 'deploy'
+
+- name: Configure watchdog
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  tasks:
+    - name: Configure watchdog
+      vars:
+        module: "{{ watchdog.module }}"
+        device: "{{ watchdog.device | default('/dev/watchdog') }}"
+        interval: "{{ watchdog.interval | default(10) }}"
+        realtime: "{{ watchdog.realtime | default('yes') }}"
+        k3s_health: true
+      include_tasks: tasks/configure_watchdog.yaml
