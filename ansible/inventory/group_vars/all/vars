@@ -63,6 +63,9 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    smsgammu:
+      repository: pajikos/sms-gammu-gateway
+      tag: 1.1
     kubefledged:
       chart: v0.8.2
     descheduler:
@@ -175,6 +178,8 @@ manifest:
       image:
         repository: blakeblackshear/frigate
         tag: 0.9.1-amd64
+  sms:
+    password: placeholder
   samba:
     password: placeholder
   nut:
