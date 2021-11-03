@@ -6,3 +6,4 @@ watchdog:
 k3s:
   labels:
     video_processing: "true"
+    modem_controller: "true"
