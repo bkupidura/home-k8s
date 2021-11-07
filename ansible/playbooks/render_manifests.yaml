@@ -4,7 +4,7 @@
   tasks:
     - name: Find all manifests
       find:
-        paths: "templates/manifests/"
+        paths: "../templates/manifests/"
         file_type: file
         recurse: true
       register: manifest_files_dict

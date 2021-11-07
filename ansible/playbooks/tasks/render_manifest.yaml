@@ -1,5 +1,5 @@
 - set_fact:
-    dst: "../../{{ item | replace('templates/', '') | replace('.j2', '') }}"
+    dst: "../../{{ item | replace('../templates/', '') | replace('.j2', '') }}"
 
 - name: Create destination directory
   file:
@@ -15,5 +15,5 @@
 
 - name: Append changed manifests
   set_fact:
-    changed_manifests: "{{ changed_manifests + [  item | replace('templates/', '') | replace('.j2', '') ] }}"
+    changed_manifests: "{{ changed_manifests + [  item | replace('../templates/', '') | replace('.j2', '') ] }}"
   when: renderer_template.changed

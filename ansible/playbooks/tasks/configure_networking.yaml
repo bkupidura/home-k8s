@@ -1,6 +1,6 @@
 - name: netplan configure
   template:
-    src: templates/netplan.yaml.j2
+    src: "../templates/netplan.yaml.j2"
     dest: /etc/netplan/00-installer-config.yaml
   register: netplan_config
   become: true
@@ -19,7 +19,7 @@
 
 - name: systemd-resolver configure
   template:
-    src: templates/resolved.conf.j2
+    src: "../templates/resolved.conf.j2"
     dest: /etc/systemd/resolved.conf
   register: systemd_resolver_config
   become: true

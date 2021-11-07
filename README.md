@@ -26,7 +26,7 @@
 `./scripts/run_ansible.sh -r render_manifests.yaml`
 
 ## Restore volumes from backup
-`kubectl create job --from=cronjob/home-assistant-restic-restore home-assistant-restore -n home-infra`
+`kubectl create job --from=cronjob/home-assistant-restic-restore home-assistant-restore -n smart-home`
 
 ## Deploy
 `kubectl -f manifests/stage...`
