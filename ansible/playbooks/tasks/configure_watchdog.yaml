@@ -1,6 +1,6 @@
 - name: watchdog configure
   template:
-    src: "templates/{{ item.src }}"
+    src: "../templates/{{ item.src }}"
     dest: "{{ item.dst }}"
   register: watchdog_config
   become: true
