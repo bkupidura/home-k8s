@@ -17,6 +17,10 @@ spec:
   targetNamespace: metallb-system
   valuesContent: |-
     controller:
+      resources:
+        limits:
+          cpu: 75m
+          memory: 64Mi
       image:
         repository: {{ manifest.versions.metallb.controller.repository }}
         tag: {{ manifest.versions.metallb.controller.tag }}
@@ -24,6 +28,10 @@ spec:
       image:
         repository: {{ manifest.versions.metallb.speaker.repository }}
         tag: {{ manifest.versions.metallb.speaker.tag }}
+      resources:
+        limits:
+          cpu: 75m
+          memory: 64Mi
     prometheus:
       scrapeAnnotations: true
     configInline:

@@ -12,9 +12,9 @@ spec:
   valuesContent: |-
     resources:
       requests:
-        memory: 128Mi
+        memory: 32Mi
       limits:
-        memory: 128Mi
+        memory: 64Mi
     image:
       repository: {{ manifest.versions.grafana.image.repository }}
       tag: {{ manifest.versions.grafana.image.tag }}

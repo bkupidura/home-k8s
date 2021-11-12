@@ -79,3 +79,5 @@ spec:
   issuerRef:
     name: letsencrypt
   secretName: "{{ global.domain | replace('.', '-') }}-tls"
+  renewBefore: 720h
+  duration: 2160h

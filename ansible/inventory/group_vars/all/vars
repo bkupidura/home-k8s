@@ -257,9 +257,9 @@ manifest:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Low free memory {{ humanize $value }} on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}Low free memory {{ $value | humanizePercentage }} on {{ $labels.kubernetes_node }}{%- endraw -%}"
               - alert: CertInvalidShortly
-                expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 45
+                expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 29
                 labels:
                   service: certmanager
                   severity: info
@@ -374,7 +374,7 @@ manifest:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} are using 70% of HV total memory{%- endraw -%}"
+                  summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} are using 80% of HV total memory{%- endraw -%}"
               - alert: HighMemoryHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) /
                   on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
@@ -386,13 +386,13 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory{%- endraw -%}"
               - alert: HighMemoryPodUsage
-                expr: max by (pod, namespace) (container_memory_working_set_bytes{pod!=""} / container_spec_memory_limit_bytes < Inf) > 0.90
-                for: 15m
+                expr: max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.90
+                for: 30m
                 labels:
                   service: k8s
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}POD {{ $labels.pod }} is using {{ humanize $value }} of memory limit{%- endraw -%}"
+                  summary: "{%- raw -%}POD {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit{%- endraw -%}"
               - alert: ClusterRunningDifferentK8sVersionComponets
                 expr: count (count by (git_version) (kubernetes_build_info)) > 1
                 for: 10m
@@ -538,7 +538,7 @@ manifest:
                   service: ceph
                   severity: warning
                 annotations:
-                   summary: "{%- raw -%}Back-end storage device is critically full ({{ humanize $value }}) on {{ $labels.ceph_daemon }}{%- endraw -%}"
+                   summary: "{%- raw -%}Back-end storage device is critically full ({{ $value | humanizePercentage }}) on {{ $labels.ceph_daemon }}{%- endraw -%}"
               - alert: CephOSDFlapping
                 expr: changes(ceph_osd_up[5m]) > 3
                 for: 5m
