@@ -89,6 +89,35 @@ spec:
   version: {{ manifest.versions.ceph.chart }}
   targetNamespace: rook-ceph
   valuesContent: |
+    csi:
+      csiRBDProvisionerResource: |
+        - name: csi-provisioner
+          resource:
+            requests:
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      csiRBDPluginResource: |
+        - name: csi-rbdplugin
+          resource:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      csiCephFSProvisionerResource: |
+        - name: csi-provisioner
+          resource:
+            requests:
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      csiCephFSPluginResource: |
+        - name: csi-cephfsplugin
+          resource:
+            requests:
+              memory: 64Mi
+            limits:
+              memory: 128Mi
     resources:
       limits:
         cpu: 600m
@@ -117,11 +146,26 @@ spec:
       mgr:
         count: 1
       resources:
+        mon:
+          limits:
+            memory: 1536Mi
+          requests:
+            memory: 512Mi
+        mgr:
+          limits:
+            memory: 768Mi
+          requests:
+            memory: 512Mi
         osd:
           limits:
             memory: 2Gi
           requests:
             memory: 512Mi
+        crashcollector:
+          limits:
+            memory: 32Mi
+          requests:
+            memory: 16Mi
       dashboard:
         enabled: true
       crashCollector:
@@ -167,6 +211,7 @@ spec:
           isDefault: false
           name: ceph-filesystem
           reclaimPolicy: Delete
+          allowVolumeExpansion: true
           parameters:
             csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
             csi.storage.k8s.io/provisioner-secret-namespace: rook-ceph
