@@ -93,7 +93,7 @@ manifest:
       tag: v1.8.4
     chrony:
       repository: bkupidura/chrony
-      tag: 16102021
+      tag: 20112021
     restic:
       repository: restic/restic
       tag: 0.12.1
@@ -121,10 +121,10 @@ manifest:
         repository: grafana/grafana
         tag: 8.2.3
     homeassistant:
-      chart: 11.0.4
+      chart: 11.1.0
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.10.4
+        tag: 2021.11.5
     nodered:
       chart: 9.0.1
       image:
@@ -155,12 +155,12 @@ manifest:
       chart: 9.0.3
       image:
         repository: spx01/blocky
-        tag: v0.16
+        tag: v0.17
     traefik:
-      chart: 10.6.1
+      chart: 10.6.2
       image:
         repository: traefik
-        tag: v2.5.3
+        tag: v2.5.4
     certmanager:
       chart: v1.6.1
       image:
@@ -386,7 +386,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory{%- endraw -%}"
               - alert: HighMemoryPodUsage
-                expr: max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.90
+                expr: max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.95
                 for: 30m
                 labels:
                   service: k8s
@@ -490,13 +490,13 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}Daemonset {{ $labels.daemonset }} has wrong number of copies{%- endraw -%}"
               - alert: EndpointNotReady
-                expr: kube_endpoint_address_not_ready != 0
+                expr: kube_endpoint_address_not_ready / (kube_endpoint_address_not_ready + kube_endpoint_address_available) > 0.4
                 for: 5m
                 labels:
                   service: k8s
                   severity: info
                 annotations:
-                  summary: "{%- raw -%}Endpoint {{ $labels.endpoint }} is not ready for last 5m{%- endraw -%}"
+                  summary: "{%- raw -%}Endpoint {{ $labels.endpoint }} has more than 40% of not ready members for last 5m{%- endraw -%}"
               - alert: PendingPods
                 expr: scheduler_pending_pods{job="kubernetes-nodes"} > 0
                 for: 5m
