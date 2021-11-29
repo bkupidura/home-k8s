@@ -1,6 +1,8 @@
 ansible_user: ansible
 global:
   k8s:
+    mqtt:
+      service: mosquitto
     storage:
       service: rook-ceph
       class:
