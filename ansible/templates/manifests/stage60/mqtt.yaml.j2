@@ -1,3 +1,4 @@
+{%- if global.k8s.mqtt.service == 'mosquitto' -%}
 ---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
@@ -45,13 +46,7 @@ spec:
         accessMode: {{ global.k8s.storage.class.default.mode }}
     service:
       main:
-        type: LoadBalancer
-        loadBalancerIP: "{{ global.vips[3].ip }}"
-        externalTrafficPolicy: Local
-        ports:
-          http:
-            enabled: false
-          mqtt:
-            enabled: true
+        enabled: false
     auth:
       enabled: true
+{%- endif %}

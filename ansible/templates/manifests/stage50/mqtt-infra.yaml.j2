@@ -1,0 +1,22 @@
+{%- if global.k8s.mqtt.service == 'mosquitto' -%}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt
+  namespace: smart-home
+  labels:
+    app.kubernetes.io/name: mqtt
+spec:
+  type: LoadBalancer
+  loadBalancerIP: "{{ global.vips[3].ip }}"
+  externalTrafficPolicy: Local
+  publishNotReadyAddresses: false
+  ports:
+    - name: mqtt
+      port: 1883
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: mosquitto
+
+{%- endif %}
