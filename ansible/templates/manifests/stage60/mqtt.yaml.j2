@@ -1,9 +1,10 @@
 {%- if global.k8s.mqtt.service == 'mosquitto' -%}
+{% for r in [0, 1] %}
 ---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: mosquitto
+  name: mosquitto-{{ r }}
   namespace: kube-system
 spec:
   repo: https://k8s-at-home.com/charts/
@@ -29,6 +30,18 @@ spec:
     image:
       repository: {{ manifest.versions.mosquitto.image.repository }}
       tag: {{ manifest.versions.mosquitto.image.tag }}
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - mosquitto
+              topologyKey: kubernetes.io/hostname
     env:
       TZ: {{ global.timezone }}
     persistence:
@@ -37,16 +50,13 @@ spec:
         type: custom
         volumeSpec:
           secret:
-            secretName: mosquitto
+            secretName: mosquitto-{{ r }}
       data:
-        enabled: true
-        storageClass: {{ global.k8s.storage.class.default.name }}
-        size: 1Gi
-        type: pvc
-        accessMode: {{ global.k8s.storage.class.default.mode }}
+        enabled: false
     service:
       main:
-        enabled: false
+        enabled: true
     auth:
       enabled: true
+{% endfor %}
 {%- endif %}
