@@ -173,6 +173,9 @@ manifest:
       image:
         repository: eclipse-mosquitto
         tag: 2.0.13
+      exporter:
+        repository: sapcc/mosquitto-exporter
+        tag: 0.8.0
     prometheus:
       chart: 14.11.1
     frigate:
@@ -661,6 +664,42 @@ manifest:
                   severity: critical
                 annotations:
                   summary: "{%- raw -%}Node {{ $labels.node }} is unhealthy ({{ $labels.condition }}){%- endraw -%}"
+          - name: mosquitto
+            rules:
+              - alert: MosquittoNoClients
+                expr: broker_clients_connected == 0
+                for: 5m
+                labels:
+                  service: mosquitto
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} has no client connected{%- endraw -%}"
+              - alert: MosquittoPublishDropped
+                expr: broker_load_publish_dropped_15min > 0
+                for: 5m
+                labels:
+                  service: mosquitto
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} started dropping publish messages{%- endraw -%}"
+              - alert: MosquittoMessagesSentDifferent
+                expr: broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) > 2 or
+                  broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) < 0.5
+                for: 5m
+                labels:
+                  service: mosquitto
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start sending different ammount of messages than in last 15m (2x more or 2x less)m{%- endraw -%}"
+              - alert: MosquittoMessagesReceiveDifferent
+                expr: broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) > 2 or
+                  broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) < 0.5
+                for: 5m
+                labels:
+                  service: mosquitto
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start receiving different ammount of messages than in last 15m (2x more or 2x less){%- endraw -%}"
     extrascrape:
       - job_name: 'home-assistant'
         scrape_interval: 10s
@@ -749,6 +788,9 @@ manifest:
         record:
           enabled: false
   mosquitto:
+    exporter:
+      username: bridge
+      password: placeholder
     bridge:
       config: |
         connection bridge-0

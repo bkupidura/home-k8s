@@ -30,6 +30,29 @@ spec:
     image:
       repository: {{ manifest.versions.mosquitto.image.repository }}
       tag: {{ manifest.versions.mosquitto.image.tag }}
+    podAnnotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '9234'
+    additionalContainers:
+      prometheus-exporter:
+        name: mosquitto-exporter
+        image: {{ manifest.versions.mosquitto.exporter.repository }}:{{ manifest.versions.mosquitto.exporter.tag }}
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: MQTT_USER
+            value: {{ manifest.mosquitto.exporter.username }}
+          - name: MQTT_PASS
+            value: {{ manifest.mosquitto.exporter.password }}
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 9234
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
