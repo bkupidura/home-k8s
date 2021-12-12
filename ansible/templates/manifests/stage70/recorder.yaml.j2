@@ -95,6 +95,41 @@ spec:
     app.kubernetes.io/name: recorder
 
 ---
+apiVersion: v1
+data:
+  config: |
+    mqtt:
+      topic: recorder
+      server: mqtt.smart-home:1883
+      user: recorder
+    ssh:
+      user: recorder
+      key: /secret/id_rsa
+    upload:
+      workers: 4
+      timeout: 60
+      max_errors: 30
+    record:
+      workers: 4
+      burst_overlap: 2
+    convert:
+      workers: 1
+      input_args:
+        "f": "concat"
+        "vaapi_device": "/dev/dri/renderD128"
+        "hwaccel": "vaapi"
+        "safe": "0"
+      output_args:
+        "c:a": "copy"
+        "c:v": "h264_vaapi"
+        "preset": "veryfast"
+        "vf": "format=nv12|vaapi,hwupload"
+kind: ConfigMap
+metadata:
+  name: recorder
+  namespace: smart-home
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -113,31 +148,11 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: recorder
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
     spec:
       containers:
-        - name: web
-          image: {{ manifest.versions.http_server.repository }}:{{ manifest.versions.http_server.tag }}
-          imagePullPolicy: IfNotPresent
-          resources:
-            requests:
-              memory: 16Mi
-            limits:
-              memory: 32Mi
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-          volumeMounts:
-            - mountPath: /web
-              name: data
-          env:
-            - name: TZ
-              value: {{ global.timezone }}
         - name: recorder
           image: {{ manifest.versions.recorder.repository }}:{{ manifest.versions.recorder.tag }}
           imagePullPolicy: IfNotPresent
@@ -146,59 +161,64 @@ spec:
               memory: 512Mi
             limits:
               memory: 1Gi
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
           volumeMounts:
             - mountPath: /data
               name: data
+            - mountPath: /secret
+              name: id-rsa
             - mountPath: /config
-              name: secret
+              name: config
             - name: dev-dri-renderd128
               mountPath: /dev/dri/renderD128
           securityContext:
             privileged: true
           livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - netstat -n|grep ESTABLISHED
-            initialDelaySeconds: 5
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           env:
             - name: TZ
               value: {{ global.timezone }}
-            - name: MQTT_SERVER
-              value: mqtt.smart-home:1883
-            - name: MQTT_USER
-              value: recorder
             - name: MQTT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: recorder-secret
+                  name: recorder
                   key: mqtt_password
-            - name: MQTT_TOPIC
-              value: recorder
-            - name: FFMPEG_RECORD_CMD
-              value: "ffmpeg -rtsp_transport tcp -i %s -t %d -vcodec copy -acodec aac %s"
-            - name: FFMPEG_CONCAT_CMD
-              value: "nice -n 19 ffmpeg -f concat -safe 0 -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -i %s -vcodec h264_vaapi -acodec copy -preset veryfast -vf format=nv12|vaapi,hwupload %s"
-            - name: SSH_STRING
+            - name: SSH_SERVER
               valueFrom:
                 secretKeyRef:
-                  name: recorder-secret
-                  key: ssh_string
+                  name: recorder
+                  key: ssh_server
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: recorder
-        - name: secret
+        - name: id-rsa
           secret:
-            secretName: recorder-secret
+            secretName: recorder
             defaultMode: 0400
             items:
               - key: id_rsa
                 path: id_rsa
+        - name: config
+          configMap:
+            name: recorder
+            items:
+              - key: config
+                path: config.yaml
         - name: dev-dri-renderd128
           hostPath:
             path: /dev/dri/renderD128
+      terminationGracePeriodSeconds: 5
       nodeSelector:
         video_processing: "true"
       affinity:

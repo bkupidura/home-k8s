@@ -90,9 +90,6 @@ manifest:
         tag: 2.12.03
     k8s_dashboard:
       chart: 5.0.4
-    http_server:
-      repository: halverneus/static-file-server
-      tag: v1.8.4
     chrony:
       repository: bkupidura/chrony
       tag: 20112021
@@ -136,10 +133,10 @@ manifest:
       chart: 4.3.0
       image:
         repository: jacobalberty/unifi
-        tag: v6.4.54
+        tag: v6.5.53
     recorder:
       repository: bkupidura/recorder
-      tag: 0.0.3
+      tag: 0.0.4
     metallb:
       chart: 0.11.0
       controller:
@@ -731,7 +728,7 @@ manifest:
       size: 30Gi
     secret:
       mqtt_password: placeholder
-      ssh_string: placeholder
+      ssh_server: placeholder
       id_rsa: |
         -----BEGIN RSA PRIVATE KEY-----
         placeholder
