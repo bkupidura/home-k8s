@@ -91,8 +91,8 @@ manifest:
     k8s_dashboard:
       chart: 5.0.4
     chrony:
-      repository: bkupidura/chrony
-      tag: 20112021
+      repository: ghcr.io/bkupidura/chrony
+      tag: 12122021
     restic:
       repository: restic/restic
       tag: 0.12.1
@@ -135,7 +135,7 @@ manifest:
         repository: jacobalberty/unifi
         tag: v6.5.53
     recorder:
-      repository: bkupidura/recorder
+      repository: ghcr.io/bkupidura/recorder
       tag: 0.0.4
     metallb:
       chart: 0.11.0
@@ -661,6 +661,24 @@ manifest:
                   severity: critical
                 annotations:
                   summary: "{%- raw -%}Node {{ $labels.node }} is unhealthy ({{ $labels.condition }}){%- endraw -%}"
+          - name: recorder
+            rules:
+              - alert: RecorderWorkersHanging
+                expr: recorder_workers > 0
+                for: 15m
+                labels:
+                  service: recorder
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Recorder worker {{ $labels.service }} is running for more than 15m{%- endraw -%}"
+              - alert: RecorderErrors
+                expr: delta(recorder_errors_total[5m]) > 0
+                for: 1m
+                labels:
+                  service: recorder
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Recorder errors observed for {{ $labels.service }} in last 5m{%- endraw -%}"
           - name: mosquitto
             rules:
               - alert: MosquittoNoClients
