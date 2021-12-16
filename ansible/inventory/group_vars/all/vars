@@ -75,7 +75,7 @@ manifest:
     loki:
       chart: 2.5.0
     ceph:
-      chart: v1.7.7
+      chart: v1.7.10
       image:
         repository: quay.io/ceph/ceph
         tag: v16.2.6-20210927
@@ -105,10 +105,10 @@ manifest:
         repository: ghcr.io/k8s-at-home/network-ups-tools
         tag: v2.7.4-2486-gaa0b3d1d
     zigbee2mqtt:
-      chart: 9.0.1
+      chart: 9.1.0
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.22.0
+        tag: 1.22.1
     esphome:
       chart: 8.0.1
       image:
@@ -120,23 +120,23 @@ manifest:
         repository: grafana/grafana
         tag: 8.2.3
     homeassistant:
-      chart: 11.1.0
+      chart: 11.2.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.11.5
+        tag: 2021.12.2
     nodered:
-      chart: 9.0.1
+      chart: 9.1.0
       image:
         repository: nodered/node-red
-        tag: 2.1.3-14
+        tag: 2.1.4-1
     unifi:
-      chart: 4.3.0
+      chart: 4.5.0
       image:
         repository: jacobalberty/unifi
-        tag: v6.5.53
+        tag: v6.5.55
     recorder:
       repository: ghcr.io/bkupidura/recorder
-      tag: 0.0.4
+      tag: 0.0.4.5
     metallb:
       chart: 0.11.0
       controller:
@@ -665,12 +665,12 @@ manifest:
             rules:
               - alert: RecorderWorkersHanging
                 expr: recorder_workers > 0
-                for: 15m
+                for: 30m
                 labels:
                   service: recorder
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Recorder worker {{ $labels.service }} is running for more than 15m{%- endraw -%}"
+                  summary: "{%- raw -%}Recorder worker {{ $labels.service }} is running for more than 30m{%- endraw -%}"
               - alert: RecorderErrors
                 expr: delta(recorder_errors_total[5m]) > 0
                 for: 1m
@@ -776,7 +776,7 @@ manifest:
             objects:
               person: 2
         rtmp:
-          enabled: false
+          enabled: true
         record:
           enabled: false
       cam2_office:
@@ -799,7 +799,7 @@ manifest:
             objects:
               person: 2
         rtmp:
-          enabled: false
+          enabled: true
         record:
           enabled: false
   mosquitto:

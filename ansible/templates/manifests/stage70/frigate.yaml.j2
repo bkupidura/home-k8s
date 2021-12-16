@@ -84,7 +84,7 @@ spec:
             port: 5000
             enabled: true
           rtmp:
-            enabled: false
+            enabled: true
     ingress:
       main:
         enabled: false
@@ -120,7 +120,7 @@ spec:
           - -hwaccel_device
           - /dev/dri/renderD128
           - -hwaccel_output_format
-          - h264_vaapi
+          - yuv420p
       cameras:
 {% for key, value in manifest.frigate.cameras.items() %}
         {{ key }}:
