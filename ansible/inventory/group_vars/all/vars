@@ -700,21 +700,21 @@ manifest:
               - alert: MosquittoMessagesSentDifferent
                 expr: broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) > 2 or
                   broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) < 0.5
-                for: 5m
+                for: 10m
                 labels:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start sending different ammount of messages than in last 15m (2x more or 2x less)m{%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start sending different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
               - alert: MosquittoMessagesReceiveDifferent
                 expr: broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) > 2 or
                   broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) < 0.5
-                for: 5m
+                for: 10m
                 labels:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start receiving different ammount of messages than in last 15m (2x more or 2x less){%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start receiving different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
     extrascrape:
       - job_name: 'home-assistant'
         scrape_interval: 10s
