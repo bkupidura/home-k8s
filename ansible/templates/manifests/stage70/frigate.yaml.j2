@@ -50,8 +50,10 @@ spec:
     resources:
       requests:
         memory: 256Mi
+        cpu: 500m
       limits:
         memory: 512Mi
+        cpu: 1000m
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -143,6 +145,4 @@ spec:
         enabled: false
       detectors:
         cpu1:
-          type: cpu
-        cpu2:
           type: cpu

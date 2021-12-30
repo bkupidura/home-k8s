@@ -420,7 +420,7 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}{{ $labels.node }} is readiness is flapping{%- endraw -%}"
               - alert: PodCPUThrotling
-                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5
                 for: 15m
                 labels:
                   service: k8s
@@ -428,8 +428,8 @@ manifest:
                 annotations:
                   summary: "{%- raw -%}{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}{%- endraw -%}"
               - alert: PodCPUThrotling
-                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!="", }[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3
-                for: 20m
+                expr: sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3
+                for: 30m
                 labels:
                   service: k8s
                   severity: info
