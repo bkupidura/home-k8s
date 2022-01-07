@@ -22,3 +22,5 @@ sysctl:
   net.ipv4.tcp_keepalive_time: 30
   net.ipv4.tcp_keepalive_intvl: 5
   net.ipv4.tcp_keepalive_probes: 3
+  fs.inotify.max_user_instances: 512
+  fs.inotify.max_user_watches: 32768
