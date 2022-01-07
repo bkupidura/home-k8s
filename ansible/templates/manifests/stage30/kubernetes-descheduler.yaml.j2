@@ -10,7 +10,8 @@ spec:
   version: {{ manifest.versions.descheduler.chart }}
   targetNamespace: kube-system
   valuesContent: |-
-    schedule: "*/10 * * * *"
+    kind: Deployment
+    deschedulingInterval: 10m
     deschedulerPolicy:
       strategies:
         RemoveDuplicates:
