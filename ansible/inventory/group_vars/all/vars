@@ -65,6 +65,8 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    mysql:
+      chart: 10.3.1
     smsgammu:
       repository: pajikos/sms-gammu-gateway
       tag: 1.1
@@ -84,7 +86,7 @@ manifest:
     deconz:
       firmware:
         url: https://deconz.dresden-elektronik.de/deconz-firmware/
-        name: deCONZ_ConBeeII_0x266f0700.bin.GCF
+        name: deCONZ_ConBeeII_0x26720700.bin.GCF
       image:
         repository: marthoc/deconz
         tag: 2.12.03
@@ -123,7 +125,7 @@ manifest:
       chart: 11.2.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.12.7
+        tag: 2021.12.9
     nodered:
       chart: 9.1.0
       image:
@@ -188,6 +190,11 @@ manifest:
     auth:
       admin: placeholder
       hass: placeholder
+  mysql:
+    password: placeholder
+    init_script:
+      init.sql: |
+        CREATE DATABASE homeassistant CHARACTER SET utf8mb4;
   grafana:
     password: placeholder
   alertmanager:
@@ -715,6 +722,48 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start receiving different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
+          - name: mysql
+            rules:
+              - alert: MysqlWrongBufferPoolUsage
+                expr: delta(mysql_global_status_innodb_buffer_pool_reads[5m]) > delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) * 0.01
+                for: 5m
+                labels:
+                  service: mysql
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mysql wrong innodb buffer pool reads, check https://mariadb.com/kb/en/innodb-buffer-pool/#innodb_buffer_pool_size{%- endraw -%}"
+              - alert: MysqlDown
+                expr: mysql_up == 0
+                for: 1m
+                labels:
+                  service: mysql
+                  severity: critical
+                annotations:
+                  summary: "{%- raw -%}Mysql server is down{%- endraw -%}"
+              - alert: MysqlTooManyConnections
+                expr: max_over_time(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections > 0.8
+                for: 5m
+                labels:
+                  service: mysql
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mysql server is using more than {{ $value | humanizePercentage }} of all available connections{%- endraw -%}"
+              - alert: MysqlSlowQueries
+                expr: increase(mysql_global_status_slow_queries[5m]) > 0
+                for: 2m
+                labels:
+                  service: mysql
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Slow queries observed on Mysql{%- endraw -%}"
+              - alert: MysqlInnodbLogWaits
+                expr: rate(mysql_global_status_innodb_log_waits[15m]) > 10
+                for: 2m
+                labels:
+                  service: mysql
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Mysql InnoDB log waits{%- endraw -%}"
     extrascrape:
       - job_name: 'home-assistant'
         scrape_interval: 10s
