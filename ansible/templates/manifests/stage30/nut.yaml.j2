@@ -6,7 +6,7 @@ metadata:
   namespace: home-infra
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 20 5,25 * *"
+  schedule: "0 20 25 * *"
   jobTemplate:
     spec:
       template:
@@ -30,7 +30,7 @@ metadata:
   namespace: home-infra
 spec:
   concurrencyPolicy: Forbid
-  schedule: "0 18 16 */3 *"
+  schedule: "0 18 16 */6 *"
   jobTemplate:
     spec:
       template:

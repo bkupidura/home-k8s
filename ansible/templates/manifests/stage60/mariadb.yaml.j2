@@ -1,0 +1,149 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-restic-restore
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: mariadb
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              mkdir /data
+              cd /data
+              apk add mysql-client
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose restore latest --target .
+              mysql --host=mariadb.home-infra --user=root --password="{{ manifest.mysql.password }}" < dump-all.sql
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - mariadb
+                  topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-restic-backup
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "40 03 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: mariadb
+          containers:
+          - name: backup
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              mkdir /data
+              cd /data
+              apk add mysql-client
+              mysqldump --all-databases --host=mariadb.home-infra --user=root --password="{{ manifest.mysql.password }}" --result-file=dump-all.sql
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose backup .
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - mariadb
+                  topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: mariadb
+  namespace: kube-system
+spec:
+  chart: mariadb
+  repo: https://charts.bitnami.com/bitnami
+  version: {{ manifest.versions.mysql.chart }}
+  targetNamespace: home-infra
+  valuesContent: |-
+    architecture: standalone
+    image:
+      debug: true
+    auth:
+      rootPassword: {{ manifest.mysql.password }}
+      database: ""
+    initdbScripts: {{ manifest.mysql.init_script }}
+    primary:
+      extraEnvVars:
+        - name: TZ
+          value: "Europe/Warsaw"
+      persistence:
+        storageClass: {{ global.k8s.storage.class.default.name }}
+        accessModes:
+          - {{ global.k8s.storage.class.default.mode }}
+        size: 8Gi
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+      configuration: |-
+        [mysqld]
+        skip-name-resolve
+        explicit_defaults_for_timestamp
+        basedir=/opt/bitnami/mariadb
+        plugin_dir=/opt/bitnami/mariadb/plugin
+        port=3306
+        socket=/opt/bitnami/mariadb/tmp/mysql.sock
+        tmpdir=/opt/bitnami/mariadb/tmp
+        max_allowed_packet=16M
+        bind-address=::
+        pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+        log-error=/opt/bitnami/mariadb/logs/mysqld.log
+        character-set-server=UTF8
+        collation-server=utf8_general_ci
+
+        innodb_buffer_pool_size=96M
+        key_buffer_size=10M
+
+        [client]
+        port=3306
+        socket=/opt/bitnami/mariadb/tmp/mysql.sock
+        default-character-set=UTF8
+        plugin_dir=/opt/bitnami/mariadb/plugin
+
+        [manager]
+        port=3306
+        socket=/opt/bitnami/mariadb/tmp/mysql.sock
+        pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+    metrics:
+      enabled: true
