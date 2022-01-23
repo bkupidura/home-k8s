@@ -20,10 +20,10 @@ spec:
           value: "30"
     resources:
       requests:
-        memory: 1024Mi
+        memory: 512Mi
         cpu: 300m
       limits:
-        memory: 1024Mi
+        memory: 512Mi
         cpu: 300m
     affinity:
       podAntiAffinity:
@@ -86,9 +86,10 @@ spec:
         enabled: true
         custom: true
         spec:
-          periodSeconds: 10
-          failureThreshold: 3
+          periodSeconds: 15
+          failureThreshold: 5
           initialDelaySeconds: 120
+          timeoutSeconds: 5
           httpGet:
             path: /healthz
             port: 8123

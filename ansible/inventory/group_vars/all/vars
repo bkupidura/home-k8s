@@ -77,10 +77,10 @@ manifest:
     loki:
       chart: 2.5.0
     ceph:
-      chart: v1.7.10
+      chart: v1.8.2
       image:
         repository: quay.io/ceph/ceph
-        tag: v16.2.6-20210927
+        tag: v16.2.7-20211208
     reflector:
       chart: 6.1.16
     deconz:
@@ -725,8 +725,8 @@ manifest:
           - name: mysql
             rules:
               - alert: MysqlWrongBufferPoolUsage
-                expr: delta(mysql_global_status_innodb_buffer_pool_reads[5m]) > delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) * 0.01
-                for: 5m
+                expr: delta(mysql_global_status_innodb_buffer_pool_reads[5m]) / delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) > 0.03
+                for: 15m
                 labels:
                   service: mysql
                   severity: warning
@@ -750,7 +750,7 @@ manifest:
                   summary: "{%- raw -%}Mysql server is using more than {{ $value | humanizePercentage }} of all available connections{%- endraw -%}"
               - alert: MysqlSlowQueries
                 expr: increase(mysql_global_status_slow_queries[5m]) > 0
-                for: 2m
+                for: 10m
                 labels:
                   service: mysql
                   severity: warning
@@ -764,6 +764,14 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}Mysql InnoDB log waits{%- endraw -%}"
+              - alert: MysqlNoFreePages
+                expr: delta(mysql_global_status_innodb_buffer_pool_wait_free[5m]) / 300 > 2
+                for: 5m
+                labels:
+                  service: mysql
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}No free pages in buffer pool{%- endraw -%}"
     extrascrape:
       - job_name: 'home-assistant'
         scrape_interval: 10s
@@ -870,6 +878,11 @@ manifest:
     htaccess:
       - 'placeholder'
   blocky:
+    servers:
+      - tcp-tls:8.8.8.8:853
+      - tcp-tls:8.8.4.4:853
+      - https://1.1.1.1/dns-query
+      - https://1.0.0.1/dns-query
     blocking:
       client_group:
         default:

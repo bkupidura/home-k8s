@@ -51,7 +51,7 @@ spec:
         enable: true
       upstream:
         default:
-{% for dns_server in global.dns.servers %}
+{% for dns_server in manifest.blocky.servers %}
           - {{ dns_server }}
 {% endfor %}
       conditional:
@@ -79,7 +79,7 @@ spec:
             - {{ elem }}
 {% endfor %}
 {% endfor %}
-        refreshPeriod: 240
+        refreshPeriod: 120
         blockType: zeroIP
       caching:
         minTime: 2m
