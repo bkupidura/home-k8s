@@ -10,6 +10,8 @@ spec:
   version: {{ manifest.versions.esphome.chart }}
   targetNamespace: smart-home
   valuesContent: |-
+    controller:
+      replicas: 0
     resources:
       requests:
         memory: 64Mi

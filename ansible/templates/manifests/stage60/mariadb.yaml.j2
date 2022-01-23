@@ -112,10 +112,14 @@ spec:
       resources:
         requests:
           cpu: 200m
-          memory: 256Mi
+          memory: 320Mi
         limits:
           cpu: 200m
-          memory: 256Mi
+          memory: 320Mi
+      livenessProbe:
+        failureThreshold: 5
+        timeoutSeconds: 2
+        periodSeconds: 15
       configuration: |-
         [mysqld]
         skip-name-resolve
@@ -132,7 +136,7 @@ spec:
         character-set-server=UTF8
         collation-server=utf8_general_ci
 
-        innodb_buffer_pool_size=96M
+        innodb_buffer_pool_size=128M
         key_buffer_size=10M
 
         [client]
