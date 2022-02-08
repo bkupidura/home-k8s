@@ -95,6 +95,9 @@ spec:
   valuesContent: |-
     architecture: standalone
     image:
+      registry: {{ manifest.versions.mysql.image.registry }}
+      repository: {{ manifest.versions.mysql.image.repository }}
+      tag: {{ manifest.versions.mysql.image.tag }}
       debug: true
     auth:
       rootPassword: {{ manifest.mysql.password }}

@@ -38,7 +38,7 @@ os:
       key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
 
 k3s:
-  version: "v1.22.5+k3s1"
+  version: "v1.23.3+k3s1"
   args:
     - "--disable"
     - "traefik"
@@ -66,23 +66,27 @@ manifest:
       repo_samba: placeholder
   versions:
     mysql:
-      chart: 10.3.1
+      chart: 10.3.2
+      image:
+        registry: docker.io
+        repository: bitnami/mariadb
+        tag: 10.5.13-debian-10-r58
     smsgammu:
       repository: pajikos/sms-gammu-gateway
-      tag: 1.1
+      tag: 1.2
     kubefledged:
-      chart: v0.8.2
+      chart: v0.9.0
     descheduler:
       chart: 0.22.1
     loki:
-      chart: 2.5.0
+      chart: 2.6.0
     ceph:
-      chart: v1.8.2
+      chart: v1.8.4
       image:
         repository: quay.io/ceph/ceph
         tag: v16.2.7-20211208
     reflector:
-      chart: 6.1.16
+      chart: 6.1.23
     deconz:
       firmware:
         url: https://deconz.dresden-elektronik.de/deconz-firmware/
@@ -91,48 +95,48 @@ manifest:
         repository: marthoc/deconz
         tag: 2.12.03
     k8s_dashboard:
-      chart: 5.0.5
+      chart: 5.2.0
     chrony:
       repository: ghcr.io/bkupidura/chrony
-      tag: 25122021
+      tag: "05022022"
     restic:
       repository: restic/restic
       tag: 0.12.1
     samba:
       repository: mbentley/timemachine
-      tag: smb-20211230
+      tag: smb-20220207
     nut:
-      chart: 6.1.0
+      chart: 6.2.0
       image:
         repository: ghcr.io/k8s-at-home/network-ups-tools
         tag: v2.7.4-2486-gaa0b3d1d
     zigbee2mqtt:
-      chart: 9.1.0
+      chart: 9.2.0
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.22.1
+        tag: 1.23.0
     esphome:
-      chart: 8.1.0
+      chart: 8.2.0
       image:
         repository: esphome/esphome
-        tag: 2021.12.3
+        tag: 2022.1.3
     grafana:
-      chart: 6.20.3
+      chart: 6.21.2
       image:
         repository: grafana/grafana
-        tag: 8.3.3
+        tag: 8.3.4
     homeassistant:
-      chart: 11.2.1
+      chart: 12.0.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2021.12.9
+        tag: 2022.2.3
     nodered:
-      chart: 9.1.0
+      chart: 10.0.0
       image:
         repository: nodered/node-red
-        tag: 2.1.4-1
+        tag: 2.2.0
     unifi:
-      chart: 4.5.0
+      chart: 4.6.1
       image:
         repository: jacobalberty/unifi
         tag: v6.5.55
@@ -151,24 +155,24 @@ manifest:
       chart: 1.2.0
     ubuntu:
       repository: ubuntu
-      tag: focal-20211006
+      tag: focal-20220113
     blocky:
-      chart: 10.0.0
+      chart: 10.1.0
       image:
         repository: spx01/blocky
         tag: v0.17
     traefik:
-      chart: 10.9.1
+      chart: 10.14.0
       image:
         repository: traefik
-        tag: v2.5.6
+        tag: v2.6.0
     certmanager:
-      chart: v1.6.1
+      chart: v1.7.1
       image:
         repository: quay.io/jetstack/cert-manager-controller
-        tag: v1.6.1
+        tag: v1.7.1
     mosquitto:
-      chart: 4.1.0
+      chart: 4.2.0
       image:
         repository: eclipse-mosquitto
         tag: 2.0.14
@@ -176,9 +180,9 @@ manifest:
         repository: sapcc/mosquitto-exporter
         tag: 0.8.0
     prometheus:
-      chart: 15.0.2
+      chart: 15.1.3
     frigate:
-      chart: 7.0.0
+      chart: 7.1.0
       image:
         repository: blakeblackshear/frigate
         tag: 0.9.4-amd64
@@ -219,6 +223,13 @@ manifest:
         groups:
           - name: infra
             rules:
+              - alert: NodeRebooted
+                expr: time() - node_boot_time_seconds < 600
+                labels:
+                  service: system
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}{{ $labels.node }} was rebooted{%- endraw -%}"
               - alert: TraefikServiceErrors
                 expr: sum by (service, method, protocol, code) (delta(traefik_service_requests_total{code=~"(4|5).."}[15m])) > 20
                 for: 5m
