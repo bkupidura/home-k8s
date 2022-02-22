@@ -28,6 +28,9 @@ spec:
       - name: node-red
         port: 1880
         namespace: smart-home
+    middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 

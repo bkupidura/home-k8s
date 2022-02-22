@@ -43,7 +43,9 @@ spec:
         port: 80
         namespace: home-infra
     middlewares:
-      - name: basic-auth
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: auth
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
@@ -65,7 +67,9 @@ spec:
         port: 80
         namespace: home-infra
     middlewares:
-      - name: basic-auth
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: auth
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authelia
+  namespace: home-infra
+spec:
+  accessModes:
+  - {{ global.k8s.storage.class.default.mode }}
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: {{ global.k8s.storage.class.default.name }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: home-infra
+  name: authelia
+  labels:
+    app: authelia
+spec:
+  selector:
+    app: authelia
+  ports:
+    - port: 9091
+      name: authelia
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: authelia
+  namespace: home-infra
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`auth.{{ global.domain }}`)
+    services:
+    - name: authelia
+      port: 9091
+  tls:
+    secretName: "{{ global.domain | replace('.', '-') }}-tls"
