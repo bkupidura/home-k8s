@@ -44,6 +44,8 @@ spec:
     additionalArguments:
       - --accesslog
       - --serversTransport.insecureSkipVerify=true
+      - --entryPoints.web.forwardedHeaders.trustedIPs=10.42.0.0/16
+      - --entryPoints.websecure.forwardedHeaders.trustedIPs=10.42.0.0/16
       - --log
       - --log.level=INFO
       - --metrics.prometheus=true
@@ -67,11 +69,29 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: basic-auth
+  name: lan-whitelist
   namespace: traefik-system
 spec:
-  basicAuth:
-    secret: traefik-htaccess
+  ipWhiteList:
+    sourceRange:
+{% for elem in manifest.traefik.lan_ip %}
+      - {{ elem }}
+{% endfor %}
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: auth
+  namespace: traefik-system
+spec:
+  forwardAuth:
+    address: http://authelia.home-infra:9091/api/verify?rd=https://auth.{{ global.domain }}
+    authResponseHeaders:
+      - Remote-User
+      - Remote-Name
+      - Remote-Email
+      - Remote-Groups
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -100,7 +120,9 @@ spec:
       - name: api@internal
         kind: TraefikService
     middlewares:
-      - name: basic-auth
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: auth
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

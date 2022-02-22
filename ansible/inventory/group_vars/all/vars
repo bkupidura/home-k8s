@@ -65,6 +65,9 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    authelia:
+      repository: authelia/authelia
+      tag: 4.33.2
     mysql:
       chart: 10.3.2
       image:
@@ -79,7 +82,7 @@ manifest:
     descheduler:
       chart: 0.22.1
     loki:
-      chart: 2.6.0
+      chart: 2.6.1
     ceph:
       chart: v1.8.4
       image:
@@ -129,7 +132,7 @@ manifest:
       chart: 12.0.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2022.2.3
+        tag: 2022.2.9
     nodered:
       chart: 10.0.0
       image:
@@ -194,6 +197,20 @@ manifest:
     auth:
       admin: placeholder
       hass: placeholder
+  authelia:
+    jwt_secret: placeholder
+    storage:
+      encryption_key: placeholder
+    notifier:
+      filesystem:
+        filename: /data/notification.txt
+    users:
+      username:
+        displayname: "Display Name"
+        password: "placeholder"
+        email: "placeholder"
+        groups:
+          - admin
   mysql:
     password: placeholder
     init_script:
@@ -886,8 +903,9 @@ manifest:
     htaccess:
       - 'placeholder'
   traefik:
-    htaccess:
-      - 'placeholder'
+    lan_ip:
+      - 10.0.120.0/24
+      - 10.0.130.0/24
   blocky:
     servers:
       - tcp-tls:8.8.8.8:853
@@ -954,7 +972,9 @@ manifest:
         ip: "{{ global.vips[2].ip }}"
       - domain: "z2m.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
-      - domain: "{{ global.domain }}"
+      - domain: "ha.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "auth.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
   r53:
     access_key: placeholder

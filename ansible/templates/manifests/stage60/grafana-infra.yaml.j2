@@ -14,6 +14,11 @@ spec:
       - name: grafana
         port: 80
         namespace: home-infra
+    middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: auth
+        namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 

@@ -35,6 +35,9 @@ spec:
       - name: k8s-dashboard-kubernetes-dashboard
         port: 443
         namespace: kube-system
+    middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 

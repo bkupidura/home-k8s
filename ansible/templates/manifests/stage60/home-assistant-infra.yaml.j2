@@ -22,7 +22,7 @@ spec:
   entryPoints:
   - websecure
   routes:
-  - match: Host(`{{ global.domain }}`)
+  - match: Host(`ha.{{ global.domain }}`)
     kind: Rule
     services:
       - name: home-assistant

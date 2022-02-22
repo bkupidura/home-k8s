@@ -45,22 +45,6 @@ spec:
             enabled: false
           speedtest:
             enabled: false
-      vip-udp:
-        enabled: true
-        type: LoadBalancer
-        loadBalancerIP: "{{ global.vips[1].ip }}"
-        externalTrafficPolicy: Local
-        annotations:
-          metallb.universe.tf/allow-shared-ip: "{{ global.vips[1].ip }}"
-        ports:
-          stun:
-            port: 3478
-            enabled: true
-            protocol: UDP
-          discovery:
-            port: 10001
-            enabled: true
-            protocol: UDP
     resources:
       requests:
         memory: 500Mi

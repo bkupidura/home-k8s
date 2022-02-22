@@ -29,7 +29,9 @@ spec:
         port: 8080
         namespace: smart-home
     middlewares:
-      - name: basic-auth
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: auth
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
