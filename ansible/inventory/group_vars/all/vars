@@ -262,7 +262,7 @@ manifest:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Out of memory kill observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}Out of memory kill observed on {{ $labels.node }}{%- endraw -%}"
               - alert: HighMaxErrorTimeDrift
                 expr: node_timex_maxerror_seconds > 0.5
                 for: 5m
@@ -270,23 +270,23 @@ manifest:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High max error time drift observed on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High max error time drift observed on {{ $labels.node }}{%- endraw -%}"
               - alert: 1MLoadHigh
-                expr: node_load1 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 1.5
+                expr: node_load1 > on (node) (count by (node) (node_cpu_seconds_total{mode="system"})) * 1.5
                 for: 10m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 1m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 1m on {{ $labels.node }}{%- endraw -%}"
               - alert: 15MLoadHigh
-                expr: node_load15 > on (kubernetes_node) (count by (kubernetes_node) (node_cpu_seconds_total{mode="system"})) * 0.95
+                expr: node_load15 > on (node) (count by (node) (node_cpu_seconds_total{mode="system"})) * 0.95
                 for: 30m
                 labels:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 15m on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}High load avg {{ humanize $value }} from 15m on {{ $labels.node }}{%- endraw -%}"
               - alert: HighMemory
                 expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.1
                 for: 10m
@@ -294,7 +294,7 @@ manifest:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Low free memory {{ $value | humanizePercentage }} on {{ $labels.kubernetes_node }}{%- endraw -%}"
+                  summary: "{%- raw -%}Low free memory {{ $value | humanizePercentage }} on {{ $labels.node }}{%- endraw -%}"
               - alert: CertInvalidShortly
                 expr: (certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 29
                 labels:
@@ -322,7 +322,7 @@ manifest:
                   service: system
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}High disk usage on {{ $labels.kubernetes_node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}{%- endraw -%}"
+                  summary: "{%- raw -%}High disk usage on {{ $labels.node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}{%- endraw -%}"
           - name: prometheus
             rules:
               - alert: InstanceDown
