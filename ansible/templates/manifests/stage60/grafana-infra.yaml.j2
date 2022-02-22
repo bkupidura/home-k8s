@@ -17,8 +17,6 @@ spec:
     middlewares:
       - name: lan-whitelist
         namespace: traefik-system
-      - name: auth
-        namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 
