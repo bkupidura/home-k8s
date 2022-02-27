@@ -1,4 +1,24 @@
 ---
+- name: Generate SSH keys for nodes
+  hosts:
+    - k8s_master_primary
+  gather_facts: true
+  tasks:
+    - name: Generate SSH key
+      openssh_keypair:
+        path: /root/.ssh/id_rsa
+      become: true
+    - name: Cat SSH pub key
+      command: cat /root/.ssh/id_rsa.pub
+      register: cat_ssh_pub
+      become: true
+    - name: Set SSH pubkey fact
+      set_fact:
+        ansible_global_ssh_key: "{{ {'user': 'root', 'key': cat_ssh_pub.stdout} }}"
+      delegate_facts: true
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+
 - name: Configure k8s master
   hosts:
     - k8s_master_primary
@@ -10,7 +30,7 @@
         timezone: "{{ global.timezone }}"
         hostname: "{{ os.hostname }}"
         swap_file: "{{ os.swap_file }}"
-        ssh_keys: "{{ os.ssh_keys }}"
+        ssh_keys: "{{ os.ssh_keys + [ ansible_global_ssh_key ] }}"
       include_tasks: tasks/base_config.yaml
 
     - name: Configure networking
