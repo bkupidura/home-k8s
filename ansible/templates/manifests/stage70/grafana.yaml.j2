@@ -28,8 +28,12 @@ spec:
     adminUser: admin
     adminPassword: "{{ manifest.grafana.password }}"
     grafana.ini:
+      server:
+        domain: grafana.{{ global.domain }}
+        root_url: https://%(domain)s/
       security:
         allow_embedding: true
+      {{ manifest.grafana.additional_config | to_nice_yaml | indent(6, false) }}
     datasources:
       datasources.yaml:
         apiVersion: 1

@@ -9,6 +9,8 @@ data:
     users:
       {{ manifest.authelia.users | to_nice_yaml | indent(6, false) }}
   configuration.yml: |-
+    identity_providers:
+       {{ manifest.authelia.identity_providers | to_nice_yaml | indent(6, false) }}
     authentication_backend:
       disable_reset_password: true
       file:
@@ -66,11 +68,11 @@ spec:
           image: {{ manifest.versions.authelia.repository }}:{{ manifest.versions.authelia.tag }}
           resources:
             requests:
-              memory: 64Mi
-              cpu: 10m
-            limits:
               memory: 128Mi
-              cpu: 20m
+              cpu: 30m
+            limits:
+              memory: 256Mi
+              cpu: 50m
           ports:
             - name: http
               containerPort: 9091

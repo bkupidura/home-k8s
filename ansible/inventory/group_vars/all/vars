@@ -136,7 +136,7 @@ manifest:
     nodered:
       chart: 10.0.0
       image:
-        repository: nodered/node-red
+        repository: ghcr.io/bkupidura/node-red-docker
         tag: 2.2.0
     unifi:
       chart: 4.6.1
@@ -145,7 +145,7 @@ manifest:
         tag: v6.5.55
     recorder:
       repository: ghcr.io/bkupidura/recorder
-      tag: 0.0.4.5
+      tag: 0.0.4.6
     metallb:
       chart: 0.11.0
       controller:
@@ -201,16 +201,6 @@ manifest:
     jwt_secret: placeholder
     storage:
       encryption_key: placeholder
-    notifier:
-      filesystem:
-        filename: /data/notification.txt
-    users:
-      username:
-        displayname: "Display Name"
-        password: "placeholder"
-        email: "placeholder"
-        groups:
-          - admin
   mysql:
     password: placeholder
     init_script:
