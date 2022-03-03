@@ -12,11 +12,6 @@ spec:
   valuesContent: |-
     controller:
       replicas: 0
-    resources:
-      requests:
-        memory: 64Mi
-      limits:
-        memory: 512Mi
     env:
       TZ: {{ global.timezone }}
     image:
