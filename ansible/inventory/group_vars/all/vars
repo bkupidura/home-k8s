@@ -50,6 +50,18 @@ k3s:
     - "default-not-ready-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "feature-gates=EphemeralContainers=true"
+    - "--kube-apiserver-arg"
+    - "oidc-issuer-url=https://auth.{{ global.domain }}"
+    - "--kube-apiserver-arg"
+    - "oidc-client-id=oauth2-proxy"
+    - "--kube-apiserver-arg"
+    - "oidc-username-claim=email"
+    - "--kube-apiserver-arg"
+    - "oidc-username-prefix=oidc:"
+    - "--kube-apiserver-arg"
+    - "oidc-groups-claim=groups"
+    - "--kube-apiserver-arg"
+    - "oidc-groups-prefix=oidc:"
     - "--kubelet-arg"
     - "allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
     - "--kubelet-arg"
@@ -65,6 +77,8 @@ manifest:
       password: placeholder
       repo_samba: placeholder
   versions:
+    oauth2_proxy:
+      chart: 6.2.0
     authelia:
       repository: authelia/authelia
       tag: 4.33.2
@@ -82,7 +96,7 @@ manifest:
     descheduler:
       chart: 0.22.1
     loki:
-      chart: 2.6.1
+      chart: 2.5.0
     ceph:
       chart: v1.8.4
       image:
@@ -136,7 +150,7 @@ manifest:
     nodered:
       chart: 10.0.0
       image:
-        repository: ghcr.io/bkupidura/node-red-docker
+        repository: nodered/node-red
         tag: 2.2.0
     unifi:
       chart: 4.6.1
@@ -965,6 +979,8 @@ manifest:
       - domain: "ha.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
       - domain: "auth.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "oauth-proxy.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
   r53:
     access_key: placeholder
