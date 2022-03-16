@@ -108,43 +108,47 @@ spec:
         medium: Memory
         sizeLimit: 500Mi
         mountPath: /dev/shm
-    config: |
-      mqtt:
-        host: mqtt.smart-home
-        port: 1883
-        topic_prefix: frigate
-        client_id: frigate
-        user: frigate
-        password: "{{ manifest.frigate.mqtt.password }}"
-        stats_interval: 60
-      ffmpeg:
-        hwaccel_args:
-          - -hwaccel
-          - vaapi
-          - -hwaccel_device
-          - /dev/dri/renderD128
-          - -hwaccel_output_format
-          - yuv420p
-      cameras:
+    configmap:
+      config:
+        enabled: true
+        data:
+          config.yml: |
+            mqtt:
+              host: mqtt.smart-home
+              port: 1883
+              topic_prefix: frigate
+              client_id: frigate
+              user: frigate
+              password: "{{ manifest.frigate.mqtt.password }}"
+              stats_interval: 60
+            ffmpeg:
+              hwaccel_args:
+                - -hwaccel
+                - vaapi
+                - -hwaccel_device
+                - /dev/dri/renderD128
+                - -hwaccel_output_format
+                - yuv420p
+            cameras:
 {% for key, value in manifest.frigate.cameras.items() %}
-        {{ key }}:
-          {{ value | to_nice_yaml | indent(10, false) }}
+              {{ key }}:
+                {{ value | to_nice_yaml | indent(16, false) }}
 {% endfor %}
-      objects:
-        track:
-          - person
-          - cat
-        filters:
-          person:
-            min_score: 0.7
-            threshold: 0.75
-          cat:
-            min_score: 0.6
-            threshold: 0.7
-      detect:
-        max_disappeared: 60
-      record:
-        enabled: false
-      detectors:
-        cpu1:
-          type: cpu
+            objects:
+              track:
+                - person
+                - cat
+              filters:
+                person:
+                  min_score: 0.7
+                  threshold: 0.75
+                cat:
+                  min_score: 0.6
+                  threshold: 0.7
+            detect:
+              max_disappeared: 60
+            record:
+              enabled: false
+            detectors:
+              cpu1:
+                type: cpu
