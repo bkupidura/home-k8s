@@ -81,27 +81,27 @@ manifest:
       chart: 6.2.0
     authelia:
       repository: authelia/authelia
-      tag: 4.33.2
+      tag: 4.34.4
     mysql:
-      chart: 10.3.2
+      chart: 10.4.0
       image:
         registry: docker.io
         repository: bitnami/mariadb
-        tag: 10.5.13-debian-10-r58
+        tag: 10.5.15-debian-10-r11
     smsgammu:
       repository: pajikos/sms-gammu-gateway
       tag: 1.2
     kubefledged:
       chart: v0.9.0
     descheduler:
-      chart: 0.22.1
+      chart: 0.23.1
     loki:
       chart: 2.5.0
     ceph:
-      chart: v1.8.4
+      chart: v1.8.6
       image:
         repository: quay.io/ceph/ceph
-        tag: v16.2.7-20211208
+        tag: v16.2.7-20220303
     reflector:
       chart: 6.1.23
     deconz:
@@ -112,16 +112,16 @@ manifest:
         repository: marthoc/deconz
         tag: 2.12.03
     k8s_dashboard:
-      chart: 5.2.0
+      chart: 5.3.0
     chrony:
       repository: ghcr.io/bkupidura/chrony
-      tag: "05022022"
+      tag: "12032022"
     restic:
       repository: restic/restic
       tag: 0.12.1
     samba:
       repository: mbentley/timemachine
-      tag: smb-20220207
+      tag: smb-20220315
     nut:
       chart: 6.2.0
       image:
@@ -131,58 +131,58 @@ manifest:
       chart: 9.2.0
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.23.0
+        tag: 1.24.0
     esphome:
       chart: 8.2.0
       image:
         repository: esphome/esphome
-        tag: 2022.1.3
+        tag: 2022.2.6
     grafana:
-      chart: 6.21.2
+      chart: 6.24.1
       image:
         repository: grafana/grafana
-        tag: 8.3.4
+        tag: 8.4.3
     homeassistant:
-      chart: 12.0.1
+      chart: 12.1.0
       image:
         repository: homeassistant/home-assistant
-        tag: 2022.2.9
+        tag: 2022.3.5
     nodered:
       chart: 10.0.0
       image:
         repository: nodered/node-red
-        tag: 2.2.0
+        tag: 2.2.2-12
     unifi:
       chart: 4.6.1
       image:
         repository: jacobalberty/unifi
-        tag: v6.5.55
+        tag: v7.0.23
     recorder:
       repository: ghcr.io/bkupidura/recorder
       tag: 0.0.4.6
     metallb:
-      chart: 0.11.0
+      chart: 0.12.1
       controller:
         repository: metallb/controller
-        tag: v0.11.0
+        tag: v0.12.1
       speaker:
         repository: metallb/speaker
-        tag: v0.11.0
+        tag: v0.12.1
     longhorn:
       chart: 1.2.0
     ubuntu:
       repository: ubuntu
-      tag: focal-20220113
+      tag: focal-20220302
     blocky:
-      chart: 10.1.0
+      chart: 10.1.1
       image:
         repository: spx01/blocky
-        tag: v0.17
+        tag: v0.18
     traefik:
-      chart: 10.14.0
+      chart: 10.15.0
       image:
         repository: traefik
-        tag: v2.6.0
+        tag: v2.6.1
     certmanager:
       chart: v1.7.1
       image:
@@ -197,12 +197,12 @@ manifest:
         repository: sapcc/mosquitto-exporter
         tag: 0.8.0
     prometheus:
-      chart: 15.1.3
+      chart: 15.5.3
     frigate:
-      chart: 7.1.0
+      chart: 8.0.0
       image:
         repository: blakeblackshear/frigate
-        tag: 0.9.4-amd64
+        tag: 0.10.1-amd64
   sms:
     password: placeholder
   samba:

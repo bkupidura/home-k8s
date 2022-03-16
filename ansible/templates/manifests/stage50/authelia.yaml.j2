@@ -44,6 +44,8 @@ data:
       ban_time: 900
     default_redirection_url: https://auth.{{ global.domain }}
     jwt_secret: {{ manifest.authelia.jwt_secret }}
+    webauthn:
+      disable: true
 
 ---
 apiVersion: apps/v1

@@ -77,16 +77,16 @@
           msg: "Unknown k3s token!"
         when: k3s.token is not defined
 
-      - name: Fetch kube-config
-        fetch:
-          src: /etc/rancher/k3s/k3s.yaml
-          dest: ../../kube-config.yaml
-          flat: true
-        become: true
-
       when:
       - operation is defined
       - operation == 'deploy'
+
+    - name: Fetch kube-config
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ../../kube-config.yaml
+        flat: true
+      become: true
 
 - name: Configre k8s master (k3s)
   hosts: k8s_master
