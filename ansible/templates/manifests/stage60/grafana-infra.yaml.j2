@@ -15,7 +15,7 @@ spec:
         port: 80
         namespace: home-infra
     middlewares:
-      - name: lan-whitelist
+      - name: auth-authelia
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

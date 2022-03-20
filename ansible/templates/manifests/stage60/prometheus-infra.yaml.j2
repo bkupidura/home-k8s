@@ -43,8 +43,6 @@ spec:
         port: 80
         namespace: home-infra
     middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
       - name: auth-authelia
         namespace: traefik-system
   tls:
@@ -67,8 +65,6 @@ spec:
         port: 80
         namespace: home-infra
     middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
       - name: auth-authelia
         namespace: traefik-system
   tls:

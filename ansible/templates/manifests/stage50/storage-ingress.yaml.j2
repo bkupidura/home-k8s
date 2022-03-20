@@ -16,9 +16,7 @@ spec:
         port: 80
         namespace: longhorn-system
     middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
-      - name: auth
+      - name: auth-authelia
         namespace: traefik-system
       - name: x-forwarded-proto-https
         namespace: traefik-system
@@ -42,7 +40,7 @@ spec:
         port: 8443
         namespace: rook-ceph
     middlewares:
-      - name: lan-whitelist
+      - name: auth-authelia
         namespace: traefik-system
       - name: x-forwarded-proto-https
         namespace: traefik-system

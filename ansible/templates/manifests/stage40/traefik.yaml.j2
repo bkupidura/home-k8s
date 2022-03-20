@@ -93,45 +93,12 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
-  name: auth-oauth-headers
-  namespace: traefik-system
-spec:
-  headers:
-    sslRedirect: true
-    stsSeconds: 315360000
-    browserXssFilter: true
-    contentTypeNosniff: true
-    forceSTSHeader: true
-    stsIncludeSubdomains: true
-    stsPreload: true
-    frameDeny: true
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: auth-oauth-proxy
-  namespace: traefik-system
-spec:
-  forwardAuth:
-    address: https://oauth-proxy.{{ global.domain }}/
-    trustForwardHeader: true
-    authResponseHeaders:
-      - Authorization
-      - X-Auth-Request-User
-      - X-Auth-Request-Email
-      - X-Auth-Request-Preferred-Username
-      - X-Auth-Request-Groups
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
   name: auth-authelia
   namespace: traefik-system
 spec:
   forwardAuth:
     address: http://authelia.home-infra:9091/api/verify?rd=https://auth.{{ global.domain }}
+    trustForwardHeader: true
     authResponseHeaders:
       - Remote-User
       - Remote-Name
@@ -154,8 +121,6 @@ spec:
       - name: api@internal
         kind: TraefikService
     middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
       - name: auth-authelia
         namespace: traefik-system
   tls:
