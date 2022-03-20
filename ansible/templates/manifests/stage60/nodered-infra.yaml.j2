@@ -29,7 +29,7 @@ spec:
         port: 1880
         namespace: smart-home
     middlewares:
-      - name: lan-whitelist
+      - name: auth-authelia
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

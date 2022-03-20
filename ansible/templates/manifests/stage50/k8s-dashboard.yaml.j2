@@ -39,20 +39,7 @@ spec:
         port: 443
         namespace: kube-system
     middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
-      - name: auth-oauth-proxy
-        namespace: traefik-system
-  - match: Host(`k8s.{{ global.domain }}`) && PathPrefix(`/oauth2/`)
-    kind: Rule
-    services:
-      - name: oauth2-proxy
-        port: 80
-        namespace: home-infra
-    middlewares:
-      - name: lan-whitelist
-        namespace: traefik-system
-      - name: auth-oauth-headers
+      - name: auth-authelia
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

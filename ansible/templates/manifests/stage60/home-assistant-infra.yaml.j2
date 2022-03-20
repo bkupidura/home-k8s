@@ -31,6 +31,8 @@ spec:
     middlewares:
       - name: x-forwarded-proto-https
         namespace: traefik-system
+      - name: auth-authelia
+        namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
 
