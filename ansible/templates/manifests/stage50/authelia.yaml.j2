@@ -100,9 +100,9 @@ spec:
           resources:
             requests:
               memory: 128Mi
-              cpu: 30m
+              cpu: 50m
             limits:
-              memory: 256Mi
+              memory: 128Mi
               cpu: 50m
           ports:
             - name: http
@@ -113,6 +113,7 @@ spec:
               mountPath: /config
             - name: data
               mountPath: /data
+      terminationGracePeriodSeconds: 3
       volumes:
         - name: data
           persistentVolumeClaim:
