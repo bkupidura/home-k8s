@@ -26,7 +26,7 @@ spec:
     kind: Rule
     services:
       - name: unifi
-        port: 8443
+        port: 443
         namespace: home-infra
         scheme: https
     middlewares:
@@ -36,6 +36,27 @@ spec:
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: unifi-http
+  namespace: home-infra
+spec:
+  entryPoints:
+  - web
+  routes:
+  - match: Host(`unifi.{{ global.domain }}`)
+    kind: Rule
+    services:
+      - name: unifi
+        port: 80
+        namespace: home-infra
+        scheme: http
+    middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
 
 ---
 apiVersion: batch/v1

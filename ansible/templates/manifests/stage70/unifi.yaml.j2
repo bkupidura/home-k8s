@@ -23,16 +23,13 @@ spec:
         existingClaim: unifi
     service:
       main:
-        type: LoadBalancer
-        loadBalancerIP: "{{ global.vips[1].ip }}"
-        externalTrafficPolicy: Local
-        annotations:
-          metallb.universe.tf/allow-shared-ip: "{{ global.vips[1].ip }}"
         ports:
           http:
             enabled: true
+            port: 443
           controller:
             enabled: true
+            port: 80
           stun:
             enabled: false
           discovery:
