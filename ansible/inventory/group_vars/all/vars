@@ -68,7 +68,7 @@ manifest:
   versions:
     waf:
       repository: ghcr.io/bkupidura/waf-modsecurity
-      tag: "19032022"
+      tag: "26032022"
     authelia:
       repository: authelia/authelia
       tag: 4.34.4
@@ -206,33 +206,28 @@ manifest:
       paranoia: 4
       anomaly_inbound: 5
       anomaly_outbound: 4
-    rules:
-      REQUEST-990000-CUSTOM.conf: |
-        SecAction "phase:1, initcol:ip=%{REMOTE_ADDR}"
-        SecRule ip:errors_time "@lt %{TIME_EPOCH}" "phase:1, pass, nolog, setvar:'!ip.errors_counter', setvar:'!ip.errors_time', id:'990000100'"
-        SecRule RESPONSE_STATUS "@rx ^[45]" "phase:3, pass, nolog, setvar:'ip.errors_counter=+1', setvar:'ip.errors_time=%{TIME_EPOCH}', setvar:'ip.errors_time=+1800', id:'990000101'"
-        SecRule ip:errors_counter "@gt 10" "phase:1, setvar:tx.anomaly_score=+%{tx.critical_anomaly_score}, msg:'Too many 4xx/5xx errors', id:'990000102'"
-      REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf: |
-        # HA - ARGS:client_id=https://example.com
-        SecRuleRemoveById 920273
-        # Broken rule?
-        SecRuleRemoveById 921180
-        # HA - ARGS:redirect_uri: https:/example.com/?auth_callback=1
-        SecRuleRemoveById 932190
-        # HA - ARGS:redirect_uri: https://example.com/?auth_callback=1
-        SecRuleRemoveById 942432
-        # Dont like \r\n in REQUEST_BODY
-        SecRuleRemoveById 920272
-        # HA - ARGS:redirect_uri: https://example.com/lovelace/dashboard?auth_callback=1
-        SecRuleRemoveById 942431
-        # HA - TX:rfi_parameter_ARGS:client_id: .home-assistant.io
-        SecRuleRemoveById 931130
-        # HA
-        SecRuleRemoveById 920300
-        # Authelia cookie
-        SecRuleRemoveById 942420
-        # Authelia cookie
-        SecRuleRemoveById 942421
+    server:
+      ha:
+        rules: |
+          Include /etc/modsecurity.d/owasp-crs/crs-setup.conf
+          Include /etc/modsecurity.d/owasp-crs/rules/*.conf
+          SecRuleRemoveById 920273
+          SecRuleRemoveById 921180
+          SecRuleRemoveById 931130
+          SecRuleRemoveById 942432
+          SecRuleRemoveById 920300
+          SecRuleRemoveById 920272
+          SecRuleRemoveById 942421
+          SecRuleRemoveById 942340
+      auth:
+        rules: |
+          Include /etc/modsecurity.d/owasp-crs/crs-setup.conf
+          Include /etc/modsecurity.d/owasp-crs/rules/*.conf
+          SecRuleRemoveById 942421
+          SecRuleRemoveById 920273
+          SecRuleRemoveById 920272
+          SecRuleRemoveById 931130
+          SecRuleRemoveById 941101
   authelia:
     jwt_secret: placeholder
     storage:

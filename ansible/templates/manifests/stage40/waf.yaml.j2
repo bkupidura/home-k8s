@@ -21,19 +21,11 @@ spec:
 ---
 apiVersion: v1
 data:
-  {{ manifest.waf.rules | to_nice_yaml | indent(2, false) }}
-kind: ConfigMap
-metadata:
-  name: waf-rules
-  namespace: home-infra
-
----
-apiVersion: v1
-data:
   waf.conf: |
+{% for server_name, server_data in manifest.waf.server.items() %}
     server {
         listen 443 ssl;
-        server_name .{{ global.domain }};
+        server_name {{ server_name }}.{{ global.domain }};
 
         set $upstream https://{{ global.vips[2].ip }};
 
@@ -43,6 +35,12 @@ data:
         ssl_prefer_server_ciphers on;
         ssl_protocols TLSv1.2;
         ssl_verify_client off;
+
+{% if server_data.rules is defined %}
+        modsecurity_rules '
+        {{ server_data.rules | indent(8, False) }}
+        ';
+{% endif %}
 
         location / {
             client_max_body_size 0;
@@ -65,6 +63,7 @@ data:
             proxy_pass $upstream;
         }
     }
+{% endfor %}
 
 kind: ConfigMap
 metadata:
@@ -118,8 +117,6 @@ spec:
               mountPath: /ssl
             - mountPath: /nginx/conf.d
               name: waf-nginx
-            - mountPath: /rules
-              name: waf-rules
           env:
             - name: TZ
               value: Europe/Warsaw
@@ -144,6 +141,3 @@ spec:
         - name: waf-nginx
           configMap:
             name: waf-nginx
-        - name: waf-rules
-          configMap:
-            name: waf-rules

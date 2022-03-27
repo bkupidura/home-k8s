@@ -39,7 +39,7 @@ spec:
         port: 443
         namespace: kube-system
     middlewares:
-      - name: auth-authelia
+      - name: lan-whitelist
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

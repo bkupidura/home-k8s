@@ -29,6 +29,8 @@ spec:
         port: 8080
         namespace: smart-home
     middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
       - name: auth-authelia
         namespace: traefik-system
   tls:

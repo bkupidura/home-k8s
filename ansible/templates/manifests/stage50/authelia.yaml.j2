@@ -34,34 +34,8 @@ data:
         path: /data/db.sqlite
     access_control:
       default_policy: deny
-      networks:
-        - name: lan
-          networks:
-{% for elem in manifest.traefik.lan_ip %}
-            - {{ elem }}
-{% endfor %}
       rules:
-        - domain:
-            - 'ha.{{ global.domain }}'
-          policy: bypass
-          resources:
-            - '^/api/webhook/.*$'
-            - '^/api/websocket$'
-            - '^/auth/token$'
-            - '^/api/ios/config$'
-        - domain:
-            - 'grafana.{{ global.domain }}'
-            - 'unifi.{{ global.domain }}'
-            - 'k8s.{{ global.domain }}'
-            - 'storage.{{ global.domain }}'
-            - 'node-red.{{ global.domain }}'
-            - 'ha.{{ global.domain }}'
-          networks:
-            - lan
-          policy: bypass
         - domain: '*.{{ global.domain }}'
-          networks:
-            - lan
           subject: 'group:admin'
           policy: two_factor
     regulation:

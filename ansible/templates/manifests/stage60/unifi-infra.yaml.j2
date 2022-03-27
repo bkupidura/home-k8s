@@ -30,7 +30,7 @@ spec:
         namespace: home-infra
         scheme: https
     middlewares:
-      - name: auth-authelia
+      - name: lan-whitelist
         namespace: traefik-system
       - name: x-forwarded-proto-https
         namespace: traefik-system
