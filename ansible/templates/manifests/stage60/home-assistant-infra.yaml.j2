@@ -22,7 +22,7 @@ spec:
   entryPoints:
   - websecure
   routes:
-  - match: Host(`ha.{{ global.domain }}`)
+  - match: Host(`ha.{{ global.domain }}`) && (Path(`/api/websocket`) || Path(`/auth/token`) || Path(`/api/ios/config`) || PathPrefix(`/api/webhook/`))
     kind: Rule
     services:
       - name: home-assistant
@@ -31,7 +31,16 @@ spec:
     middlewares:
       - name: x-forwarded-proto-https
         namespace: traefik-system
-      - name: auth-authelia
+  - match: Host(`ha.{{ global.domain }}`)
+    kind: Rule
+    services:
+      - name: home-assistant
+        port: 8123
+        namespace: smart-home
+    middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
+      - name: x-forwarded-proto-https
         namespace: traefik-system
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"

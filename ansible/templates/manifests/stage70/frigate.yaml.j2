@@ -28,6 +28,8 @@ spec:
       - name: frigate
         port: 5000
     middlewares:
+      - name: lan-whitelist
+        namespace: traefik-system
       - name: x-forwarded-proto-https
         namespace: traefik-system
       - name: auth-authelia
