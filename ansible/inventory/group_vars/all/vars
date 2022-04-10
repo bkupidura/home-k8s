@@ -501,12 +501,12 @@ manifest:
                   summary: "{%- raw -%}K8s node {{ $labels.node }} is unschedulable{%- endraw -%}"
               - alert: JobIsNotCompleted
                 expr: kube_job_spec_completions - kube_job_status_succeeded > 0
-                for: 2h
+                for: 3h
                 labels:
                   service: k8s
                   severity: info
                 annotations:
-                  summary: "{%- raw -%}Job {{ $labels.job_name }} is not done for last 2h{%- endraw -%}"
+                  summary: "{%- raw -%}Job {{ $labels.job_name }} is not done for last 3h{%- endraw -%}"
               - alert: JobFailed
                 expr: kube_job_status_failed > 0
                 for: 5m

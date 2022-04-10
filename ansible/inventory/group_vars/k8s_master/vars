@@ -14,6 +14,7 @@ package:
   install:
     - watchdog
     - cpufrequtils
+    - avahi-daemon
   remove:
     - snapd
 os:

@@ -78,6 +78,16 @@
         create: "{{ service.create | default({}) }}"
       include_tasks: tasks/manage_services.yaml
 
+    - name: Create custom avahi-daemon.conf file
+      vars:
+        create:
+          custom-avahi-daemon:
+            dst: /etc/avahi/avahi-daemon.conf
+            src: "../templates/avahi-daemon.conf"
+            permission: "0644"
+            notify: avahi-daemon
+      include_tasks: tasks/custom_files.yaml
+
 - name: Upgrade k8s master
   hosts:
     - k8s_master_primary
