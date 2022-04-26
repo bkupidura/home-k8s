@@ -20,10 +20,8 @@ spec:
       controllerImageCacheRefreshFrequency: 60m
     resources:
       requests:
-        cpu: 10m
         memory: 16Mi
       limits:
-        cpu: 30m
         memory: 32Mi
 
 ---
@@ -53,7 +51,6 @@ spec:
     - {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
     - {{ manifest.versions.samba.repository }}:{{ manifest.versions.samba.tag }}
     - {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
-    - {{ manifest.versions.esphome.image.repository }}:{{ manifest.versions.esphome.image.tag }}
     - {{ manifest.versions.frigate.image.repository }}:{{ manifest.versions.frigate.image.tag }}
     - {{ manifest.versions.zigbee2mqtt.image.repository }}:{{ manifest.versions.zigbee2mqtt.image.tag }}
     - {{ manifest.versions.smsgammu.repository }}:{{ manifest.versions.smsgammu.tag }}

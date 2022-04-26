@@ -139,7 +139,14 @@ spec:
   targetNamespace: rook-ceph
   valuesContent: |-
     toolbox:
-      enabled: true
+      enabled: false
+      resources:
+        limits:
+          cpu: 60m
+          memory: 32Mi
+        requests:
+          cpu: 30m
+          memory: 16Mi
     cephClusterSpec:
       cephVersion:
         image: {{ manifest.versions.ceph.image.repository }}:{{ manifest.versions.ceph.image.tag }}
@@ -148,28 +155,36 @@ spec:
       resources:
         mon:
           limits:
+            cpu: 250m
             memory: 1280Mi
           requests:
+            cpu: 150m
             memory: 512Mi
         mgr:
           limits:
+            cpu: 220m
             memory: 768Mi
           requests:
+            cpu: 110m
             memory: 512Mi
         osd:
           limits:
+            cpu: 300m
             memory: 2Gi
           requests:
+            cpu: 150m
             memory: 512Mi
         crashcollector:
           limits:
+            cpu: 50m
             memory: 32Mi
           requests:
+            cpu: 10m
             memory: 16Mi
       dashboard:
         enabled: true
       crashCollector:
-        disable: false
+        disable: true
         daysToRetain: 30
     cephBlockPools:
       - name: ceph-blockpool
@@ -197,6 +212,7 @@ spec:
       - name: ceph-filesystem
         spec:
           metadataPool:
+            failureDomain: host
             replicated:
               size: 3
           dataPools:
@@ -206,6 +222,18 @@ spec:
           metadataServer:
             activeCount: 1
             activeStandby: true
+            placement:
+              podAntiAffinity:
+                preferredDuringSchedulingIgnoredDuringExecution:
+                  - weight: 1
+                    podAffinityTerm:
+                      labelSelector:
+                        matchExpressions:
+                          - key: app.kubernetes.io/name
+                            operator: In
+                            values:
+                              - ceph-mds
+                      topologyKey: kubernetes.io/hostname
         storageClass:
           enabled: true
           isDefault: false
