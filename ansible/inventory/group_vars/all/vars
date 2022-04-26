@@ -39,7 +39,7 @@ os:
       key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
 
 k3s:
-  version: "v1.23.3+k3s1"
+  version: "v1.23.5+k3s1"
   args:
     - "--disable"
     - "traefik"
@@ -68,16 +68,16 @@ manifest:
   versions:
     waf:
       repository: ghcr.io/bkupidura/waf-modsecurity
-      tag: "26032022"
+      tag: "23042022"
     authelia:
       repository: authelia/authelia
-      tag: 4.34.4
+      tag: 4.35.0
     mysql:
-      chart: 10.4.0
+      chart: 10.5.0
       image:
         registry: docker.io
         repository: bitnami/mariadb
-        tag: 10.5.15-debian-10-r11
+        tag: 10.5.15-debian-10-r52
     smsgammu:
       repository: pajikos/sms-gammu-gateway
       tag: 1.2
@@ -86,14 +86,14 @@ manifest:
     descheduler:
       chart: 0.23.1
     loki:
-      chart: 2.5.0
+      chart: 2.6.4
     ceph:
-      chart: v1.8.6
+      chart: v1.9.1
       image:
         repository: quay.io/ceph/ceph
-        tag: v16.2.7-20220303
+        tag: v16.2.7-20220317
     reflector:
-      chart: 6.1.23
+      chart: 6.1.47
     deconz:
       firmware:
         url: https://deconz.dresden-elektronik.de/deconz-firmware/
@@ -102,16 +102,16 @@ manifest:
         repository: marthoc/deconz
         tag: 2.12.03
     k8s_dashboard:
-      chart: 5.3.0
+      chart: 5.4.1
     chrony:
       repository: ghcr.io/bkupidura/chrony
-      tag: "12032022"
+      tag: "23042022"
     restic:
       repository: restic/restic
-      tag: 0.12.1
+      tag: 0.13.1
     samba:
       repository: mbentley/timemachine
-      tag: smb-20220315
+      tag: smb-20220418
     nut:
       chart: 6.2.0
       image:
@@ -121,32 +121,32 @@ manifest:
       chart: 9.2.0
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.24.0
+        tag: 1.25.0
     esphome:
       chart: 8.2.0
       image:
         repository: esphome/esphome
-        tag: 2022.2.6
+        tag: 2022.3.2
     grafana:
-      chart: 6.24.1
+      chart: 6.26.3
       image:
         repository: grafana/grafana
-        tag: 8.4.3
+        tag: 8.4.6
     homeassistant:
-      chart: 12.1.0
+      chart: 13.0.1
       image:
         repository: homeassistant/home-assistant
-        tag: 2022.3.6
+        tag: 2022.4.7
     nodered:
       chart: 10.0.0
       image:
         repository: nodered/node-red
         tag: 2.2.2-12
     unifi:
-      chart: 4.6.1
+      chart: 4.8.0
       image:
         repository: jacobalberty/unifi
-        tag: v7.0.23
+        tag: v7.0.25
     recorder:
       repository: ghcr.io/bkupidura/recorder
       tag: 0.0.4.6
@@ -162,22 +162,22 @@ manifest:
       chart: 1.2.0
     ubuntu:
       repository: ubuntu
-      tag: focal-20220302
+      tag: focal-20220404
     blocky:
       chart: 10.1.1
       image:
         repository: spx01/blocky
         tag: v0.18
     traefik:
-      chart: 10.15.0
+      chart: 10.19.4
       image:
         repository: traefik
-        tag: v2.6.1
+        tag: v2.6.3
     certmanager:
-      chart: v1.7.1
+      chart: v1.8.0
       image:
         repository: quay.io/jetstack/cert-manager-controller
-        tag: v1.7.1
+        tag: v1.8.0
     mosquitto:
       chart: 4.2.0
       image:
@@ -187,7 +187,7 @@ manifest:
         repository: sapcc/mosquitto-exporter
         tag: 0.8.0
     prometheus:
-      chart: 15.5.3
+      chart: 15.8.4
     frigate:
       chart: 8.0.0
       image:
@@ -219,6 +219,9 @@ manifest:
           SecRuleRemoveById 920272
           SecRuleRemoveById 942421
           SecRuleRemoveById 942340
+          SecRuleRemoveById 942210
+          SecRuleRemoveById 942450
+          SecRuleRemoveById 942460
       auth:
         rules: |
           Include /etc/modsecurity.d/owasp-crs/crs-setup.conf
@@ -268,14 +271,22 @@ manifest:
                   severity: warning
                 annotations:
                   summary: "{%- raw -%}{{ $labels.node }} was rebooted{%- endraw -%}"
-              - alert: TraefikServiceErrors
-                expr: sum by (service, method, protocol, code) (delta(traefik_service_requests_total{code=~"(4|5).."}[15m])) > 20
-                for: 5m
+              - alert: TraefikServiceErrors4XX
+                expr: sum by (service, protocol) (delta(traefik_service_requests_total{code=~"4.."}[5m])) / sum by(service, protocol) (delta(traefik_service_requests_total{code!~"(4|5).."}[5m])) > 0.3
+                for: 10m
                 labels:
                   service: traefik
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Traefik service requests error increase for {{ $labels.service }}, code {{ $labels.code }}{%- endraw -%}"
+                  summary: "{%- raw -%}Traefik service requests error (4XX) increase for {{ $labels.protocol }}/{{ $labels.service }}{%- endraw -%}"
+              - alert: TraefikServiceErrors5XX
+                expr: sum by (service, protocol) (delta(traefik_service_requests_total{code=~"5.."}[5m])) / sum by(service, protocol) (delta(traefik_service_requests_total{code!~"(4|5).."}[5m])) > 0.1
+                for: 10m
+                labels:
+                  service: traefik
+                  severity: warning
+                annotations:
+                  summary: "{%- raw -%}Traefik service requests error (5XX) increase for {{ $labels.protocol }}/{{ $labels.service }}{%- endraw -%}"
               - alert: OOMKill
                 expr: delta(node_vmstat_oom_kill[30m]) > 0
                 for: 1m
@@ -329,7 +340,7 @@ manifest:
                   service: blocky
                   severity: info
                 annotations:
-                  summary: "{%- raw -%}Errors increasing on {{ $labels.kubernetes_pod_name }}{%- endraw -%}"
+                  summary: "{%- raw -%}Errors increasing on {{ $labels.pod }}{%- endraw -%}"
               - alert: MetalLbBGPDown
                 expr: max_over_time(metallb_bgp_session_up[1d]) - metallb_bgp_session_up != 0
                 labels:
@@ -415,7 +426,7 @@ manifest:
                   summary: "{%- raw -%}Deployment {{ $labels.deployment }} have less than 70% of available replicas ready{%- endraw -%}"
               - alert: HighCPUHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) /
-                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "exported_node", "(.+)")
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)")
                     > 1
                 for: 30m
                 labels:
@@ -425,7 +436,7 @@ manifest:
                   summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} have higher CPU limits than total HV capacity{%- endraw -%}"
               - alert: HighMemoryHVUsage
                 expr: sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) /
-                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "exported_node", "(.+)")
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
                   > 0.8
                 for: 30m
                 labels:
@@ -435,7 +446,7 @@ manifest:
                   summary: "{%- raw -%}PODs running on {{ $labels.kubernetes_io_hostname }} are using 80% of HV total memory{%- endraw -%}"
               - alert: HighMemoryHVLimit
                 expr: sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) /
-                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "exported_node", "(.+)")
+                  on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)")
                   > 1
                 for: 30m
                 labels:
@@ -744,7 +755,7 @@ manifest:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} has no client connected{%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.pod }} has no client connected{%- endraw -%}"
               - alert: MosquittoPublishDropped
                 expr: broker_load_publish_dropped_15min > 0
                 for: 5m
@@ -752,7 +763,7 @@ manifest:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} started dropping publish messages{%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.pod }} started dropping publish messages{%- endraw -%}"
               - alert: MosquittoMessagesSentDifferent
                 expr: broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) > 2 or
                   broker_load_messages_sent_1min / avg_over_time(broker_load_messages_sent_1min[15m]) < 0.5
@@ -761,7 +772,7 @@ manifest:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start sending different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.pod }} start sending different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
               - alert: MosquittoMessagesReceiveDifferent
                 expr: broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) > 2 or
                   broker_load_messages_received_1min / avg_over_time(broker_load_messages_received_1min[15m]) < 0.5
@@ -770,7 +781,7 @@ manifest:
                   service: mosquitto
                   severity: warning
                 annotations:
-                  summary: "{%- raw -%}Mosquitto broker {{ $labels.kubernetes_pod_name }} start receiving different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
+                  summary: "{%- raw -%}Mosquitto broker {{ $labels.pod }} start receiving different ammount of messages ({{ $value | humanizePercentage }}) than in last 15m{%- endraw -%}"
           - name: mysql
             rules:
               - alert: MysqlWrongBufferPoolUsage

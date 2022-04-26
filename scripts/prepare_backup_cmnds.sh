@@ -12,6 +12,6 @@ for J in ${JOBS}; do
     JOB_NAME=$(echo ${J} | cut -f1 -d":")
     NAMESPACE=$(echo ${J} | cut -f2 -d":")
     if [[ "${JOB_NAME}" =~ ${SUFFIX} ]]; then
-        echo "kubectl create job --from cronjob/${JOB_NAME} ${JOB_NAME}-${NOW} -n ${NAMESPACE}"
+        echo "kubectl create job --from cronjob/${JOB_NAME} ${JOB_NAME}-manual-${NOW} -n ${NAMESPACE}"
     fi
 done

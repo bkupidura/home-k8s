@@ -17,19 +17,15 @@ spec:
         existingClaim: loki
       resources:
         requests:
-          cpu: 20m
           memory: 128Mi
         limits:
-          cpu: 30m
           memory: 156Mi
     promtail:
       enabled: true
       resources:
         requests:
-          cpu: 30m
           memory: 64Mi
         limits:
-          cpu: 60m
           memory: 128Mi
     fluent-bit:
       enabled: false
