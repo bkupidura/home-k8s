@@ -45,6 +45,7 @@ metadata:
 spec:
   concurrencyPolicy: Forbid
   schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
   suspend: true
   jobTemplate:
     spec:
@@ -85,6 +86,7 @@ metadata:
 spec:
   concurrencyPolicy: Forbid
   schedule: "40 04 * * *"
+  successfulJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:

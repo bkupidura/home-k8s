@@ -21,6 +21,7 @@ metadata:
 spec:
   concurrencyPolicy: Forbid
   schedule: "15 6,18 * * *"
+  successfulJobsHistoryLimit: 1
   suspend: false
   jobTemplate:
     spec:
