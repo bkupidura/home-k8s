@@ -82,4 +82,93 @@ spec:
     auth:
       enabled: true
 {% endfor %}
+
+{%- elif global.k8s.mqtt.service == 'broker-ha' -%}
+
+---
+apiVersion: v1
+data:
+  config: |
+    discovery:
+      domain: {{ manifest.broker_ha.discovery.domain }}
+    mqtt:
+      port: 1883
+      user:
+        {{ manifest.broker_ha.mqtt.user | to_nice_yaml | indent(8, false) }}
+    cluster:
+      secret_key: "{{ manifest.broker_ha.cluster.secret_key }}"
+kind: ConfigMap
+metadata:
+  name: broker-ha
+  namespace: smart-home
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broker-ha
+  namespace: smart-home
+  labels:
+    app.kubernetes.io/name: broker-ha
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: broker-ha
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: broker-ha
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+      - name: broker-ha
+        image: {{ manifest.versions.broker_ha.repository }}:{{ manifest.versions.broker_ha.tag }}
+        volumeMounts:
+          - mountPath: /config
+            name: config
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 1
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 70
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+      terminationGracePeriodSeconds: 3
+      dnsPolicy: ClusterFirstWithHostNet
+      volumes:
+        - name: config
+          configMap:
+            name: broker-ha
+            items:
+              - key: config
+                path: config.yaml
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - broker-ha
+                topologyKey: kubernetes.io/hostname
+
 {%- endif %}

@@ -113,5 +113,11 @@ spec:
         existingClaim: prometheus-server
     extraScrapeConfigs: |
       {{ manifest.prometheus.extrascrape | to_nice_yaml | indent(6, false) }}
-    serverFiles: 
-      {{ manifest.prometheus.serverfiles | to_nice_yaml | indent(6, false) }}
+    serverFiles:
+      alerting_rules.yml:
+        groups:
+{% for group in manifest.prometheus.alert %}
+{% if group.enabled is not defined or group.enabled %}
+          - {{ group | to_nice_yaml | indent(12, false) }}
+{% endif %}
+{% endfor %}
