@@ -39,7 +39,7 @@ os:
       key: "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAfsAyuh1O+SfVRgddjQ8nByz2nNzXm71sP9FAPi5G5WoJA7El3fdrOWsG5bj5kQveVZj/M4qlETajcxMLwaFQd36nS4C0WjmzfoX2i6X+iWHFH/L/ha0UaDclfYkuGdxtCeYRakJ0Xqsm0vNuMpGhIGQP8j+OSLK0Q9pnrd1md+jrxx6JS1MXM5iUh+zU4roklrGy75WQvDJcCD3miVnktJsjb2hda8cIxkRf+l88xPm5TcC82cVAWpXF91+kUVdcHiB1D13t0IDEL6BdeUHffQij1++9x6JUukIEVDoP8Ot6DC16cbma4H9ssjdc9vnTGJjsZiu7Am+BNLKD4zsMnuSqWWfPYzQuoG5HZlyonzQIYncxo98LsHLRtrEE/CWnnO+jrd8Zfe9nAatelBgVv86UHoKEPyL666nd4UxaTiyKaXfNlvHWhfgbV67ZGRTrmllfdTmu1olOIniO706L3t3V+Zu6RjN5VjYdLegKKMo2E6XwhkMCcIg9Syi95pj8x8jFoKwjvOhb1EleuZyNHNbEvosIjAy1HsUgEo5bIwiV8K0aWIQE8VVyqyhdXOpR/Gk9UtFYsACyfCX84DjQBXp7OXIkyYt9s5N15Panml2X1CXnNgsh9M60+RvJBsFj3k8M57zcc7VAarAUKnYrI59l3cCZZVLtd4aIp8= zynzel@banshee"
 
 k3s:
-  version: "v1.23.5+k3s1"
+  version: "v1.23.6+k3s1"
   args:
     - "--disable"
     - "traefik"
@@ -51,8 +51,6 @@ k3s:
     - "default-not-ready-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "feature-gates=EphemeralContainers=true"
-    - "--kubelet-arg"
-    - "allowed-unsafe-sysctls=net.ipv4.tcp_keepalive_intvl,net.ipv4.tcp_keepalive_probes,net.ipv4.tcp_keepalive_time"
     - "--kubelet-arg"
     - "image-gc-high-threshold=60"
     - "--kubelet-arg"
@@ -68,7 +66,7 @@ manifest:
   versions:
     broker_ha:
       repository: ghcr.io/bkupidura/broker-ha
-      tag: 0.0.1
+      tag: 0.0.3
     waf:
       repository: ghcr.io/bkupidura/waf-modsecurity
       tag: "23042022"
@@ -760,7 +758,7 @@ manifest:
         rules:
           - alert: BrokerWrongClusterMembers
             expr: broker_cluster_members != 3
-            for: 2m
+            for: 3m
             labels:
               service: broker-ha
               severity: warning
@@ -808,7 +806,7 @@ manifest:
               summary: "{%- raw -%}Broker-ha {{ $labels.pod }} starts reporting in-flight messages{%- endraw -%}"
           - alert: BrokerRetainedMessagesMismatch
             expr: broker_retained_messages != scalar(max(broker_retained_messages))
-            for: 2m
+            for: 5m
             labels:
               service: broker-ha
               severity: warning
