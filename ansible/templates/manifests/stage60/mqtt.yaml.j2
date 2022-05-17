@@ -12,14 +12,6 @@ spec:
   version: {{ manifest.versions.mosquitto.chart }}
   targetNamespace: smart-home
   valuesContent: |-
-    podSecurityContext:
-      sysctls:
-        - name: "net.ipv4.tcp_keepalive_intvl"
-          value: "5"
-        - name: "net.ipv4.tcp_keepalive_probes"
-          value: "3"
-        - name: "net.ipv4.tcp_keepalive_time"
-          value: "30"
     resources:
       requests:
         memory: 32Mi
@@ -160,15 +152,13 @@ spec:
                 path: config.yaml
       affinity:
         podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 1
-              podAffinityTerm:
-                labelSelector:
-                  matchExpressions:
-                    - key: app.kubernetes.io/name
-                      operator: In
-                      values:
-                        - broker-ha
-                topologyKey: kubernetes.io/hostname
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                      - blocky-ha
+              topologyKey: kubernetes.io/hostname
 
 {%- endif %}
