@@ -69,16 +69,16 @@ manifest:
       tag: 0.0.3
     waf:
       repository: ghcr.io/bkupidura/waf-modsecurity
-      tag: "23042022"
+      tag: "21052022"
     authelia:
       repository: authelia/authelia
-      tag: 4.35.0
+      tag: 4.35.5
     mysql:
-      chart: 10.5.0
+      chart: 11.0.7
       image:
         registry: docker.io
         repository: bitnami/mariadb
-        tag: 10.5.15-debian-10-r52
+        tag: 10.6.8-debian-10-r0
     smsgammu:
       repository: pajikos/sms-gammu-gateway
       tag: 1.2
@@ -89,10 +89,10 @@ manifest:
     loki:
       chart: 2.6.4
     ceph:
-      chart: v1.9.1
+      chart: v1.9.3
       image:
         repository: quay.io/ceph/ceph
-        tag: v16.2.7-20220317
+        tag: v16.2.9-20220519
     reflector:
       chart: 6.1.47
     deconz:
@@ -106,48 +106,48 @@ manifest:
       chart: 5.4.1
     chrony:
       repository: ghcr.io/bkupidura/chrony
-      tag: "23042022"
+      tag: "21052022"
     restic:
       repository: restic/restic
       tag: 0.13.1
     samba:
       repository: mbentley/timemachine
-      tag: smb-20220418
+      tag: smb-20220522
     nut:
-      chart: 6.2.0
+      chart: 6.3.3
       image:
         repository: ghcr.io/k8s-at-home/network-ups-tools
         tag: v2.7.4-2486-gaa0b3d1d
     zigbee2mqtt:
-      chart: 9.2.0
+      chart: 9.3.2
       image:
         repository: koenkk/zigbee2mqtt
         tag: 1.25.1
     esphome:
-      chart: 8.2.0
+      chart: 8.3.2
       image:
         repository: esphome/esphome
-        tag: 2022.3.2
+        tag: 2022.5.0
     grafana:
-      chart: 6.26.3
+      chart: 6.29.4
       image:
         repository: grafana/grafana
-        tag: 8.4.6
+        tag: 8.5.3
     homeassistant:
-      chart: 13.0.1
+      chart: 13.2.0
       image:
         repository: homeassistant/home-assistant
-        tag: 2022.4.7
+        tag: 2022.5.5
     nodered:
-      chart: 10.0.0
+      chart: 10.1.2
       image:
         repository: nodered/node-red
         tag: 2.2.2-12
     unifi:
-      chart: 4.8.0
+      chart: 4.9.2
       image:
         repository: jacobalberty/unifi
-        tag: v7.0.25
+        tag: v7.1.65
     recorder:
       repository: ghcr.io/bkupidura/recorder
       tag: 0.0.4.6
@@ -163,17 +163,17 @@ manifest:
       chart: 1.2.0
     ubuntu:
       repository: ubuntu
-      tag: focal-20220404
+      tag: focal-20220426
     blocky:
-      chart: 10.1.1
+      chart: 10.3.0
       image:
         repository: spx01/blocky
         tag: v0.18
     traefik:
-      chart: 10.19.4
+      chart: 10.19.5
       image:
         repository: traefik
-        tag: v2.6.3
+        tag: v2.6.6
     certmanager:
       chart: v1.8.0
       image:
@@ -188,9 +188,9 @@ manifest:
         repository: sapcc/mosquitto-exporter
         tag: 0.8.0
     prometheus:
-      chart: 15.8.4
+      chart: 15.9.0
     frigate:
-      chart: 8.0.0
+      chart: 8.1.2
       image:
         repository: blakeblackshear/frigate
         tag: 0.10.1-amd64

@@ -2,3 +2,4 @@ kube-config.yaml
 manifests/*
 ansible/.vault_password
 pocs/*
+.DS_Store
