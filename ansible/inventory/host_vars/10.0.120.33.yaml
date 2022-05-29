@@ -6,6 +6,10 @@ os:
       opts: defaults,noatime
       src: /dev/sdb
       fstype: ext4
+    - path: /var/lib/longhorn
+      opts: defaults,noatime
+      src: /dev/sda3
+      fstype: ext4
 watchdog:
   module: softdog
 k3s:

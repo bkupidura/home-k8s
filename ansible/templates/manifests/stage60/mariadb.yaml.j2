@@ -24,7 +24,7 @@ spec:
               mkdir /data
               cd /data
               apk add mysql-client
-              restic --repo "{{ manifest.backup.restic.repo }}" --verbose restore latest --target .
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose restore latest --target . --host mariadb
               mysql --host=mariadb.home-infra --user=root --password="{{ manifest.mysql.password }}" < dump-all.sql
             envFrom:
             - secretRef:
@@ -117,10 +117,10 @@ spec:
       resources:
         requests:
           cpu: 200m
-          memory: 320Mi
+          memory: 384Mi
         limits:
           cpu: 200m
-          memory: 320Mi
+          memory: 384Mi
       livenessProbe:
         failureThreshold: 5
         timeoutSeconds: 2

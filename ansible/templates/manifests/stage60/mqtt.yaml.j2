@@ -141,6 +141,13 @@ spec:
           periodSeconds: 5
           successThreshold: 1
           timeoutSeconds: 1
+        resources:
+          requests:
+            memory: 32Mi
+            cpu: 50m
+          limits:
+            memory: 32Mi
+            cpu: 50m
       terminationGracePeriodSeconds: 3
       dnsPolicy: ClusterFirstWithHostNet
       volumes:

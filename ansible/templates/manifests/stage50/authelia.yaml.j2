@@ -57,16 +57,16 @@ metadata:
   namespace: home-infra
   name: authelia
   labels:
-    app: authelia
+    app.kubernetes.io/name: authelia
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: authelia
+      app.kubernetes.io/name: authelia
   template:
     metadata:
       labels:
-        app: authelia
+        app.kubernetes.io/name: authelia
     spec:
       containers:
         - name: authelia
