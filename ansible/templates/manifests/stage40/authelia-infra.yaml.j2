@@ -19,10 +19,10 @@ metadata:
   namespace: home-infra
   name: authelia
   labels:
-    app: authelia
+    app.kubernetes.io/name: authelia
 spec:
   selector:
-    app: authelia
+    app.kubernetes.io/name: authelia
   ports:
     - port: 9091
       name: authelia
@@ -44,3 +44,90 @@ spec:
       port: 9091
   tls:
     secretName: "{{ global.domain | replace('.', '-') }}-tls"
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: authelia-restic-restore
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: authelia
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: authelia
+          containers:
+          - name: restore
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            args:
+            - "--repo"
+            - "{{ manifest.backup.restic.repo }}"
+            - "--verbose"
+            - "restore"
+            - "latest"
+            - "--host"
+            - "authelia"
+            - "--target"
+            - "/data"
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: authelia-restic-backup
+  namespace: home-infra
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "20 04 * * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          hostname: authelia
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: authelia
+          containers:
+          - name: backup
+            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            command:
+            - "/bin/sh"
+            - "-ec"
+            - |
+              cd /data
+              restic --repo "{{ manifest.backup.restic.repo }}" --verbose backup .
+            volumeMounts:
+            - mountPath: "/data"
+              name: data
+            envFrom:
+            - secretRef:
+                name: restic-secrets
+          restartPolicy: OnFailure
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchExpressions:
+                      - key: app.kubernetes.io/name
+                        operator: In
+                        values:
+                          - authelia
+                  topologyKey: kubernetes.io/hostname

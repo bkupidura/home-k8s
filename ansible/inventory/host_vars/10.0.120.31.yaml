@@ -1,6 +1,11 @@
 os:
   primary_interface: eno1
   hostname: k3s-bravo
+  additional_mounts:
+    - path: /var/lib/longhorn
+      opts: defaults,noatime
+      src: /dev/sda3
+      fstype: ext4
 watchdog:
   module: iTCO_wdt
 k3s:
