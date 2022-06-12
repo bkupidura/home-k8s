@@ -12,10 +12,10 @@ spec:
   valuesContent: |-
     resources:
       requests:
-        memory: 256Mi
+        memory: 128Mi
         cpu: 100m
       limits:
-        memory: 256Mi
+        memory: 128Mi
         cpu: 100m
     image:
       repository: {{ manifest.versions.blocky.image.repository }}
@@ -65,6 +65,7 @@ spec:
           {{ item.domain }}: {{ item.ip }}
 {% endfor %}
       blocking:
+        processingConcurrency: 1
         blackLists:
 {% for key, value in manifest.blocky.blocking.blacklist.items() %}
           {{ key }}:
@@ -84,5 +85,7 @@ spec:
       caching:
         minTime: 2m
         maxTime: 10m
+        maxItemsCount: 10240
+        cacheTimeNegative: 10m
       queryLog:
         type: none

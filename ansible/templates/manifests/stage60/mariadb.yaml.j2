@@ -142,7 +142,10 @@ spec:
         collation-server=utf8_general_ci
 
         innodb_buffer_pool_size=128M
+        innodb_buffer_pool_instances=1
         key_buffer_size=10M
+
+        max_connections=100
 
         [client]
         port=3306
