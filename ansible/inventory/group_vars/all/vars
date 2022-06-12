@@ -62,11 +62,11 @@ manifest:
     restic:
       repo: placeholder
       password: placeholder
-      repo_samba: placeholder
+      repo_restic: placeholder
   versions:
     broker_ha:
       repository: ghcr.io/bkupidura/broker-ha
-      tag: 0.0.4
+      tag: 0.0.9
     waf:
       repository: ghcr.io/bkupidura/waf-modsecurity
       tag: "26052022"
@@ -110,9 +110,9 @@ manifest:
     restic:
       repository: restic/restic
       tag: 0.13.1
-    samba:
-      repository: mbentley/timemachine
-      tag: smb-20220522
+      server:
+        repository: restic/rest-server
+        tag: 0.11.0
     nut:
       chart: 6.3.3
       image:
@@ -122,7 +122,7 @@ manifest:
       chart: 9.3.2
       image:
         repository: koenkk/zigbee2mqtt
-        tag: 1.25.1
+        tag: 1.25.2
     esphome:
       chart: 8.3.2
       image:
@@ -168,7 +168,7 @@ manifest:
       chart: 10.3.0
       image:
         repository: spx01/blocky
-        tag: v0.18
+        tag: v0.19
     traefik:
       chart: 10.19.5
       image:
@@ -265,6 +265,16 @@ manifest:
           - service
   prometheus:
     alert:
+      - name: restic
+        rules:
+          - alert: ResticNoNewBackup
+            expr: delta(rest_server_blob_write_bytes_total{type="snapshots"}[5d]) <= 0
+            for: 1d
+            labels:
+              service: restic
+              severity: warning
+            annotations:
+              summary: "{%- raw -%}No new backups found for repo {{ $labels.repo }}{%- endraw -%}"
       - name: infra
         rules:
           - alert: SystemNodeRebooted
@@ -725,13 +735,6 @@ manifest:
               severity: info
             annotations:
               summary: "{%- raw -%}High disk usage on {{ $labels.node }}{%- endraw -%}"
-          - alert: LonghornHighVolumeUsage
-            expr: longhorn_volume_actual_size_bytes / longhorn_volume_capacity_bytes > 0.9
-            labels:
-              service: longhorn
-              severity: warning
-            annotations:
-              summary: "{%- raw -%}High volume usage on {{ $labels.node }} for {{ $labels.volume }}{%- endraw -%}"
           - alert: LonghornNodeDown
             expr: longhorn_node_status != 1
             labels:
@@ -1045,7 +1048,7 @@ manifest:
           - https://blocklistproject.github.io/Lists/tracking.txt
     conditional:
       mapping:
-        home: udp:10.0.120.1
+        home: 10.0.120.1
     custom_dns:
       mapping:
       - domain: "esphome.{{ global.domain }}"
@@ -1077,6 +1080,8 @@ manifest:
       - domain: "ha.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
       - domain: "auth.{{ global.domain }}"
+        ip: "{{ global.vips[2].ip }}"
+      - domain: "restic.{{ global.domain }}"
         ip: "{{ global.vips[2].ip }}"
   r53:
     access_key: placeholder

@@ -88,7 +88,9 @@ data:
       user:
         {{ manifest.broker_ha.mqtt.user | to_nice_yaml | indent(8, false) }}
     cluster:
-      secret_key: "{{ manifest.broker_ha.cluster.secret_key }}"
+      config:
+        secret_key: "{{ manifest.broker_ha.cluster.secret_key }}"
+        probe_interval: 500
 kind: ConfigMap
 metadata:
   name: broker-ha
@@ -128,7 +130,7 @@ spec:
           httpGet:
             path: /ready
             port: 8080
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 2
           successThreshold: 1
           timeoutSeconds: 1
@@ -144,11 +146,11 @@ spec:
         resources:
           requests:
             memory: 32Mi
-            cpu: 50m
+            cpu: 80m
           limits:
             memory: 32Mi
-            cpu: 50m
-      terminationGracePeriodSeconds: 3
+            cpu: 80m
+      terminationGracePeriodSeconds: 60
       dnsPolicy: ClusterFirstWithHostNet
       volumes:
         - name: config
