@@ -9,7 +9,7 @@ metadata:
 spec:
   type: LoadBalancer
   publishNotReadyAddresses: false
-  loadBalancerIP: "{{ global.vips[7].ip }}"
+  loadBalancerIP: "{{ global.vips.waf.ip }}"
   externalTrafficPolicy: Local
   ports:
     - name: https
@@ -27,7 +27,7 @@ data:
         listen 443 ssl;
         server_name {{ server_name }}.{{ global.domain }};
 
-        set $upstream https://{{ global.vips[2].ip }};
+        set $upstream https://{{ global.vips.ingress.ip }};
 
         ssl_certificate /ssl/server.crt;
         ssl_certificate_key /ssl/server.key;
@@ -92,7 +92,7 @@ spec:
     spec:
       containers:
         - name: modsecurity-crs
-          image: {{ manifest.versions.waf.repository }}:{{ manifest.versions.waf.tag }}
+          image: {{ versions.waf.repository }}:{{ versions.waf.tag }}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -119,7 +119,7 @@ spec:
               name: waf-nginx
           env:
             - name: TZ
-              value: Europe/Warsaw
+              value: "{{ global.timezone }}"
             - name: PARANOIA
               value: "{{ manifest.waf.levels.paranoia }}"
             - name: ANOMALY_INBOUND

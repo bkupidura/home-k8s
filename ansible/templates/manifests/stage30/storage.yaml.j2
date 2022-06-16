@@ -14,7 +14,7 @@ metadata:
 spec:
   chart: longhorn
   repo: https://charts.longhorn.io
-  version: {{ manifest.versions.longhorn.chart }}
+  version: {{ versions.longhorn.chart }}
   targetNamespace: longhorn-system
   valuesContent: |-
     defaultSettings:
@@ -86,7 +86,7 @@ metadata:
 spec:
   chart: rook-ceph
   repo: https://charts.rook.io/release
-  version: {{ manifest.versions.ceph.chart }}
+  version: {{ versions.ceph.chart }}
   targetNamespace: rook-ceph
   valuesContent: |
     csi:
@@ -135,7 +135,7 @@ metadata:
 spec:
   chart: rook-ceph-cluster
   repo: https://charts.rook.io/release
-  version: {{ manifest.versions.ceph.chart }}
+  version: {{ versions.ceph.chart }}
   targetNamespace: rook-ceph
   valuesContent: |-
     toolbox:
@@ -149,7 +149,7 @@ spec:
           memory: 16Mi
     cephClusterSpec:
       cephVersion:
-        image: {{ manifest.versions.ceph.image.repository }}:{{ manifest.versions.ceph.image.tag }}
+        image: {{ versions.ceph.image.repository }}:{{ versions.ceph.image.tag }}
       mgr:
         count: 1
       resources:

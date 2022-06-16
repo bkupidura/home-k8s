@@ -70,7 +70,7 @@ spec:
     spec:
       containers:
         - name: authelia
-          image: {{ manifest.versions.authelia.repository }}:{{ manifest.versions.authelia.tag }}
+          image: {{ versions.authelia.repository }}:{{ versions.authelia.tag }}
           resources:
             requests:
               memory: 128Mi

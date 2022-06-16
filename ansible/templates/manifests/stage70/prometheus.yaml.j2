@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: prometheus
   repo: https://prometheus-community.github.io/helm-charts
-  version: {{ manifest.versions.prometheus.chart }}
+  version: {{ versions.prometheus.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     configmapReload:
@@ -116,7 +116,7 @@ spec:
     serverFiles:
       alerting_rules.yml:
         groups:
-{% for group in manifest.prometheus.alert %}
+{% for group in alerts %}
 {% if group.enabled is not defined or group.enabled %}
           - {{ group | to_nice_yaml | indent(12, false) }}
 {% endif %}

@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: unifi
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.unifi.chart }}
+  version: {{ versions.unifi.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     env:
@@ -15,8 +15,8 @@ spec:
       JVM_MAX_HEAP_SIZE: 384M
       JVM_MAX_THREAD_STACK_SIZE: 1M
     image:
-      repository: {{ manifest.versions.unifi.image.repository }}
-      tag: {{ manifest.versions.unifi.image.tag }}
+      repository: {{ versions.unifi.image.repository }}
+      tag: {{ versions.unifi.image.tag }}
     persistence:
       data:
         enabled: true

@@ -1,0 +1,131 @@
+versions:
+  broker_ha:
+    repository: ghcr.io/bkupidura/broker-ha
+    tag: 0.0.9
+  waf:
+    repository: ghcr.io/bkupidura/waf-modsecurity
+    tag: "26052022"
+  authelia:
+    repository: authelia/authelia
+    tag: 4.35.5
+  mysql:
+    chart: 11.0.7
+    image:
+      registry: docker.io
+      repository: bitnami/mariadb
+      tag: 10.6.8-debian-10-r0
+  smsgammu:
+    repository: pajikos/sms-gammu-gateway
+    tag: 1.2
+  kubefledged:
+    chart: v0.9.0
+  descheduler:
+    chart: 0.23.1
+  loki:
+    chart: 2.6.4
+  ceph:
+    chart: v1.9.3
+    image:
+      repository: quay.io/ceph/ceph
+      tag: v16.2.9-20220519
+  reflector:
+    chart: 6.1.47
+  deconz:
+    firmware:
+      url: https://deconz.dresden-elektronik.de/deconz-firmware/
+      name: deCONZ_ConBeeII_0x26720700.bin.GCF
+    image:
+      repository: marthoc/deconz
+      tag: 2.12.03
+  k8s_dashboard:
+    chart: 5.4.1
+  chrony:
+    repository: ghcr.io/bkupidura/chrony
+    tag: "21052022"
+  restic:
+    repository: restic/restic
+    tag: 0.13.1
+    server:
+      repository: restic/rest-server
+      tag: 0.11.0
+  nut:
+    chart: 6.3.3
+    image:
+      repository: ghcr.io/k8s-at-home/network-ups-tools
+      tag: v2.7.4-2486-gaa0b3d1d
+  zigbee2mqtt:
+    chart: 9.3.2
+    image:
+      repository: koenkk/zigbee2mqtt
+      tag: 1.25.2
+  esphome:
+    chart: 8.3.2
+    image:
+      repository: esphome/esphome
+      tag: 2022.5.0
+  grafana:
+    chart: 6.29.4
+    image:
+      repository: grafana/grafana
+      tag: 8.5.3
+  homeassistant:
+    chart: 13.2.0
+    image:
+      repository: homeassistant/home-assistant
+      tag: 2022.5.5
+  nodered:
+    chart: 10.1.2
+    image:
+      repository: nodered/node-red
+      tag: 2.2.2-12
+  unifi:
+    chart: 4.9.2
+    image:
+      repository: jacobalberty/unifi
+      tag: v7.1.65
+  recorder:
+    repository: ghcr.io/bkupidura/recorder
+    tag: 0.0.4.6
+  metallb:
+    chart: 0.12.1
+    controller:
+      repository: metallb/controller
+      tag: v0.12.1
+    speaker:
+      repository: metallb/speaker
+      tag: v0.12.1
+  longhorn:
+    chart: 1.2.4
+  ubuntu:
+    repository: ubuntu
+    tag: focal-20220426
+  blocky:
+    chart: 10.3.0
+    image:
+      repository: spx01/blocky
+      tag: v0.19
+  traefik:
+    chart: 10.19.5
+    image:
+      repository: traefik
+      tag: v2.6.6
+  certmanager:
+    chart: v1.8.0
+    image:
+      repository: quay.io/jetstack/cert-manager-controller
+      tag: v1.8.0
+  mosquitto:
+    chart: 4.2.0
+    image:
+      repository: eclipse-mosquitto
+      tag: 2.0.14
+    exporter:
+      repository: sapcc/mosquitto-exporter
+      tag: 0.8.0
+  prometheus:
+    chart: 15.9.0
+  frigate:
+    chart: 8.1.2
+    image:
+      repository: blakeblackshear/frigate
+      tag: 0.10.1-amd64

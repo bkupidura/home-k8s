@@ -7,7 +7,7 @@ metadata:
 spec:
   repo: https://k8s-at-home.com/charts/
   chart: blocky
-  version: {{ manifest.versions.blocky.chart }}
+  version: {{ versions.blocky.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     resources:
@@ -18,8 +18,8 @@ spec:
         memory: 128Mi
         cpu: 100m
     image:
-      repository: {{ manifest.versions.blocky.image.repository }}
-      tag: {{ manifest.versions.blocky.image.tag }}
+      repository: {{ versions.blocky.image.repository }}
+      tag: {{ versions.blocky.image.tag }}
     env:
       TZ: {{ global.timezone }}
     podAnnotations:
@@ -44,7 +44,7 @@ spec:
         enabled: true
         type: LoadBalancer
         externalTrafficPolicy: Local
-        loadBalancerIP: "{{ global.vips[0].ip }}"
+        loadBalancerIP: "{{ global.vips.dns.ip }}"
     config: |
       httpPort: 4000
       prometheus:

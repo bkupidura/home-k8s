@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: esphome
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.esphome.chart }}
+  version: {{ versions.esphome.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     controller:
@@ -15,8 +15,8 @@ spec:
     env:
       TZ: {{ global.timezone }}
     image:
-      repository: {{ manifest.versions.esphome.image.repository }}
-      tag: {{ manifest.versions.esphome.image.tag }}
+      repository: {{ versions.esphome.image.repository }}
+      tag: {{ versions.esphome.image.tag }}
     persistence:
       config:
         enabled: true

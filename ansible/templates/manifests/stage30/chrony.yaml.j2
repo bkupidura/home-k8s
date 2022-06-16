@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: chrony
 spec:
   type: LoadBalancer
-  loadBalancerIP: "{{ global.vips[5].ip }}"
+  loadBalancerIP: "{{ global.vips.ntp.ip }}"
   externalTrafficPolicy: Local
   publishNotReadyAddresses: false
   ports:
@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: chrony
-          image: {{ manifest.versions.chrony.repository }}:{{ manifest.versions.chrony.tag }}
+          image: {{ versions.chrony.repository }}:{{ versions.chrony.tag }}
           imagePullPolicy: IfNotPresent
           resources:
             requests:

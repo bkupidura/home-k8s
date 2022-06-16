@@ -16,7 +16,7 @@ spec:
           hostname: mariadb
           containers:
           - name: restore
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             command:
             - "/bin/sh"
             - "-ec"
@@ -58,7 +58,7 @@ spec:
           hostname: mariadb
           containers:
           - name: backup
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             command:
             - "/bin/sh"
             - "-ec"
@@ -92,14 +92,14 @@ metadata:
 spec:
   chart: mariadb
   repo: https://charts.bitnami.com/bitnami
-  version: {{ manifest.versions.mysql.chart }}
+  version: {{ versions.mysql.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     architecture: standalone
     image:
-      registry: {{ manifest.versions.mysql.image.registry }}
-      repository: {{ manifest.versions.mysql.image.repository }}
-      tag: {{ manifest.versions.mysql.image.tag }}
+      registry: {{ versions.mysql.image.registry }}
+      repository: {{ versions.mysql.image.repository }}
+      tag: {{ versions.mysql.image.tag }}
       debug: true
     auth:
       rootPassword: {{ manifest.mysql.password }}
@@ -108,7 +108,7 @@ spec:
     primary:
       extraEnvVars:
         - name: TZ
-          value: "Europe/Warsaw"
+          value: "{{ global.timezone }}"
       persistence:
         storageClass: {{ global.k8s.storage.class.default.name }}
         accessModes:

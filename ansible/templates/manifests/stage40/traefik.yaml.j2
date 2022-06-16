@@ -7,7 +7,7 @@ metadata:
 spec:
   repo: https://helm.traefik.io/traefik
   chart: traefik
-  version: {{ manifest.versions.traefik.chart }}
+  version: {{ versions.traefik.chart }}
   targetNamespace: traefik-system
   valuesContent: |-
     resources:
@@ -18,8 +18,8 @@ spec:
         cpu: 70m
         memory: 96Mi
     image:
-      name: {{ manifest.versions.traefik.image.repository }}
-      tag: {{ manifest.versions.traefik.image.tag }}
+      name: {{ versions.traefik.image.repository }}
+      tag: {{ versions.traefik.image.tag }}
     env:
       - name: TZ
         value: {{ global.timezone }}
@@ -62,7 +62,7 @@ spec:
         enabled: false
     service:
       spec:
-        loadBalancerIP: "{{ global.vips[2].ip }}"
+        loadBalancerIP: "{{ global.vips.ingress.ip }}"
         externalTrafficPolicy: Local
 
 ---

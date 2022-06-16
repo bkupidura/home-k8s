@@ -9,7 +9,7 @@ data:
       errors
       health
       ready
-      forward . {{ global.vips[0].ip }}:53
+      forward . {{ global.vips.dns.ip }}:53
       loop
       reload
       loadbalance

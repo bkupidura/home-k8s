@@ -80,7 +80,7 @@ spec:
                 claimName: unifi
           containers:
           - name: restore
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             args:
             - "--repo"
             - "{{ manifest.backup.restic.repo }}"
@@ -120,7 +120,7 @@ spec:
                 claimName: unifi
           containers:
           - name: backup
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             command:
             - "/bin/sh"
             - "-ec"

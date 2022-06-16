@@ -58,7 +58,7 @@ spec:
                 claimName: zigbee2mqtt
           containers:
           - name: restore
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             args:
             - "--repo"
             - "{{ manifest.backup.restic.repo }}"
@@ -98,7 +98,7 @@ spec:
                 claimName: zigbee2mqtt
           containers:
           - name: backup
-            image: {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
+            image: {{ versions.restic.repository }}:{{ versions.restic.tag }}
             command:
             - "/bin/sh"
             - "-ec"
@@ -140,16 +140,16 @@ spec:
         spec:
           containers:
           - name: upgrade
-            image: {{ manifest.versions.deconz.image.repository }}:{{ manifest.versions.deconz.image.tag }}
+            image: {{ versions.deconz.image.repository }}:{{ versions.deconz.image.tag }}
             imagePullPolicy: IfNotPresent
             command:
               - "/bin/sh"
               - "-ec"
               - |
-                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}' -o {{ manifest.versions.deconz.firmware.name }}
-                curl '{{ manifest.versions.deconz.firmware.url }}/{{ manifest.versions.deconz.firmware.name }}.md5' -o {{ manifest.versions.deconz.firmware.name }}.md5
-                md5sum -c {{ manifest.versions.deconz.firmware.name }}.md5 || exit
-                /usr/bin/GCFFlasher_internal -f {{ manifest.versions.deconz.firmware.name }} -d /dev/ttyACM0
+                curl '{{ versions.deconz.firmware.url }}/{{ versions.deconz.firmware.name }}' -o {{ versions.deconz.firmware.name }}
+                curl '{{ versions.deconz.firmware.url }}/{{ versions.deconz.firmware.name }}.md5' -o {{ versions.deconz.firmware.name }}.md5
+                md5sum -c {{ versions.deconz.firmware.name }}.md5 || exit
+                /usr/bin/GCFFlasher_internal -f {{ versions.deconz.firmware.name }} -d /dev/ttyACM0
             securityContext:
               privileged: true
             volumeMounts:

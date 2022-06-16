@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/name: mqtt
 spec:
   type: LoadBalancer
-  loadBalancerIP: "{{ global.vips[3].ip }}"
+  loadBalancerIP: "{{ global.vips.mqtt.ip }}"
   externalTrafficPolicy: Local
   publishNotReadyAddresses: false
   ports:
@@ -46,7 +46,7 @@ metadata:
     app.kubernetes.io/name: mqtt
 spec:
   type: LoadBalancer
-  loadBalancerIP: "{{ global.vips[3].ip }}"
+  loadBalancerIP: "{{ global.vips.mqtt.ip }}"
   externalTrafficPolicy: Local
   publishNotReadyAddresses: false
   ports:

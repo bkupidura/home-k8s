@@ -1,15 +1,14 @@
 {%- if global.k8s.mqtt.service == 'mosquitto' -%}
-{% for r in [0, 1] %}
 ---
 apiVersion: helm.cattle.io/v1
 kind: HelmChart
 metadata:
-  name: mosquitto-{{ r }}
+  name: mosquitto
   namespace: kube-system
 spec:
   repo: https://k8s-at-home.com/charts/
   chart: mosquitto
-  version: {{ manifest.versions.mosquitto.chart }}
+  version: {{ versions.mosquitto.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     resources:
@@ -20,15 +19,15 @@ spec:
         memory: 32Mi
         cpu: 50m
     image:
-      repository: {{ manifest.versions.mosquitto.image.repository }}
-      tag: {{ manifest.versions.mosquitto.image.tag }}
+      repository: {{ versions.mosquitto.image.repository }}
+      tag: {{ versions.mosquitto.image.tag }}
     podAnnotations:
       prometheus.io/scrape: 'true'
       prometheus.io/port: '9234'
     additionalContainers:
       prometheus-exporter:
         name: mosquitto-exporter
-        image: {{ manifest.versions.mosquitto.exporter.repository }}:{{ manifest.versions.mosquitto.exporter.tag }}
+        image: {{ versions.mosquitto.exporter.repository }}:{{ versions.mosquitto.exporter.tag }}
         imagePullPolicy: IfNotPresent
         env:
           - name: MQTT_USER
@@ -65,7 +64,7 @@ spec:
         type: custom
         volumeSpec:
           secret:
-            secretName: mosquitto-{{ r }}
+            secretName: mosquitto
       data:
         enabled: false
     service:
@@ -73,7 +72,6 @@ spec:
         enabled: true
     auth:
       enabled: true
-{% endfor %}
 
 {%- elif global.k8s.mqtt.service == 'broker-ha' -%}
 
@@ -121,7 +119,7 @@ spec:
     spec:
       containers:
       - name: broker-ha
-        image: {{ manifest.versions.broker_ha.repository }}:{{ manifest.versions.broker_ha.tag }}
+        image: {{ versions.broker_ha.repository }}:{{ versions.broker_ha.tag }}
         volumeMounts:
           - mountPath: /config
             name: config

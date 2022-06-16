@@ -13,7 +13,7 @@ metadata:
 spec:
   repo: https://metallb.github.io/metallb
   chart: metallb
-  version: {{ manifest.versions.metallb.chart }}
+  version: {{ versions.metallb.chart }}
   targetNamespace: metallb-system
   valuesContent: |-
     controller:
@@ -22,12 +22,12 @@ spec:
           cpu: 75m
           memory: 64Mi
       image:
-        repository: {{ manifest.versions.metallb.controller.repository }}
-        tag: {{ manifest.versions.metallb.controller.tag }}
+        repository: {{ versions.metallb.controller.repository }}
+        tag: {{ versions.metallb.controller.tag }}
     speaker:
       image:
-        repository: {{ manifest.versions.metallb.speaker.repository }}
-        tag: {{ manifest.versions.metallb.speaker.tag }}
+        repository: {{ versions.metallb.speaker.repository }}
+        tag: {{ versions.metallb.speaker.tag }}
       resources:
         limits:
           cpu: 75m

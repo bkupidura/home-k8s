@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
         - name: sms-gammu
-          image: {{ manifest.versions.smsgammu.repository }}:{{ manifest.versions.smsgammu.tag }}
+          image: {{ versions.smsgammu.repository }}:{{ versions.smsgammu.tag }}
           imagePullPolicy: IfNotPresent
           livenessProbe:
             httpGet:
@@ -62,7 +62,7 @@ spec:
               name: secret
           env:
             - name: TZ
-              value: Europe/Warsaw
+              value: "{{ global.timezone }}"
           securityContext:
             privileged: true
       volumes:
