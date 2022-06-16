@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: home-assistant
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.homeassistant.chart }}
+  version: {{ versions.homeassistant.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     resources:
@@ -33,8 +33,8 @@ spec:
     env:
       TZ: {{ global.timezone }}
     image:
-      repository: {{ manifest.versions.homeassistant.image.repository }}
-      tag: {{ manifest.versions.homeassistant.image.tag }}
+      repository: {{ versions.homeassistant.image.repository }}
+      tag: {{ versions.homeassistant.image.tag }}
     persistence:
       config:
         enabled: true
@@ -48,10 +48,10 @@ spec:
       vip-udp:
         enabled: true
         type: LoadBalancer
-        loadBalancerIP: "{{ global.vips[6].ip }}"
+        loadBalancerIP: "{{ global.vips.homeassistant.ip }}"
         externalTrafficPolicy: Local
         annotations:
-          metallb.universe.tf/allow-shared-ip: "{{ global.vips[6].ip }}"
+          metallb.universe.tf/allow-shared-ip: "{{ global.vips.homeassistant.ip }}"
         ports:
           shelly-coap:
             enabled: true
@@ -60,10 +60,10 @@ spec:
       vip-tcp:
         enabled: true
         type: LoadBalancer
-        loadBalancerIP: "{{ global.vips[6].ip }}"
+        loadBalancerIP: "{{ global.vips.homeassistant.ip }}"
         externalTrafficPolicy: Local
         annotations:
-          metallb.universe.tf/allow-shared-ip: "{{ global.vips[6].ip }}"
+          metallb.universe.tf/allow-shared-ip: "{{ global.vips.homeassistant.ip }}"
         ports:
           sonos:
             enabled: true

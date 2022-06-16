@@ -33,7 +33,7 @@ spec:
                 claimName: recorder
           containers:
           - name: cleanup
-            image: {{ manifest.versions.ubuntu.repository }}:{{ manifest.versions.ubuntu.tag }}
+            image: {{ versions.ubuntu.repository }}:{{ versions.ubuntu.tag }}
             command:
             - "/bin/sh"
             - "-ec"
@@ -159,7 +159,7 @@ spec:
     spec:
       containers:
         - name: recorder
-          image: {{ manifest.versions.recorder.repository }}:{{ manifest.versions.recorder.tag }}
+          image: {{ versions.recorder.repository }}:{{ versions.recorder.tag }}
           imagePullPolicy: IfNotPresent
           resources:
             requests:

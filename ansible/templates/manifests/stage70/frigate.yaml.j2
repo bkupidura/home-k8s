@@ -46,7 +46,7 @@ metadata:
 spec:
   chart: frigate
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.frigate.chart }}
+  version: {{ versions.frigate.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     resources:
@@ -79,8 +79,8 @@ spec:
     env:
       TZ: {{ global.timezone }}
     image:
-      repository: {{ manifest.versions.frigate.image.repository }}
-      tag: {{ manifest.versions.frigate.image.tag }}
+      repository: {{ versions.frigate.image.repository }}
+      tag: {{ versions.frigate.image.tag }}
     service:
       main:
         ports:

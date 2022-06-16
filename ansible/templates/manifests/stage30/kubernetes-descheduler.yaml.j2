@@ -7,7 +7,7 @@ metadata:
 spec:
   repo: https://kubernetes-sigs.github.io/descheduler/
   chart: descheduler
-  version: {{ manifest.versions.descheduler.chart }}
+  version: {{ versions.descheduler.chart }}
   targetNamespace: kube-system
   valuesContent: |-
     kind: Deployment

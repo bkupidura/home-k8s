@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: node-red
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.nodered.chart }}
+  version: {{ versions.nodered.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     resources:
@@ -33,8 +33,8 @@ spec:
     env:
       TZ: {{ global.timezone }}
     image:
-      repository: {{ manifest.versions.nodered.image.repository }}
-      tag: {{ manifest.versions.nodered.image.tag }}
+      repository: {{ versions.nodered.image.repository }}
+      tag: {{ versions.nodered.image.tag }}
     persistence:
       data:
         enabled: true

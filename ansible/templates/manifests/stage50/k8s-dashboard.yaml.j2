@@ -53,7 +53,7 @@ metadata:
 spec:
   chart: kubernetes-dashboard
   repo: https://kubernetes.github.io/dashboard/
-  version: {{ manifest.versions.k8s_dashboard.chart }}
+  version: {{ versions.k8s_dashboard.chart }}
   targetNamespace: kube-system
   valuesContent: |-
     resources:

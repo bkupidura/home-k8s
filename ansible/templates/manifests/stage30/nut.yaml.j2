@@ -14,7 +14,7 @@ spec:
         spec:
           containers:
           - name: battery-check
-            image: {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
+            image: {{ versions.nut.image.repository }}:{{ versions.nut.image.tag }}
             imagePullPolicy: IfNotPresent
             command:
             - "/bin/sh"
@@ -39,7 +39,7 @@ spec:
         spec:
           containers:
           - name: batter-check
-            image: {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
+            image: {{ versions.nut.image.repository }}:{{ versions.nut.image.tag }}
             imagePullPolicy: IfNotPresent
             command:
             - "/bin/sh"
@@ -57,7 +57,7 @@ metadata:
 spec:
   repo: https://k8s-at-home.com/charts/
   chart: network-ups-tools
-  version: {{ manifest.versions.nut.chart }}
+  version: {{ versions.nut.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     resources:
@@ -75,8 +75,8 @@ spec:
               sleep 30
               /usr/local/ups/bin/upscmd -u admin -p '{{ manifest.nut.auth.admin }}' apc@127.0.0.1 beeper.disable
     image:
-      repository: {{ manifest.versions.nut.image.repository }}
-      tag: {{ manifest.versions.nut.image.tag }}
+      repository: {{ versions.nut.image.repository }}
+      tag: {{ versions.nut.image.tag }}
     env:
       TZ: {{ global.timezone }}
     service:

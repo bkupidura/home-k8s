@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: loki-stack
   repo: https://grafana.github.io/helm-charts
-  version: {{ manifest.versions.loki.chart }}
+  version: {{ versions.loki.chart }}
   targetNamespace: home-infra
   valuesContent: |-
     loki:

@@ -7,12 +7,12 @@ metadata:
 spec:
   repo: https://charts.jetstack.io
   chart: cert-manager
-  version: {{ manifest.versions.certmanager.chart }}
+  version: {{ versions.certmanager.chart }}
   targetNamespace: cert-manager
   valuesContent: |-
     image:
-      repository: {{ manifest.versions.certmanager.image.repository }}
-      tag: {{ manifest.versions.certmanager.image.tag }}
+      repository: {{ versions.certmanager.image.repository }}
+      tag: {{ versions.certmanager.image.tag }}
     extraEnv:
       - name: TZ
         value: {{ global.timezone }}

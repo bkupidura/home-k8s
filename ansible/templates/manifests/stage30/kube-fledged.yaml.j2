@@ -13,7 +13,7 @@ metadata:
 spec:
   repo: https://senthilrch.github.io/kubefledged-charts/
   chart: kube-fledged
-  version: {{ manifest.versions.kubefledged.chart }}
+  version: {{ versions.kubefledged.chart }}
   targetNamespace: kube-fledged
   valuesContent: |-
     args:
@@ -36,20 +36,19 @@ metadata:
 spec:
   cacheSpec:
   - images:
-    - {{ manifest.versions.ceph.image.repository }}:{{ manifest.versions.ceph.image.tag }}
-    - {{ manifest.versions.traefik.image.repository }}:{{ manifest.versions.traefik.image.tag }}
-    - {{ manifest.versions.blocky.image.repository }}:{{ manifest.versions.blocky.image.tag }}
-    - {{ manifest.versions.homeassistant.image.repository }}:{{ manifest.versions.homeassistant.image.tag }}
-    - {{ manifest.versions.nodered.image.repository }}:{{ manifest.versions.nodered.image.tag }}
-    - {{ manifest.versions.unifi.image.repository }}:{{ manifest.versions.unifi.image.tag }}
-    - {{ manifest.versions.metallb.controller.repository }}:{{ manifest.versions.metallb.controller.tag }}
-    - {{ manifest.versions.metallb.speaker.repository }}:{{ manifest.versions.metallb.speaker.tag }}
-    - {{ manifest.versions.recorder.repository }}:{{ manifest.versions.recorder.tag }}
-    - {{ manifest.versions.ubuntu.repository }}:{{ manifest.versions.ubuntu.tag }}
-    - {{ manifest.versions.nut.image.repository }}:{{ manifest.versions.nut.image.tag }}
-    - {{ manifest.versions.restic.repository }}:{{ manifest.versions.restic.tag }}
-    - {{ manifest.versions.frigate.image.repository }}:{{ manifest.versions.frigate.image.tag }}
-    - {{ manifest.versions.zigbee2mqtt.image.repository }}:{{ manifest.versions.zigbee2mqtt.image.tag }}
-    - {{ manifest.versions.smsgammu.repository }}:{{ manifest.versions.smsgammu.tag }}
-    - {{ manifest.versions.mysql.image.registry }}/{{ manifest.versions.mysql.image.repository }}:{{ manifest.versions.mysql.image.tag }}
-    - {{ manifest.versions.authelia.repository }}:{{ manifest.versions.authelia.tag }}
+    - {{ versions.traefik.image.repository }}:{{ versions.traefik.image.tag }}
+    - {{ versions.blocky.image.repository }}:{{ versions.blocky.image.tag }}
+    - {{ versions.homeassistant.image.repository }}:{{ versions.homeassistant.image.tag }}
+    - {{ versions.nodered.image.repository }}:{{ versions.nodered.image.tag }}
+    - {{ versions.unifi.image.repository }}:{{ versions.unifi.image.tag }}
+    - {{ versions.metallb.controller.repository }}:{{ versions.metallb.controller.tag }}
+    - {{ versions.metallb.speaker.repository }}:{{ versions.metallb.speaker.tag }}
+    - {{ versions.recorder.repository }}:{{ versions.recorder.tag }}
+    - {{ versions.ubuntu.repository }}:{{ versions.ubuntu.tag }}
+    - {{ versions.nut.image.repository }}:{{ versions.nut.image.tag }}
+    - {{ versions.restic.repository }}:{{ versions.restic.tag }}
+    - {{ versions.frigate.image.repository }}:{{ versions.frigate.image.tag }}
+    - {{ versions.zigbee2mqtt.image.repository }}:{{ versions.zigbee2mqtt.image.tag }}
+    - {{ versions.smsgammu.repository }}:{{ versions.smsgammu.tag }}
+    - {{ versions.mysql.image.registry }}/{{ versions.mysql.image.repository }}:{{ versions.mysql.image.tag }}
+    - {{ versions.authelia.repository }}:{{ versions.authelia.tag }}

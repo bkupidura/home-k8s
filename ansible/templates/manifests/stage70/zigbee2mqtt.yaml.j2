@@ -7,7 +7,7 @@ metadata:
 spec:
   chart: zigbee2mqtt
   repo: https://k8s-at-home.com/charts/
-  version: {{ manifest.versions.zigbee2mqtt.chart }}
+  version: {{ versions.zigbee2mqtt.chart }}
   targetNamespace: smart-home
   valuesContent: |-
     resources:
@@ -20,8 +20,8 @@ spec:
     env:
       TZ: {{ global.timezone }}
     image:
-      repository: {{ manifest.versions.zigbee2mqtt.image.repository }}
-      tag: {{ manifest.versions.zigbee2mqtt.image.tag }}
+      repository: {{ versions.zigbee2mqtt.image.repository }}
+      tag: {{ versions.zigbee2mqtt.image.tag }}
     securityContext:
       privileged: true
     persistence:
