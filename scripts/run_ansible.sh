@@ -1,13 +1,6 @@
 #!/bin/bash
-VAULT_PASSWORD_FILE=".vault_password"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd ${SCRIPT_DIR}/../ansible
-
-if [ -f "${VAULT_PASSWORD_FILE}" ]; then
-    ANSIBLE_ARGS="--vault-password-file ${VAULT_PASSWORD_FILE}"
-else
-    ANSIBLE_ARGS="--ask-vault-password"
-fi
 
 show_help() {
     cat << EOF
