@@ -1,7 +1,9 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  local s = v1.service,
   local c = v1.container,
+  local d = $.k.apps.v1.deployment,
   zigbee2mqtt: {
     pvc: p.new('zigbee2mqtt')
          + p.metadata.withNamespace('smart-home')
@@ -51,32 +53,37 @@
                                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.withNodeSelectorTerms(
                                        { matchExpressions: [{ key: 'zigbee_controller', operator: 'In', values: ['true'] }] },
                                      ),
-    helm: $._custom.helm.new('zigbee2mqtt', 'https://k8s-at-home.com/charts/', $._version.zigbee2mqtt.chart, 'smart-home', {
-      controller: {
-        replicas: if $._config.restore then 0 else 1,
-      },
-      resources: {
-        requests: { memory: '128Mi', cpu: '50m' },
-        limits: { memory: '128Mi', cpu: '50m' },
-      },
-      env: { TZ: $._config.tz },
-      image: { repository: $._version.zigbee2mqtt.repo, tag: $._version.zigbee2mqtt.tag },
-      securityContext: { privileged: true },
-      persistence: {
-        data: { enabled: true, existingClaim: 'zigbee2mqtt' },
-        usb: { enabled: true, type: 'hostPath', hostPath: '/dev/ttyACM0' },
-      },
-      ingress: { main: { enabled: false } },
-      affinity: {
-        nodeAffinity: {
-          requiredDuringSchedulingIgnoredDuringExecution: {
-            nodeSelectorTerms: [
-              { matchExpressions: [{ key: 'zigbee_controller', operator: 'In', values: ['true'] }] },
-            ],
-          },
-        },
-      },
-      config: {},
-    }),
+    service: s.new('zigbee2mqtt', { 'app.kubernetes.io/name': 'zigbee2mqtt' }, [v1.servicePort.withPort(8080) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
+             + s.metadata.withNamespace('smart-home')
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'zigbee2mqtt' }),
+    deployment: d.new('zigbee2mqtt',
+                      if $._config.restore then 0 else 1,
+                      [
+                        c.new('zigbee2mqtt', $._version.zigbee2mqtt.image)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts(v1.containerPort.newNamed(8080, 'http'))
+                        + c.withEnvMap({
+                          TZ: $._config.tz,
+                          ZIGBEE2MQTT_DATA: '/data',
+                        })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
+                        + c.securityContext.withPrivileged(true)
+                        + c.readinessProbe.tcpSocket.withPort('http')
+                        + c.readinessProbe.withInitialDelaySeconds(30)
+                        + c.readinessProbe.withPeriodSeconds(10)
+                        + c.readinessProbe.withTimeoutSeconds(1)
+                        + c.livenessProbe.tcpSocket.withPort('http')
+                        + c.livenessProbe.withInitialDelaySeconds(120)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(1),
+                      ],
+                      { 'app.kubernetes.io/name': 'zigbee2mqtt' })
+                + d.pvcVolumeMount('zigbee2mqtt', '/data', false, {})
+                + d.hostVolumeMount('dev-ttyacm0', '/dev/ttyACM0', '/dev/ttyACM0', false, {})
+                + d.spec.strategy.withType('Recreate')
+                + d.spec.template.spec.withNodeSelector({ zigbee_controller: 'true' })
+                + d.metadata.withNamespace('smart-home')
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(30),
   },
 }

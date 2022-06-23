@@ -1,6 +1,9 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  local s = v1.service,
+  local c = v1.container,
+  local d = $.k.apps.v1.deployment,
   home_assistant: {
     pvc: p.new('home-assistant')
          + p.metadata.withNamespace('smart-home')
@@ -29,79 +32,74 @@
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host home-assistant --target .', std.extVar('secrets').restic.repo.default)]
     )], 'home-assistant'),
-    helm: $._custom.helm.new('home-assistant', 'https://k8s-at-home.com/charts/', $._version.home_assistant.chart, 'smart-home', {
-      controller: {
-        replicas: if $._config.restore then 0 else 1,
-      },
-      resources: {
-        requests: { memory: '512Mi', cpu: '300m' },
-        limits: { memory: '512Mi', cpu: '300m' },
-      },
-      affinity: {
-        podAntiAffinity: {
-          preferredDuringSchedulingIgnoredDuringExecution: [
-            {
-              weight: 1,
-              podAffinityTerm: {
-                labelSelector: {
-                  matchExpressions: [
-                    { key: 'app.kubernetes.io/name', operator: 'In', values: ['node-red', 'zigbee2mqtt'] },
-                  ],
-                },
-                topologyKey: 'kubernetes.io/hostname',
-              },
-            },
-          ],
-        },
-      },
-      env: {
-        TZ: $._config.tz,
-      },
-      image: { repository: $._version.home_assistant.repo, tag: $._version.home_assistant.tag },
-      persistence: {
-        config: { enabled: true, existingClaim: 'home-assistant' },
-      },
-      service: {
-        main: {
-          ports: {
-            http: { enabled: true, port: 8123 },
-          },
-        },
-        'vip-udp': {
-          enabled: true,
-          type: 'LoadBalancer',
-          loadBalancerIP: $._config.vip.home_assistant,
-          externalTrafficPolicy: 'Local',
-          annotations: { 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant },
-          ports: {
-            'shelly-coap': { enabled: true, port: 5683, protocol: 'UDP' },
-          },
-        },
-        'vip-tcp': {
-          enabled: true,
-          type: 'LoadBalancer',
-          loadBalancerIP: $._config.vip.home_assistant,
-          externalTrafficPolicy: 'Local',
-          annotations: { 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant },
-          ports: {
-            sonos: { enabled: true, port: 1400, protocol: 'TCP' },
-          },
-        },
-      },
-      ingress: { main: { enabled: false } },
-      probes: {
-        liveness: {
-          enabled: true,
-          custom: true,
-          spec: {
-            periodSeconds: 15,
-            failureThreshold: 5,
-            initialDelaySeconds: 120,
-            timeoutSeconds: 5,
-            httpGet: { path: '/healthz', port: 8123 },
-          },
-        },
-      },
-    }),
+    service: s.new('home-assistant', { 'app.kubernetes.io/name': 'home-assistant' }, [v1.servicePort.withPort(8123) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
+             + s.metadata.withNamespace('smart-home')
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' }),
+    service_lb_tcp: s.new(
+                      'home-assistant-vip-tcp',
+                      { 'app.kubernetes.io/name': 'home-assistant' },
+                      [
+                        v1.servicePort.withPort(1400) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('sonos') + v1.servicePort.withTargetPort('sonos'),
+                      ]
+                    )
+                    + s.metadata.withNamespace('smart-home')
+                    + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
+                    + s.metadata.withAnnotations({ 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant })
+                    + s.spec.withLoadBalancerIP($._config.vip.home_assistant)
+                    + s.spec.withType('LoadBalancer')
+                    + s.spec.withExternalTrafficPolicy('Local')
+                    + s.spec.withPublishNotReadyAddresses(false),
+    service_lb_udp: s.new(
+                      'home-assistant-vip-udp',
+                      { 'app.kubernetes.io/name': 'home-assistant' },
+                      [
+                        v1.servicePort.withPort(5683) + v1.servicePort.withProtocol('UDP') + v1.servicePort.withName('shelly-coap') + v1.servicePort.withTargetPort('shelly-coap'),
+                      ]
+                    )
+                    + s.metadata.withNamespace('smart-home')
+                    + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
+                    + s.metadata.withAnnotations({ 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant })
+                    + s.spec.withLoadBalancerIP($._config.vip.home_assistant)
+                    + s.spec.withType('LoadBalancer')
+                    + s.spec.withExternalTrafficPolicy('Local')
+                    + s.spec.withPublishNotReadyAddresses(false),
+    deployment: d.new('home-assistant',
+                      if $._config.restore then 0 else 1,
+                      [
+                        c.new('home-assistant', $._version.home_assistant.image)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts([
+                          v1.containerPort.newNamed(8123, 'http'),
+                          v1.containerPort.newNamed(1400, 'sonos'),
+                          v1.containerPort.newNamedUDP(5683, 'shelly-coap'),
+                        ])
+                        + c.withEnvMap({
+                          TZ: $._config.tz,
+                        })
+                        + c.resources.withRequests({ memory: '512Mi', cpu: '300m' })
+                        + c.resources.withLimits({ memory: '512Mi', cpu: '300m' })
+                        + c.readinessProbe.tcpSocket.withPort('http')
+                        + c.readinessProbe.withInitialDelaySeconds(30)
+                        + c.readinessProbe.withPeriodSeconds(15)
+                        + c.readinessProbe.withTimeoutSeconds(2)
+                        + c.livenessProbe.httpGet.withPath('/healthz')
+                        + c.livenessProbe.httpGet.withPort('http')
+                        + c.livenessProbe.withInitialDelaySeconds(120)
+                        + c.livenessProbe.withPeriodSeconds(15)
+                        + c.livenessProbe.withTimeoutSeconds(5),
+                      ],
+                      { 'app.kubernetes.io/name': 'home-assistant' })
+                + d.pvcVolumeMount('home-assistant', '/config', false, {})
+                + d.spec.strategy.withType('Recreate')
+                + d.spec.template.spec.withEnableServiceLinks(true)
+                + d.metadata.withNamespace('smart-home')
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
+                + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
+                  v1.weightedPodAffinityTerm.withWeight(1)
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.labelSelector.withMatchExpressions(
+                    { key: 'app.kubernetes.io/name', operator: 'In', values: ['zigbee2mqtt', 'node-red'] }
+                  )
+                ),
   },
 }

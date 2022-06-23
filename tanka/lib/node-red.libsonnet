@@ -1,6 +1,9 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  local s = v1.service,
+  local c = v1.container,
+  local d = $.k.apps.v1.deployment,
   node_red: {
     pvc: p.new('node-red')
          + p.metadata.withNamespace('smart-home')
@@ -23,50 +26,43 @@
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host node-red --target .', std.extVar('secrets').restic.repo.default)]
     )], 'node-red'),
-    helm: $._custom.helm.new('node-red', 'https://k8s-at-home.com/charts/', $._version.node_red.chart, 'smart-home', {
-      controller: {
-        replicas: if $._config.restore then 0 else 1,
-      },
-      resources: {
-        requests: { memory: '384Mi', cpu: '500m' },
-        limits: { memory: '384Mi', cpu: '500m' },
-      },
-      affinity: {
-        podAntiAffinity: {
-          preferredDuringSchedulingIgnoredDuringExecution: [
-            {
-              weight: 1,
-              podAffinityTerm: {
-                labelSelector: {
-                  matchExpressions: [
-                    { key: 'app.kubernetes.io/name', operator: 'In', values: ['home-assistant', 'zigbee2mqtt'] },
-                  ],
-                },
-                topologyKey: 'kubernetes.io/hostname',
-              },
-            },
-          ],
-        },
-      },
-      env: { TZ: $._config.tz },
-      image: { repository: $._version.node_red.repo, tag: $._version.node_red.tag },
-      persistence: {
-        data: { enabled: true, existingClaim: 'node-red' },
-      },
-      ingress: { main: { enabled: false } },
-      podSecurityContext: { fsGroup: 1000 },
-      probes: {
-        liveness: {
-          enabled: true,
-          custom: true,
-          spec: {
-            periodSeconds: 10,
-            failureThreshold: 3,
-            initialDelaySeconds: 60,
-            httpGet: { path: '/dead-man-switch', port: 1880 },
-          },
-        },
-      },
-    }),
+    service: s.new('node-red', { 'app.kubernetes.io/name': 'node-red' }, [v1.servicePort.withPort(1880) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
+             + s.metadata.withNamespace('smart-home')
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'node-red' }),
+    deployment: d.new('node-red',
+                      if $._config.restore then 0 else 1,
+                      [
+                        c.new('node-red', $._version.node_red.image)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts(v1.containerPort.newNamed(1880, 'http'))
+                        + c.withEnvMap({
+                          TZ: $._config.tz,
+                          FLOWS: 'flows.json',
+                        })
+                        + c.resources.withRequests({ memory: '384Mi', cpu: '500m' })
+                        + c.resources.withLimits({ memory: '384Mi', cpu: '500m' })
+                        + c.readinessProbe.tcpSocket.withPort('http')
+                        + c.readinessProbe.withInitialDelaySeconds(30)
+                        + c.readinessProbe.withPeriodSeconds(10)
+                        + c.readinessProbe.withTimeoutSeconds(2)
+                        + c.livenessProbe.httpGet.withPath('/dead-man-switch')
+                        + c.livenessProbe.httpGet.withPort('http')
+                        + c.livenessProbe.withInitialDelaySeconds(60)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(2),
+                      ],
+                      { 'app.kubernetes.io/name': 'node-red' })
+                + d.pvcVolumeMount('node-red', '/data', false, {})
+                + d.spec.strategy.withType('Recreate')
+                + d.metadata.withNamespace('smart-home')
+                + d.spec.template.spec.securityContext.withFsGroup(1000)
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
+                + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
+                  v1.weightedPodAffinityTerm.withWeight(1)
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.labelSelector.withMatchExpressions(
+                    { key: 'app.kubernetes.io/name', operator: 'In', values: ['zigbee2mqtt', 'home-assistant'] }
+                  )
+                ),
   },
 }
