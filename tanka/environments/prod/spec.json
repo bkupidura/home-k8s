@@ -1,0 +1,11 @@
+{
+  "apiVersion": "tanka.dev/v1alpha1",
+  "kind": "Environment",
+  "metadata": {
+    "name": "environments/prod"
+  },
+  "spec": {
+     "apiServer": "https://10.0.120.31:6443",
+     "injectLabels": true
+  }
+}

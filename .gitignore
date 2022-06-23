@@ -1,5 +1,4 @@
 kube-config.yaml
-manifests/*
-ansible/.vault_password
 pocs/*
+tanka/vendor/*
 .DS_Store

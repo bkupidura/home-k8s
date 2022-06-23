@@ -1,0 +1,3 @@
+#!/bin/bash
+VAULT=$2/vault.enc
+sops exec-file ${VAULT} "tk $* --ext-code secrets='import \"{}\"'"

@@ -6,15 +6,6 @@
   register: get_k3s_ready
   until: get_k3s_ready.status == 200
 
-- name: Create custom coredns file
-  vars:
-    create:
-      custom-coredns:
-        dst: /var/lib/rancher/k3s/server/manifests/z-custom-coredns.yaml
-        src: "../templates/k3s-custom-coredns.yaml.j2"
-        permission: "0600"
-  include_tasks: tasks/custom_files.yaml
-
 - name: Env used for k3s deployment
   debug:
     msg: "{{ env }}"
