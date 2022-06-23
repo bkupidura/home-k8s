@@ -1,38 +1,12 @@
 ansible_user: ansible
+ansible_password: ansible
+ansible_sudo_pass: ansible
 global:
-  k8s:
-    mqtt:
-      service: broker-ha
-    storage:
-      service: longhorn
-      class:
-        default:
-          name: longhorn-standard
-          mode: ReadWriteOnce
-  vips:
-    dns:
-      ip: 10.0.10.40
-    ingress:
-      ip: 10.0.10.42
-    mqtt:
-      ip: 10.0.10.43
-    ntp:
-      ip: 10.0.10.45
-    homeassistant:
-      ip: 10.0.10.46
-    waf:
-      ip: 10.0.10.47
   timezone: "Europe/Warsaw"
-  ntp:
-    servers:
-    - "0.pl.pool.ntp.org"
-    - "1.pl.pool.ntp.org"
   dns:
     servers:
     - "1.1.1.1"
     - "8.8.8.8"
-    - "1.0.0.1"
-    - "8.8.4.4"
 os:
   ssh_keys:
     - user: root
@@ -46,6 +20,8 @@ k3s:
     - "traefik"
     - "--disable"
     - "servicelb"
+    - "--disable"
+    - "coredns"
     - "--kube-apiserver-arg"
     - "default-unreachable-toleration-seconds=120"
     - "--kube-apiserver-arg"

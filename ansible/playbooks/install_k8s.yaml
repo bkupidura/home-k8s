@@ -157,12 +157,3 @@
         realtime: "{{ watchdog.realtime | default('yes') }}"
         k3s_health: true
       include_tasks: tasks/configure_watchdog.yaml
-
-- name: Fix k3s
-  hosts:
-    - localhost
-  tasks:
-    - name: Scale coredns https://github.com/k3s-io/k3s/issues/1606
-      command: kubectl scale -n kube-system --replicas=2 deployment/coredns
-      environment:
-        KUBECONFIG: "../../kube-config.yaml"
