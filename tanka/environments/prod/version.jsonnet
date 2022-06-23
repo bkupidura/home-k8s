@@ -30,9 +30,7 @@
       },
     },
     nut: {
-      repo: 'ghcr.io/k8s-at-home/network-ups-tools',
-      tag: 'v2.7.4-2486-gaa0b3d1d',
-      chart: '6.3.3',
+      image: 'ghcr.io/k8s-at-home/network-ups-tools:v2.7.4-2486-gaa0b3d1d',
     },
     longhorn: {
       chart: '1.2.4',
@@ -79,9 +77,7 @@
     zigbee2mqtt: {
       deconz: 'marthoc/deconz:2.12.03',
       firmware: 'deCONZ_ConBeeII_0x26720700.bin.GCF',
-      chart: '9.3.2',
-      repo: 'koenkk/zigbee2mqtt',
-      tag: '1.25.2',
+      image: 'koenkk/zigbee2mqtt:1.25.2',
     },
     esphome: {
       image: 'esphome/esphome:2022.6.1',
@@ -100,14 +96,10 @@
       tag: '0.10.1-amd64',
     },
     home_assistant: {
-      chart: '13.2.0',
-      repo: 'homeassistant/home-assistant',
-      tag: '2022.5.5',
+      image: 'homeassistant/home-assistant:2022.5.5',
     },
     node_red: {
-      chart: '10.1.2',
-      repo: 'nodered/node-red',
-      tag: '2.2.2-12',
+      image: 'nodered/node-red:2.2.2-12',
     },
     recorder: {
       image: 'ghcr.io/bkupidura/recorder:0.0.4.6',
@@ -116,9 +108,7 @@
       image: 'pajikos/sms-gammu-gateway:1.2',
     },
     unifi: {
-      chart: '4.9.2',
-      repo: 'jacobalberty/unifi',
-      tag: 'v7.1.65',
+      image: 'jacobalberty/unifi:v7.1.65',
     },
     prometheus: {
       chart: '15.9.0',

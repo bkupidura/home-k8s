@@ -1,6 +1,9 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  local s = v1.service,
+  local c = v1.container,
+  local d = $.k.apps.v1.deployment,
   unifi: {
     pvc: p.new('unifi')
          + p.metadata.withNamespace('home-infra')
@@ -31,33 +34,45 @@
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host unifi --target .', std.extVar('secrets').restic.repo.default)]
     )], 'unifi'),
-    helm: $._custom.helm.new('unifi', 'https://k8s-at-home.com/charts/', $._version.unifi.chart, 'home-infra', {
-      controller: {
-        replicas: if $._config.restore then 0 else 1,
-      },
-      resources: {
-        requests: { memory: '500Mi' },
-        limits: { memory: '1Gi' },
-      },
-      env: { TZ: $._config.tz, JVM_MAX_HEAP_SIZE: '384M', JVM_MAX_THREAD_STACK_SIZE: '1M' },
-      image: { repository: $._version.unifi.repo, tag: $._version.unifi.tag },
-      persistence: {
-        data: { enabled: true, existingClaim: 'unifi' },
-      },
-      service: {
-        main: {
-          ports: {
-            http: { enabled: true, port: 443 },
-            controller: { enabled: true, port: 80 },
-            stun: { enabled: false },
-            discovery: { enabled: false },
-            syslog: { enabled: false },
-            'portal-http': { enabled: false },
-            'portal-https': { enabled: false },
-            speedtest: { enabled: false },
-          },
-        },
-      },
-    }),
+    service: s.new('unifi', { 'app.kubernetes.io/name': 'unifi' }, [
+               v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
+               v1.servicePort.withPort(443) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('https'),
+             ])
+             + s.metadata.withNamespace('home-infra')
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'unifi' }),
+    deployment: d.new('unifi',
+                      if $._config.restore then 0 else 1,
+                      [
+                        c.new('unifi', $._version.unifi.image)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts([
+                          v1.containerPort.newNamed(80, 'http'),
+                          v1.containerPort.newNamed(443, 'https'),
+                        ])
+                        + c.withEnvMap({
+                          TZ: $._config.tz,
+                          JVM_MAX_HEAP_SIZE: '384M',
+                          JVM_MAX_THREAD_STACK_SIZE: '1M',
+                          RUNAS_UID0: 'false',
+                          UNIFI_GID: '999',
+                          UNIFI_UID: '999',
+                          UNIFI_STDOUT: 'true',
+                        })
+                        + c.resources.withRequests({ memory: '512Mi' })
+                        + c.resources.withLimits({ memory: '1Gi' })
+                        + c.readinessProbe.tcpSocket.withPort('https')
+                        + c.readinessProbe.withInitialDelaySeconds(30)
+                        + c.readinessProbe.withPeriodSeconds(10)
+                        + c.readinessProbe.withTimeoutSeconds(1)
+                        + c.livenessProbe.tcpSocket.withPort('https')
+                        + c.livenessProbe.withInitialDelaySeconds(60)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(1),
+                      ],
+                      { 'app.kubernetes.io/name': 'unifi' })
+                + d.pvcVolumeMount('unifi', '/unifi', false, {})
+                + d.spec.strategy.withType('Recreate')
+                + d.metadata.withNamespace('home-infra')
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(30),
   },
 }
