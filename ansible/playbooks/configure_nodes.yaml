@@ -101,10 +101,15 @@
           upgrade: true
         include_tasks: tasks/manage_packages.yaml
 
+      - stat:
+          path: "/var/run/reboot-required"
+        register: reboot_required
+
       - name: Reboot
         reboot:
           post_reboot_delay: 120
           reboot_timeout: 300
+        when: reboot_required.stat.exists
         become: true
 
       when:
