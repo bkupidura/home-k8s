@@ -91,9 +91,7 @@
       chart: '2.6.4',
     },
     frigate: {
-      chart: '8.1.2',
-      repo: 'blakeblackshear/frigate',
-      tag: '0.10.1-amd64',
+      image: 'blakeblackshear/frigate:0.10.1-amd64',
     },
     home_assistant: {
       image: 'homeassistant/home-assistant:2022.5.5',
