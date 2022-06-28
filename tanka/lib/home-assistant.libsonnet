@@ -4,6 +4,24 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  prometheus+: {
+    extra_scrape+:: {
+      home_assistant: {
+        bearer_token: std.extVar('secrets').home_assistant.bearer_token,
+        job_name: 'home-assistant',
+        metric_relabel_configs: [
+          { action: 'labeldrop', regex: 'friendly_name' },
+          { regex: '.*\\.(.*)', replacement: '${1}', source_labels: ['entity'], target_label: 'entity_name' },
+        ],
+        metrics_path: '/api/prometheus',
+        scheme: 'http',
+        scrape_interval: '10s',
+        static_configs: [
+          { targets: ['home-assistant.smart-home:8123'] },
+        ],
+      },
+    },
+  },
   home_assistant: {
     pvc: p.new('home-assistant')
          + p.metadata.withNamespace('smart-home')

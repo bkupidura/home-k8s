@@ -1,4 +1,148 @@
 {
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'ceph',
+        rules: [
+          {
+            alert: 'CephMdsMissingReplicas',
+            expr: 'sum(ceph_mds_metadata == 1) < 2',
+            'for': '5m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Insufficient replicas for storage metadata service',
+            },
+          },
+          {
+            alert: 'CephMonQuorumAtRisk',
+            expr: 'count(ceph_mon_quorum_status == 1) <= (floor(count(ceph_mon_metadata) / 2) + 1)',
+            'for': '5m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Storage quorum at risk',
+            },
+          },
+          {
+            alert: 'CephOSDCriticallyFull',
+            expr: '(ceph_osd_metadata * on (ceph_daemon) group_right(device_class,hostname) (ceph_osd_stat_bytes_used / ceph_osd_stat_bytes)) > 0.80',
+            'for': '5m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Back-end storage device is critically full ({{ $value | humanizePercentage }}) on {{ $labels.ceph_daemon }}',
+            },
+          },
+          {
+            alert: 'CephOSDFlapping',
+            expr: 'changes(ceph_osd_up[5m]) > 3',
+            'for': '5m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Ceph storage osd flapping on {{ $labels.ceph_daemon }}',
+            },
+          },
+          {
+            alert: 'CephOSDSlowOps',
+            expr: 'ceph_healthcheck_slow_ops > 0',
+            'for': '1m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Slow ops detected in ceph cluster',
+            },
+          },
+          {
+            alert: 'CephPGNotClean',
+            expr: 'ceph_pg_clean != ceph_pg_total',
+            'for': '1h',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Not clean PGs detected in cluster',
+            },
+          },
+          {
+            alert: 'CephPGNotActive',
+            expr: 'ceph_pg_active != ceph_pg_total',
+            'for': '1h',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Not active PGs detected in cluster',
+            },
+          },
+          {
+            alert: 'CephPGUndersized',
+            expr: 'ceph_pg_undersized > 0',
+            'for': '30m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'PGs data recovery is slow',
+            },
+          },
+          {
+            alert: 'CephPGInconsistent',
+            expr: 'ceph_pg_inconsistent > 0',
+            'for': '30m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Inconsistent PGs detected in cluster',
+            },
+          },
+          {
+            alert: 'CephMissingHealthStatus',
+            expr: 'absent(ceph_health_status) == 1',
+            'for': '10m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Missing ceph_health_status metric',
+            },
+          },
+          {
+            alert: 'CephClusterErrorState',
+            expr: 'ceph_health_status > 1',
+            'for': '5m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Storage cluster is in error state',
+            },
+          },
+          {
+            alert: 'CephClusterWarningState',
+            expr: 'ceph_health_status == 1',
+            'for': '20m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Storage cluster is in warning state',
+            },
+          },
+          {
+            alert: 'CephServiceVersionMismatch',
+            expr: 'count(count by(ceph_version) ({__name__=~"^ceph_(osd|mgr|mds|mon)_metadata$"})) > 1',
+            'for': '10m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'There are multiple versions of services running',
+            },
+          },
+          {
+            alert: 'CephClusterCriticallyFull',
+            expr: 'ceph_cluster_total_used_raw_bytes / ceph_cluster_total_bytes > 0.75',
+            'for': '30m',
+            labels: { service: 'ceph', severity: 'warning' },
+            annotations: {
+              summary: 'Storage cluster is critically full',
+            },
+          },
+          {
+            alert: 'CephClusterReadOnly',
+            expr: 'ceph_cluster_total_used_raw_bytes / ceph_cluster_total_bytes >= 0.85',
+            'for': '1m',
+            labels: { service: 'ceph', severity: 'critical' },
+            annotations: {
+              summary: 'Storage cluster is in read only mode',
+            },
+          },
+        ],
+      },
+    ],
+  },
   rook_ceph: {
     namespace: $.k.core.v1.namespace.new('rook-ceph'),
     config: $.k.core.v1.configMap.new('rook-config-override', { config: '' })

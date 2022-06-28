@@ -4,6 +4,33 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'recorder',
+        rules: [
+          {
+            alert: 'RecorderWorkersHanging',
+            expr: 'recorder_workers > 0',
+            'for': '30m',
+            labels: { service: 'recorder', severity: 'warning' },
+            annotations: {
+              summary: 'Recorder worker {{ $labels.service }} is running for more than 30m',
+            },
+          },
+          {
+            alert: 'RecorderErrors',
+            expr: 'delta(recorder_errors_total[5m]) > 0',
+            'for': '1m',
+            labels: { service: 'recorder', severity: 'warning' },
+            annotations: {
+              summary: 'Recorder errors observed for {{ $labels.service }} in last 5m',
+            },
+          },
+        ],
+      },
+    ],
+  },
   recorder: {
     pvc: p.new('recorder')
          + p.metadata.withNamespace('smart-home')
