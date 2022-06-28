@@ -1,4 +1,21 @@
 {
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'cert-manager',
+        rules: [
+          {
+            alert: 'CertInvalidShortly',
+            expr: '(certmanager_certificate_expiration_timestamp_seconds - time()) / 60 / 60 / 24 < 29',
+            labels: { service: 'certmanager', severity: 'info' },
+            annotations: {
+              summary: 'Certificate will expire soon',
+            },
+          },
+        ],
+      },
+    ],
+  },
   cert_manager: {
     namespace: $.k.core.v1.namespace.new('cert-manager'),
     secret: $.k.core.v1.secret.new('cert-manager', {

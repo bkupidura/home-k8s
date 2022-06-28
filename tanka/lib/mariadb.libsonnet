@@ -1,4 +1,67 @@
 {
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'mariadb',
+        rules: [
+          {
+            alert: 'MysqlWrongBufferPoolUsage',
+            expr: 'delta(mysql_global_status_innodb_buffer_pool_reads[5m]) / delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) > 0.03',
+            'for': '15m',
+            labels: { service: 'mysql', severity: 'warning' },
+            annotations: {
+              summary: 'Mysql wrong innodb buffer pool reads, check https://mariadb.com/kb/en/innodb-buffer-pool/#innodb_buffer_pool_size',
+            },
+          },
+          {
+            alert: 'MysqlDown',
+            expr: 'mysql_up == 0',
+            'for': '1m',
+            labels: { service: 'mysql', severity: 'critical' },
+            annotations: {
+              summary: 'Mysql server is down',
+            },
+          },
+          {
+            alert: 'MysqlTooManyConnections',
+            expr: 'max_over_time(mysql_global_status_threads_connected[5m]) / mysql_global_variables_max_connections > 0.8',
+            'for': '5m',
+            labels: { service: 'mysql', severity: 'warning' },
+            annotations: {
+              summary: 'Mysql server is using more than {{ $value | humanizePercentage }} of all available connections',
+            },
+          },
+          {
+            alert: 'MysqlSlowQueries',
+            expr: 'increase(mysql_global_status_slow_queries[5m]) > 0',
+            'for': '10m',
+            labels: { service: 'mysql', severity: 'warning' },
+            annotations: {
+              summary: 'Slow queries observed on Mysql',
+            },
+          },
+          {
+            alert: 'MysqlInnodbLogWaits',
+            expr: 'rate(mysql_global_status_innodb_log_waits[15m]) > 10',
+            'for': '2m',
+            labels: { service: 'mysql', severity: 'warning' },
+            annotations: {
+              summary: 'Mysql InnoDB log waits',
+            },
+          },
+          {
+            alert: 'MysqlNoFreePages',
+            expr: 'delta(mysql_global_status_innodb_buffer_pool_wait_free[5m]) / 300 > 2',
+            'for': '5m',
+            labels: { service: 'mysql', severity: 'warning' },
+            annotations: {
+              summary: 'No free pages in buffer pool',
+            },
+          },
+        ],
+      },
+    ],
+  },
   mariadb: {
     cronjob_backup: $._custom.cronjob_backup.new('mariadb',
                                                  'home-infra',

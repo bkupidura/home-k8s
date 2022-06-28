@@ -3,6 +3,23 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'blocky',
+        rules: [
+          {
+            alert: 'BlockyErrorsIncreasing',
+            expr: 'increase(blocky_error_total[10m]) > 10',
+            labels: { service: 'blocky', severity: 'info' },
+            annotations: {
+              summary: 'Errors increasing on {{ $labels.pod }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   blocky: {
     service: s.new(
                'blocky',

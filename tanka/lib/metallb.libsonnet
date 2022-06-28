@@ -1,4 +1,21 @@
 {
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'metallb',
+        rules: [
+          {
+            alert: 'MetalLbBGPDown',
+            expr: 'max_over_time(metallb_bgp_session_up[1d]) - metallb_bgp_session_up != 0',
+            labels: { service: 'metallb', severity: 'warning' },
+            annotations: {
+              summary: 'BGP sessions down on {{ $labels.instance }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   metallb: {
     namespace: $.k.core.v1.namespace.new('metallb-system'),
     helm: $._custom.helm.new(

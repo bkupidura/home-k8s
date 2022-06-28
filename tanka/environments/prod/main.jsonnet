@@ -1,8 +1,9 @@
 (import 'custom.jsonnet') +
 (import 'version.jsonnet') +
-(import 'coredns.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
+(import 'prometheus.libsonnet') +
+(import 'coredns.libsonnet') +
 (import 'kubefledged.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
 (import 'kubernetes-reflector.libsonnet') +
@@ -21,7 +22,6 @@
 (import 'loki.libsonnet') +
 (import 'mariadb.libsonnet') +
 (import 'grafana.libsonnet') +
-(import 'prometheus.libsonnet') +
 (import 'unifi.libsonnet') +
 (import 'restic-server.libsonnet') +
 (import 'home-assistant.libsonnet') +
@@ -151,26 +151,6 @@
             'SecRuleRemoveById 931130',
             'SecRuleRemoveById 941101',
           ],
-        },
-      },
-    },
-    prometheus: {
-      server: {
-        extra_scrape_config: {
-          home_assistant: {
-            bearer_token: std.extVar('secrets').home_assistant.bearer_token,
-            job_name: 'home-assistant',
-            metric_relabel_configs: [
-              { action: 'labeldrop', regex: 'friendly_name' },
-              { regex: '.*\\.(.*)', replacement: '${1}', source_labels: ['entity'], target_label: 'entity_name' },
-            ],
-            metrics_path: '/api/prometheus',
-            scheme: 'http',
-            scrape_interval: '10s',
-            static_configs: [
-              { targets: ['home-assistant.smart-home:8123'] },
-            ],
-          },
         },
       },
     },

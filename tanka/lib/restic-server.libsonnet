@@ -3,6 +3,24 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'restic',
+        rules: [
+          {
+            alert: 'ResticNoNewBackup',
+            expr: 'delta(rest_server_blob_write_bytes_total{type="snapshots"}[5d]) <= 0',
+            'for': '1d',
+            labels: { service: 'restic', severity: 'warning' },
+            annotations: {
+              summary: 'No new backups found for repo {{ $labels.repo }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   restic_server: {
     _custom:: {
       cronjob_backup:: {
