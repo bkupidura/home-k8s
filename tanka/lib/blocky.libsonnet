@@ -49,7 +49,7 @@
                   type: 'none',
                 },
                 blocking: {
-                  processingConcurrency: 1,
+                  processingConcurrency: 2,
                   refreshPeriod: 120,
                   blockType: 'zeroIP',
                   [if $._config.blocky.blacklist != null then 'blackLists']: $._config.blocky.blacklist,
@@ -73,8 +73,8 @@
                           TZ: $._config.tz,
                           CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '156Mi', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '156Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '192Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '192Mi', cpu: '100m' })
                         + c.readinessProbe.tcpSocket.withPort(53)
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
