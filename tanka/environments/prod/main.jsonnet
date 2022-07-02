@@ -1,5 +1,5 @@
-(import 'custom.jsonnet') +
 (import 'version.jsonnet') +
+(import 'custom-resources.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
 (import 'prometheus.libsonnet') +
@@ -32,7 +32,6 @@
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
 {
-  k: import 'github.com/jsonnet-libs/k8s-libsonnet/1.23/main.libsonnet',
   _config:: {
     restore: false,
     vip: {

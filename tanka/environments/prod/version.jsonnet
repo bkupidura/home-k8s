@@ -83,9 +83,7 @@
       image: 'esphome/esphome:2022.6.1',
     },
     grafana: {
-      chart: '6.29.4',
-      repo: 'grafana/grafana',
-      tag: '8.5.3',
+      image: 'grafana/grafana:8.5.3',
     },
     loki: {
       chart: '2.6.4',
