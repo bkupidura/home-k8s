@@ -87,6 +87,9 @@
                         + c.resources.withRequests({ memory: '256Mi', cpu: '500m' })
                         + c.resources.withLimits({ memory: '512Mi', cpu: 1 })
                         + c.securityContext.withPrivileged(true)
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
+                        ])
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
@@ -97,9 +100,9 @@
                         + c.livenessProbe.withTimeoutSeconds(1),
                       ],
                       { 'app.kubernetes.io/name': 'frigate' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('frigate-config', '/config/config.yml', $.k.core.v1.volumeMount.withSubPath('config.yml'))
                 + d.pvcVolumeMount('frigate', '/media', false, {})
-                + d.hostVolumeMount('dev-dri-renderd128', '/dev/dri/renderD128', '/dev/dri/renderD128', false, {})
                 + d.emptyVolumeMount('cache', '/dev/shm', {}, v1.volume.emptyDir.withSizeLimit('500Mi'))
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ video_processing: 'true' })
