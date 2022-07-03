@@ -69,6 +69,9 @@
                         + c.resources.withRequests({ memory: '8Mi' })
                         + c.resources.withLimits({ memory: '16Mi' })
                         + c.securityContext.withPrivileged(true)
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('dev-usb-hiddev0', '/dev/usb/hiddev0', false),
+                        ])
                         + c.readinessProbe.tcpSocket.withPort('nut')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
@@ -84,8 +87,8 @@
                         ]),
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-usb-hiddev0', '/dev/usb/hiddev0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
-                + d.hostVolumeMount('dev-usb-hiddev0', '/dev/usb/hiddev0', '/dev/usb/hiddev0', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ ups_controller: 'true' })
                 + d.metadata.withNamespace('home-infra')

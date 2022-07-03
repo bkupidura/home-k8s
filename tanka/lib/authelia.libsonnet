@@ -4,6 +4,31 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  prometheus+: {
+    rules+:: [
+      {
+        name: 'authelia',
+        rules: [
+          {
+            alert: 'AutheliaAuthFailureFirst',
+            expr: 'round(delta(authelia_authentication_first_factor{success="false"}[10m])) > 2',
+            labels: { service: 'authelia', severity: 'info' },
+            annotations: {
+              summary: 'Auth failues for first auth factor on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'AutheliaAuthFailureSecond',
+            expr: 'round(delta(authelia_authentication_second_factor{success="false"}[10m])) > 2',
+            labels: { service: 'authelia', severity: 'info' },
+            annotations: {
+              summary: 'Auth failues for second auth factor on {{ $labels.pod }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   authelia: {
     oidc_clients:: [
       {
@@ -89,6 +114,9 @@
                     subject: '[Authelia] {title}',
                   },
                 },
+                telemetry: {
+                  metrics: { enabled: true },
+                },
                 storage: {
                   'local': {
                     path: '/data/db.sqlite',
@@ -125,7 +153,10 @@
                       [
                         c.new('authelia', $._version.authelia.image)
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.withPorts(v1.containerPort.newNamed(9091, 'http'))
+                        + c.withPorts([
+                          v1.containerPort.newNamed(9091, 'http'),
+                          v1.containerPort.newNamed(9959, 'metrics'),
+                        ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
@@ -142,6 +173,10 @@
                 + d.pvcVolumeMount('authelia', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(3),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
+                + d.spec.template.metadata.withAnnotations({
+                  'prometheus.io/scrape': 'true',
+                  'prometheus.io/port': '9959',
+                }),
   },
 }

@@ -39,11 +39,13 @@
                                            std.format('/usr/bin/GCFFlasher_internal -f %s -d /dev/ttyACM0', $._version.zigbee2mqtt.firmware),
                                          ]),
                                        ])
-                                       + c.withVolumeMounts(v1.volumeMount.new('adapter', '/dev/ttyACM0', false))
+                                       + c.withVolumeMounts(v1.volumeMount.new('dev-ttyacm0', '/dev/ttyACM0', false))
                                        + c.securityContext.withPrivileged(true),
                                      ])
+                                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                                       $.k.core.v1.volume.fromHostPath('dev-ttyacm0', '/dev/ttyACM0') + v1.volume.hostPath.withType('CharDevice'),
+                                     ])
                                      + $.k.batch.v1.cronJob.spec.withSuspend(true)
-                                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes(v1.volume.fromHostPath('adapter', '/dev/ttyACM0'))
                                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
                                        v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
                                        + v1.podAffinityTerm.labelSelector.withMatchExpressions(
@@ -69,6 +71,9 @@
                         + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
                         + c.securityContext.withPrivileged(true)
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('dev-ttyacm0', '/dev/ttyACM0', false),
+                        ])
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
@@ -79,8 +84,8 @@
                         + c.livenessProbe.withTimeoutSeconds(1),
                       ],
                       { 'app.kubernetes.io/name': 'zigbee2mqtt' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyacm0', '/dev/ttyACM0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.pvcVolumeMount('zigbee2mqtt', '/data', false, {})
-                + d.hostVolumeMount('dev-ttyacm0', '/dev/ttyACM0', '/dev/ttyACM0', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ zigbee_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')

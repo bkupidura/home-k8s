@@ -101,6 +101,9 @@
                         + c.resources.withRequests({ memory: '128Mi' })
                         + c.resources.withLimits({ memory: '256Mi' })
                         + c.securityContext.withPrivileged(true)
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
+                        ])
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
@@ -108,10 +111,10 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'recorder' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('recorder-config', '/config/', {})
                 + d.secretVolumeMount('recorder-secret', '/secret/', 256, {})
                 + d.pvcVolumeMount('recorder', '/data', false, {})
-                + d.hostVolumeMount('dev-dri-renderd128', '/dev/dri/renderD128', '/dev/dri/renderD128', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ video_processing: 'true' })
                 + d.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(

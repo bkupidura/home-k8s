@@ -23,6 +23,9 @@
                         + c.resources.withRequests({ memory: '16Mi' })
                         + c.resources.withLimits({ memory: '32Mi' })
                         + c.securityContext.withPrivileged(true)
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('dev-ttyusb0', '/dev/mobile', false),
+                        ])
                         + c.livenessProbe.httpGet.withPath('/signal')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
@@ -30,8 +33,8 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'sms-gammu' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyusb0', '/dev/ttyUSB0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.secretVolumeMount('sms-gammu-secret', '/sms-gw/credentials.txt', 256, $.k.core.v1.volumeMount.withSubPath('credentials.txt'))
-                + d.hostVolumeMount('dev-ttyusb0', '/dev/ttyUSB0', '/dev/mobile', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ modem_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')

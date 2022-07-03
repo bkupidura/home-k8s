@@ -27,8 +27,8 @@
                          CHRONY_SYNC_RTC: 'true',
                        })
                        + c.withVolumeMounts([
-                         v1.volumeMount.new('tz-config', '/etc/localtime', true),
-                         v1.volumeMount.new('tzdata-config', '/etc/timezone', true),
+                         v1.volumeMount.new('etc-localtime', '/etc/localtime', true),
+                         v1.volumeMount.new('etc-timezone', '/etc/timezone', true),
                        ])
                        + c.resources.withRequests({ memory: '8Mi' })
                        + c.resources.withLimits({ memory: '16Mi' })
@@ -45,8 +45,8 @@
                + d.metadata.withNamespace('home-infra')
                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                + d.spec.template.spec.withVolumes([
-                 v1.volume.fromHostPath('tz-config', '/etc/localtime'),
-                 v1.volume.fromHostPath('tzdata-config', '/etc/timezone'),
+                 v1.volume.fromHostPath('etc-localtime', '/etc/localtime') + v1.volume.hostPath.withType('File'),
+                 v1.volume.fromHostPath('etc-timezone', '/etc/timezone') + v1.volume.hostPath.withType('File'),
                ]),
   },
 }
