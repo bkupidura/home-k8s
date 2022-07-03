@@ -48,7 +48,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'waf' })
-             + s.spec.withLoadBalancerIP($._config.vip.waf)
+             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.waf })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

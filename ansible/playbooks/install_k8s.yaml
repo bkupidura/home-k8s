@@ -47,7 +47,7 @@
 
       - name: Prepare K3s exec env
         set_fact:
-          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address {{ primary_ip }} --advertise-address {{ primary_ip }} --cluster-init"
+          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address 0.0.0.0 --advertise-address {{ primary_ip }} --cluster-init"
 
       - name: Add labels to exec env
         set_fact:
@@ -112,7 +112,7 @@
 
       - name: Prepare K3s exec env
         set_fact:
-          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address {{ primary_ip }} --advertise-address {{ primary_ip }} --server https://{{ primary_node_ip }}:6443"
+          k3s_exec: "server {{ k3s.args | join(' ') }} --node-ip {{ primary_ip }} --bind-address 0.0.0.0 --advertise-address {{ primary_ip }} --server https://{{ primary_node_ip }}:6443"
 
       - name: Add labels to exec env
         set_fact:

@@ -94,10 +94,10 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'grafana' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
                 + d.pvcVolumeMount('grafana', '/var/lib/grafana', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
-                + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
   },
 }
