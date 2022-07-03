@@ -97,7 +97,7 @@
              )
              + s.metadata.withNamespace('smart-home')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mqtt' })
-             + s.spec.withLoadBalancerIP($._config.vip.mqtt)
+             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.mqtt })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

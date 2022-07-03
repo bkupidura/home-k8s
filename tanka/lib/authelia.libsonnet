@@ -61,7 +61,7 @@
                   },
                 },
                 authentication_backend: {
-                  disable_reset_password: true,
+                  password_reset: { disable: true },
                   file: {
                     path: '/config/users.yml',
                     password: {
@@ -140,7 +140,7 @@
                       { 'app.kubernetes.io/name': 'authelia' })
                 + d.configVolumeMount('authelia-config', '/config', {})
                 + d.pvcVolumeMount('authelia', '/data', false, {})
-                + d.spec.strategy.withType('RollingUpdate')
+                + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3),
   },

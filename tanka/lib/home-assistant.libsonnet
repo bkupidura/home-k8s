@@ -62,8 +62,10 @@
                     )
                     + s.metadata.withNamespace('smart-home')
                     + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
-                    + s.metadata.withAnnotations({ 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant })
-                    + s.spec.withLoadBalancerIP($._config.vip.home_assistant)
+                    + s.metadata.withAnnotations({
+                      'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant,
+                      'metallb.universe.tf/loadBalancerIPs': $._config.vip.home_assistant,
+                    })
                     + s.spec.withType('LoadBalancer')
                     + s.spec.withExternalTrafficPolicy('Local')
                     + s.spec.withPublishNotReadyAddresses(false),
@@ -76,8 +78,10 @@
                     )
                     + s.metadata.withNamespace('smart-home')
                     + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
-                    + s.metadata.withAnnotations({ 'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant })
-                    + s.spec.withLoadBalancerIP($._config.vip.home_assistant)
+                    + s.metadata.withAnnotations({
+                      'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant,
+                      'metallb.universe.tf/loadBalancerIPs': $._config.vip.home_assistant,
+                    })
                     + s.spec.withType('LoadBalancer')
                     + s.spec.withExternalTrafficPolicy('Local')
                     + s.spec.withPublishNotReadyAddresses(false),
