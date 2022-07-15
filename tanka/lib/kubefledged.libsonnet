@@ -30,6 +30,8 @@
               std.format('%s:%s', [$._version.metallb.controller.repo, $._version.metallb.controller.tag]),
               std.format('%s:%s', [$._version.metallb.speaker.repo, $._version.metallb.speaker.tag]),
               std.format('%s:%s', [$._version.traefik.repo, $._version.traefik.tag]),
+              $._version.mariadb.image,
+              $._version.mariadb.metrics,
               $._version.coredns.image,
               $._version.blocky.image,
               $._version.authelia.image,
