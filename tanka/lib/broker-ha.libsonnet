@@ -46,12 +46,9 @@
           },
           {
             alert: 'BrokerPublishDroppedHigh',
-            expr: 'broker_publish_dropped > 0',
+            expr: 'delta(broker_publish_dropped[5m]) > 0',
             'for': '5m',
-            labels: {
-              service: 'broker-ha',
-              severity: 'warning',
-            },
+            labels: { service: 'broker-ha', severity: 'warning' },
             annotations: {
               summary: 'Broker-ha {{ $labels.pod }} starts dropping publish messages',
             },
@@ -142,9 +139,10 @@
                       { 'app.kubernetes.io/name': 'broker-ha' })
                 + d.configVolumeMount('broker-ha-config', '/config/', {})
                 + d.spec.strategy.withType('RollingUpdate')
-                + d.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                  v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                  + v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
+                  v1.weightedPodAffinityTerm.withWeight(1)
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                  + v1.weightedPodAffinityTerm.podAffinityTerm.labelSelector.withMatchExpressions(
                     { key: 'app.kubernetes.io/name', operator: 'In', values: ['broker-ha'] }
                   )
                 )
