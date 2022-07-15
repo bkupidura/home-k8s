@@ -66,10 +66,8 @@
       chart: '5.7.0',
     },
     mariadb: {
-      chart: '11.0.14',
-      registry: 'docker.io',
-      repo: 'bitnami/mariadb',
-      tag: '10.8.3-debian-11-r3',
+      image: 'mariadb:10.7.4',
+      metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
       image: 'ghcr.io/bkupidura/broker-ha:0.0.9',
