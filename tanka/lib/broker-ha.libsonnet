@@ -84,7 +84,7 @@
                           + v1.servicePort.withProtocol('TCP'),
                         ]
                       )
-                      + s.metadata.withNamespace('smart-home')
+                      + s.metadata.withNamespace('home-infra')
                       + s.metadata.withLabels({ 'app.kubernetes.io/name': 'broker-ha' })
                       + s.spec.withClusterIP('None'),
     service: s.new(
@@ -92,7 +92,7 @@
                { 'app.kubernetes.io/name': 'broker-ha' },
                [v1.servicePort.withPort(1883) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('mqtt')]
              )
-             + s.metadata.withNamespace('smart-home')
+             + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mqtt' })
              + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.mqtt })
              + s.spec.withType('LoadBalancer')
@@ -101,7 +101,7 @@
     config: v1.configMap.new('broker-ha-config', {
               'config.yaml': std.manifestYamlDoc({
                 discovery: {
-                  domain: 'broker-headless.smart-home.svc.cluster.local',
+                  domain: 'broker-headless.home-infra.svc.cluster.local',
                 },
                 mqtt: {
                   port: 1883,
@@ -115,7 +115,7 @@
                 },
               }),
             })
-            + v1.configMap.metadata.withNamespace('smart-home'),
+            + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('broker-ha',
                       3,
                       [
@@ -146,7 +146,7 @@
                     { key: 'app.kubernetes.io/name', operator: 'In', values: ['broker-ha'] }
                   )
                 )
-                + d.metadata.withNamespace('smart-home')
+                + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(60)
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',

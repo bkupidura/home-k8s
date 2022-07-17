@@ -336,32 +336,32 @@
       for extra_scrape in std.objectFields($.prometheus.extra_scrape)
     ],
     pvc_prometheus: p.new('prometheus-server')
-                    + p.metadata.withNamespace('home-infra')
+                    + p.metadata.withNamespace('monitoring')
                     + p.spec.withAccessModes(['ReadWriteOnce'])
                     + p.spec.withStorageClassName('longhorn-standard')
                     + p.spec.resources.withRequests({ storage: '10Gi' }),
     pvc_alertmanager: p.new('alertmanager')
-                      + p.metadata.withNamespace('home-infra')
+                      + p.metadata.withNamespace('monitoring')
                       + p.spec.withAccessModes(['ReadWriteOnce'])
                       + p.spec.withStorageClassName('longhorn-standard')
                       + p.spec.resources.withRequests({ storage: '1Gi' }),
-    ingress_route_prometheus: $._custom.ingress_route.new('prometheus', 'home-infra', ['websecure'], [
+    ingress_route_prometheus: $._custom.ingress_route.new('prometheus', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`prometheus.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'prometheus-server', port: 80, namespace: 'home-infra' }],
+        services: [{ name: 'prometheus-server', port: 80, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
-    ingress_route_alertmanager: $._custom.ingress_route.new('alertmanager', 'home-infra', ['websecure'], [
+    ingress_route_alertmanager: $._custom.ingress_route.new('alertmanager', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`alertmanager.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'prometheus-alertmanager', port: 80, namespace: 'home-infra' }],
+        services: [{ name: 'prometheus-alertmanager', port: 80, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
-    helm: $._custom.helm.new('prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'home-infra', {
+    helm: $._custom.helm.new('prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'monitoring', {
       configmapReload: {
         alertmanager: {
           resources: {

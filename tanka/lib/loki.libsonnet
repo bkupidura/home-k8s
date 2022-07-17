@@ -3,11 +3,11 @@
   local p = v1.persistentVolumeClaim,
   loki: {
     pvc: p.new('loki')
-         + p.metadata.withNamespace('home-infra')
+         + p.metadata.withNamespace('monitoring')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName('longhorn-standard')
          + p.spec.resources.withRequests({ storage: '20Gi' }),
-    helm: $._custom.helm.new('loki-stack', 'https://grafana.github.io/helm-charts', $._version.loki.chart, 'home-infra', {
+    helm: $._custom.helm.new('loki-stack', 'https://grafana.github.io/helm-charts', $._version.loki.chart, 'monitoring', {
       loki: {
         enabled: true,
         persistence: { enabled: true, existingClaim: 'loki' },
