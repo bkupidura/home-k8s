@@ -4,7 +4,7 @@
       image: 'coredns/coredns:1.9.3',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:02072022',
+      image: 'ghcr.io/bkupidura/chrony:16072022',
     },
     ubuntu: {
       image: 'ubuntu:focal-20220531',
@@ -46,16 +46,16 @@
     traefik: {
       chart: '10.24.0',
       repo: 'traefik',
-      tag: 'v2.8.0',
+      tag: 'v2.8.1',
     },
     blocky: {
       image: 'spx01/blocky:v0.19',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:02072022',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:16072022',
     },
     authelia: {
-      image: 'authelia/authelia:4.36.1',
+      image: 'authelia/authelia:4.36.2',
     },
     cert_manager: {
       chart: 'v1.8.2',
@@ -81,7 +81,7 @@
       image: 'esphome/esphome:2022.6.2',
     },
     grafana: {
-      image: 'grafana/grafana:9.0.2',
+      image: 'grafana/grafana:9.0.3',
     },
     loki: {
       chart: '2.6.4',
@@ -90,10 +90,10 @@
       image: 'blakeblackshear/frigate:0.10.1-amd64',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2022.6.7',
+      image: 'homeassistant/home-assistant:2022.7.5',
     },
     node_red: {
-      image: 'nodered/node-red:2.2.2-12',
+      image: 'nodered/node-red:3.0.0-16',
     },
     recorder: {
       image: 'ghcr.io/bkupidura/recorder:0.0.4.6',
@@ -105,7 +105,7 @@
       image: 'jacobalberty/unifi:v7.1.66',
     },
     prometheus: {
-      chart: '15.10.2',
+      chart: '15.10.4',
     },
   },
 }
