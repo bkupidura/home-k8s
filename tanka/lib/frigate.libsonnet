@@ -32,7 +32,7 @@
     config: v1.configMap.new('frigate-config', {
               'config.yml': std.manifestYamlDoc({
                 mqtt: {
-                  host: 'mqtt.smart-home',
+                  host: 'mqtt.home-infra',
                   port: 1883,
                   topic_prefix: 'frigate',
                   client_id: 'frigate',

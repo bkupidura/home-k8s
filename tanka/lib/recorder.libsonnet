@@ -67,7 +67,7 @@
               'config.yml': std.manifestYamlDoc({
                 mqtt: {
                   topic: 'recorder',
-                  server: 'mqtt.smart-home:1883',
+                  server: 'mqtt.home-infra:1883',
                   user: 'recorder',
                   password: std.extVar('secrets').broker_ha.user.recorder,
                 },

@@ -6,7 +6,7 @@
   local d = $.k.apps.v1.deployment,
   grafana: {
     pvc: p.new('grafana')
-         + p.metadata.withNamespace('home-infra')
+         + p.metadata.withNamespace('monitoring')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName('longhorn-standard')
          + p.spec.resources.withRequests({ storage: '1Gi' }),
@@ -15,21 +15,21 @@
                { 'app.kubernetes.io/name': 'grafana' },
                [v1.servicePort.withPort(3000) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')]
              )
-             + s.metadata.withNamespace('home-infra')
+             + s.metadata.withNamespace('monitoring')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'grafana' }),
-    ingress_route: $._custom.ingress_route.new('grafana', 'home-infra', ['websecure'], [
+    ingress_route: $._custom.ingress_route.new('grafana', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`grafana.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'grafana', port: 3000, namespace: 'home-infra' }],
+        services: [{ name: 'grafana', port: 3000, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('grafana', 'home-infra', '30 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('grafana', 'monitoring', '30 04 * * *', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default)]
     )], 'grafana'),
-    cronjob_restore: $._custom.cronjob_restore.new('grafana', 'home-infra', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default)]
     )], 'grafana'),
@@ -56,11 +56,11 @@
               'datasources.yaml': std.manifestYamlDoc({
                 apiVersion: 1,
                 datasources: [
-                  { name: 'Prometheus', type: 'prometheus', url: 'http://prometheus-server.home-infra', access: 'proxy', isDefault: true },
+                  { name: 'Prometheus', type: 'prometheus', url: 'http://prometheus-server.monitoring', access: 'proxy', isDefault: true },
                 ],
               }),
             })
-            + v1.configMap.metadata.withNamespace('home-infra'),
+            + v1.configMap.metadata.withNamespace('monitoring'),
     deployment: d.new('grafana',
                       if $._config.restore then 0 else 1,
                       [
@@ -96,8 +96,18 @@
                       { 'app.kubernetes.io/name': 'grafana' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
                 + d.pvcVolumeMount('grafana', '/var/lib/grafana', false, {})
+                + d.spec.template.spec.withInitContainers(
+                  c.new('chown-data', $._version.ubuntu.image)
+                  + c.withImagePullPolicy('IfNotPresent')
+                  + c.withCommand(['chown', '-R', '472:472', '/var/lib/grafana'])
+                  + c.withVolumeMounts([
+                    v1.volumeMount.new('grafana', '/var/lib/grafana', false),
+                  ])
+                  + c.securityContext.withRunAsNonRoot(false)
+                  + c.securityContext.withRunAsUser(0)
+                )
                 + d.spec.strategy.withType('Recreate')
-                + d.metadata.withNamespace('home-infra')
+                + d.metadata.withNamespace('monitoring')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
   },
 }
