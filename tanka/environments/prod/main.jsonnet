@@ -51,22 +51,16 @@
       pool: '0.pl.pool.ntp.org',
     },
     metallb: {
-      config: {
-        'address-pools': [
-          {
-            addresses: ['10.0.10.0/24'],
-            name: 'default',
-            protocol: 'bgp',
-          },
-        ],
-        peers: [
-          {
-            'my-asn': 64500,
-            'peer-address': '10.0.120.1',
-            'peer-asn': 64501,
-          },
-        ],
-      },
+      pool: [
+        '10.0.10.0/24',
+      ],
+      peers: [
+        {
+          my_asn: 64500,
+          address: '10.0.120.1',
+          asn: 64501,
+        },
+      ],
     },
     blocky: {
       conditional: {
