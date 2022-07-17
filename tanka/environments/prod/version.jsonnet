@@ -19,14 +19,14 @@
       chart: '6.1.47',
     },
     metallb: {
-      chart: '0.12.1',
+      chart: '0.13.3',
       controller: {
-        repo: 'metallb/controller',
-        tag: 'v0.12.1',
+        repo: 'quay.io/metallb/controller',
+        tag: 'v0.13.3',
       },
       speaker: {
-        repo: 'metallb/speaker',
-        tag: 'v0.12.1',
+        repo: 'quay.io/metallb/speaker',
+        tag: 'v0.13.3',
       },
     },
     nut: {
