@@ -30,6 +30,15 @@
               summary: 'Node {{ $labels.node }} is unhealthy ({{ $labels.condition }})',
             },
           },
+          {
+            alert: 'LonghornMultipleInstanceManagerVersion',
+            expr: 'count (count by (image) (kube_pod_container_info{pod=~"instance-manager.*"})) > 1',
+            'for': '30m',
+            labels: { service: 'longhorn', severity: 'info' },
+            annotations: {
+              summary: 'There is multiple versions of instance-manager running',
+            },
+          },
         ],
       },
     ],
@@ -42,6 +51,7 @@
         nodeDownPodDeletionPolicy: 'delete-both-statefulset-and-deployment-pod',
         replicaAutoBalance: 'best-effort',
         concurrentAutomaticEngineUpgradePerNodeLimit: 1,
+        orphanAutoDeletion: true,
       },
       annotations: {
         'prometheus.io/scrape': 'true',
