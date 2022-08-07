@@ -76,43 +76,71 @@
     service: s.new('mariadb', { 'app.kubernetes.io/name': 'mariadb' }, [v1.servicePort.withPort(3306) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('mysql')])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mariadb' }),
-    cronjob_backup: $._custom.cronjob_backup.new('mariadb',
-                                                 'home-infra',
-                                                 '40 03 * * *',
-                                                 [
-                                                   '/bin/sh',
-                                                   '-ec',
-                                                   std.join('\n',
-                                                            [
-                                                              'apk add mysql-client',
-                                                              'mkdir /dump',
-                                                              'cd /dump',
-                                                              std.format('mysqldump --all-databases --host=mariadb.home-infra --user=root --password="%s" --result-file=dump-all.sql', std.extVar('secrets').mariadb.password),
-                                                              std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default),
-                                                            ]),
-                                                 ],
-                                                 'mariadb'),
-    cronjob_restore: $._custom.cronjob_restore.new('mariadb',
-                                                   'home-infra',
-                                                   [
-                                                     '/bin/sh',
-                                                     '-ec',
-                                                     std.join('\n',
-                                                              [
-                                                                'apk add mysql-client',
-                                                                'mkdir /dump',
-                                                                'cd /dump',
-                                                                std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default),
-                                                                std.format('mysql --host=mariadb.home-infra --user=root --password="%s" < dump-all.sql', std.extVar('secrets').mariadb.password),
-                                                              ]),
-                                                   ],
-                                                   'mariadb')
-                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                       $.k.core.v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                       + $.k.core.v1.podAffinityTerm.labelSelector.withMatchExpressions(
-                         { key: 'app.kubernetes.io/name', operator: 'In', values: ['mariadb'] }
-                       )
-                     ),
+    cronjob_backup: $._custom.cronjob.new('mariadb-backup',
+                                          'home-infra',
+                                          '40 03 * * *',
+                                          [
+                                            c.new('backup', $._version.mariadb.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
+                                              v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                                            ])
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets'))
+                                            + c.withCommand([
+                                              '/bin/sh',
+                                              '-ec',
+                                              std.join('\n', [
+                                                'apt update',
+                                                'apt install -y restic',
+                                                'mkdir /dump',
+                                                'cd /dump',
+                                                std.format('mariabackup --backup --target-dir=/dump --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default),
+                                              ]),
+                                            ]),
+                                          ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('mariadb')
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                      v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
+                      v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                    ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
+                      v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                      + v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                        { key: 'app.kubernetes.io/name', operator: 'In', values: ['mariadb'] }
+                      )
+                    ),
+    cronjob_restore: $._custom.cronjob.new('mariadb-restore',
+                                           'home-infra',
+                                           '0 0 * * *',
+                                           [
+                                             c.new('restore', $._version.mariadb.image)
+                                             + c.withVolumeMounts([
+                                               v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
+                                               v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                                             ])
+                                             + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets'))
+                                             + c.withCommand([
+                                               '/bin/sh',
+                                               '-ec',
+                                               std.join('\n', [
+                                                 'apt update',
+                                                 'apt install -y restic',
+                                                 'mkdir /dump',
+                                                 'cd /dump',
+                                                 std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default),
+                                                 'mariabackup --prepare --target-dir=/dump',
+                                                 'mariabackup --copy-back --target-dir=/dump',
+                                                 'chown -R mysql:mysql /var/lib/mysql/data',
+                                               ]),
+                                             ]),
+                                           ])
+                     + $.k.batch.v1.cronJob.spec.withSuspend(true)
+                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('mariadb')
+                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                       v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
+                       v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                     ]),
     init: v1.configMap.new('mariadb-init', {
             'init.sql': std.strReplace(|||
               CREATE DATABASE homeassistant CHARACTER SET utf8mb4;
@@ -132,10 +160,31 @@
                 datadir=/var/lib/mysql/data
                 character-set-server=UTF8
                 collation-server=utf8_general_ci
+
                 max_allowed_packet=1M
                 key_buffer_size=10M
                 max_connections=64
+                myisam_recover_options = FORCE
+                myisam_sort_buffer_size = 8M
+                net_buffer_length = 16K
+                read_buffer_size = 256K
+                read_rnd_buffer_size = 512K
+                sort_buffer_size = 512K
+                join_buffer_size = 128K
+                table_open_cache = 64
+                thread_cache_size = 8
+                thread_stack = 192K
+                tmp_table_size = 16M
+
+                query_cache_limit = 1M
+                query_cache_size = 0M
+                query_cache_type = 0
+
                 innodb_buffer_pool_size=128M
+                innodb_log_buffer_size = 8M
+                innodb_log_file_size = 48M
+                max_binlog_size = 96M
+
                 [client]
                 port=3306
                 default-character-set=UTF8
@@ -147,7 +196,7 @@
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('mariadb',
-                      1,
+                      if $._config.restore then 0 else 1,
                       [
                         c.new('mariadb', $._version.mariadb.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -162,8 +211,8 @@
                           v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                           v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                         ])
-                        + c.resources.withRequests({ cpu: '200m', memory: '386Mi' })
-                        + c.resources.withLimits({ cpu: '200m', memory: '386Mi' })
+                        + c.resources.withRequests({ cpu: '300m', memory: '512Mi' })
+                        + c.resources.withLimits({ cpu: '300m', memory: '512Mi' })
                         + c.readinessProbe.exec.withCommand([
                           '/bin/bash',
                           '-ec',
