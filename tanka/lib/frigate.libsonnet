@@ -54,7 +54,7 @@
                 objects: {
                   track: ['person', 'cat'],
                   filters: {
-                    person: { min_score: 0.7, threshold: 0.7 },
+                    person: { min_score: 0.7, threshold: 0.75 },
                     cat: { min_score: 0.6, threshold: 0.7 },
                   },
                 },
