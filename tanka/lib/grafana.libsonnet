@@ -8,7 +8,7 @@
     pvc: p.new('grafana')
          + p.metadata.withNamespace('monitoring')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName('longhorn-standard')
+         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '1Gi' }),
     service: s.new(
                'grafana',

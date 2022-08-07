@@ -338,12 +338,12 @@
     pvc_prometheus: p.new('prometheus-server')
                     + p.metadata.withNamespace('monitoring')
                     + p.spec.withAccessModes(['ReadWriteOnce'])
-                    + p.spec.withStorageClassName('longhorn-standard')
+                    + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
                     + p.spec.resources.withRequests({ storage: '10Gi' }),
     pvc_alertmanager: p.new('alertmanager')
                       + p.metadata.withNamespace('monitoring')
                       + p.spec.withAccessModes(['ReadWriteOnce'])
-                      + p.spec.withStorageClassName('longhorn-standard')
+                      + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
                       + p.spec.resources.withRequests({ storage: '1Gi' }),
     ingress_route_prometheus: $._custom.ingress_route.new('prometheus', 'monitoring', ['websecure'], [
       {

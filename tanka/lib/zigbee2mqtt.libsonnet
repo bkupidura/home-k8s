@@ -8,7 +8,7 @@
     pvc: p.new('zigbee2mqtt')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName('longhorn-standard')
+         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '1Gi' }),
     ingress_route: $._custom.ingress_route.new('zigbee2mqtt', 'smart-home', ['websecure'], [
       {
