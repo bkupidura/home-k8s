@@ -134,6 +134,8 @@
             'SecRuleRemoveById 942210',
             'SecRuleRemoveById 942450',
             'SecRuleRemoveById 942460',
+            'SecRuleRemoveById 941120',
+            'SecRuleRemoveById 941100',
           ],
         },
         auth: {
