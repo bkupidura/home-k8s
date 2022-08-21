@@ -33,7 +33,7 @@
           {
             alert: 'LonghornMultipleInstanceManagerVersion',
             expr: 'count (count by (image) (kube_pod_container_info{pod=~"instance-manager.*"})) > 1',
-            'for': '30m',
+            'for': '1h',
             labels: { service: 'longhorn', severity: 'info' },
             annotations: {
               summary: 'There is multiple versions of instance-manager running',

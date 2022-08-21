@@ -55,8 +55,8 @@
           },
           {
             alert: 'BrokerInFlightHigh',
-            expr: 'broker_inflight_messages > 0',
-            'for': '5m',
+            expr: 'delta(broker_inflight_messages[5m]) > 0',
+            'for': '15m',
             labels: { service: 'broker-ha', severity: 'warning' },
             annotations: {
               summary: 'Broker-ha {{ $labels.pod }} starts reporting in-flight messages',
