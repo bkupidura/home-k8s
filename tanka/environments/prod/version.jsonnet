@@ -33,7 +33,7 @@
       image: 'ghcr.io/k8s-at-home/network-ups-tools:v2.7.4-2486-gaa0b3d1d',
     },
     longhorn: {
-      chart: '1.3.0',
+      chart: '1.3.1',
     },
     ceph: {
       chart: 'v1.9.3',
@@ -70,7 +70,7 @@
       metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.0.9',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1',
     },
     zigbee2mqtt: {
       deconz: 'marthoc/deconz:2.12.03',
@@ -90,7 +90,7 @@
       image: 'blakeblackshear/frigate:0.10.1-amd64',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2022.7.7',
+      image: 'homeassistant/home-assistant:2022.8.3',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-16',
