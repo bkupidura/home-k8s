@@ -443,8 +443,8 @@
       server: {
         enabled: true,
         resources: {
-          requests: { memory: '2Gi' },
-          limits: { memory: '2Gi' },
+          requests: { memory: '2560Mi' },
+          limits: { memory: '2560Mi' },
         },
         global: { external_labels: { cluster: 'k3s' } },
         baseURL: std.format('https://prometheus.%s', std.extVar('secrets').domain),
