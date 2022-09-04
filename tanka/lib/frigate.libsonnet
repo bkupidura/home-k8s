@@ -37,7 +37,7 @@
                   topic_prefix: 'frigate',
                   client_id: 'frigate',
                   user: 'frigate',
-                  password: std.extVar('secrets').broker_ha.user.frigate,
+                  password: std.extVar('secrets').broker_ha.mqtt.user.frigate,
                   stats_interval: 60,
                 },
                 ffmpeg: {

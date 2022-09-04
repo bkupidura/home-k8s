@@ -27,24 +27,6 @@
             },
           },
           {
-            alert: 'BrokerFromClusterQueueHigh',
-            expr: 'broker_cluster_mqtt_publish_from_cluster > 0',
-            'for': '5m',
-            labels: { service: 'broker-ha', severity: 'warning' },
-            annotations: {
-              summary: 'Broker-ha {{ $labels.pod }} is unable to process messages from cluster',
-            },
-          },
-          {
-            alert: 'BrokerToClusterQueueHigh',
-            expr: 'broker_cluster_mqtt_publish_to_cluster > 0',
-            'for': '5m',
-            labels: { service: 'broker-ha', severity: 'warning' },
-            annotations: {
-              summary: 'Broker-ha {{ $labels.pod }} is unable to process messages to cluster',
-            },
-          },
-          {
             alert: 'BrokerPublishDroppedHigh',
             expr: 'delta(broker_publish_dropped[5m]) > 0',
             'for': '5m',
@@ -100,12 +82,15 @@
              + s.spec.withPublishNotReadyAddresses(false),
     config: v1.configMap.new('broker-ha-config', {
               'config.yaml': std.manifestYamlDoc({
+                api: {
+                    user: std.extVar('secrets').broker_ha.api.user,
+                },
                 discovery: {
                   domain: 'broker-headless.home-infra.svc.cluster.local',
                 },
                 mqtt: {
                   port: 1883,
-                  user: std.extVar('secrets').broker_ha.user,
+                  user: std.extVar('secrets').broker_ha.mqtt.user,
                 },
                 cluster: {
                   config: {
@@ -124,8 +109,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '32Mi', cpu: '80m' })
-                        + c.resources.withLimits({ memory: '32Mi', cpu: '80m' })
+                        + c.resources.withRequests({ memory: '48Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '48Mi', cpu: '100m' })
                         + c.readinessProbe.httpGet.withPath('/ready')
                         + c.readinessProbe.httpGet.withPort(8080)
                         + c.readinessProbe.withInitialDelaySeconds(10)
