@@ -83,7 +83,7 @@
     config: v1.configMap.new('broker-ha-config', {
               'config.yaml': std.manifestYamlDoc({
                 api: {
-                    user: std.extVar('secrets').broker_ha.api.user,
+                  user: std.extVar('secrets').broker_ha.api.user,
                 },
                 discovery: {
                   domain: 'broker-headless.home-infra.svc.cluster.local',

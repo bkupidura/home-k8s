@@ -10,7 +10,7 @@
       + $.k.core.v1.container.withCommand([
         '/bin/sh',
         '-ec',
-        std.format("/usr/local/ups/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.quick", std.extVar('secrets').nut.admin),
+        std.format("/usr/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.quick", std.extVar('secrets').nut.admin),
       ]),
     ]),
     cron_job_ups_deep_check: $._custom.cronjob.new('deep-ups-battery-check', 'home-infra', '0 18 16 */6 *', [
@@ -19,7 +19,7 @@
       + $.k.core.v1.container.withCommand([
         '/bin/sh',
         '-ec',
-        std.format("/usr/local/ups/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.deep", std.extVar('secrets').nut.admin),
+        std.format("/usr/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.deep", std.extVar('secrets').nut.admin),
       ]),
     ]),
     config: v1.configMap.new('network-ups-tools-config', {
@@ -83,7 +83,7 @@
                         + c.lifecycle.postStart.exec.withCommand([
                           '/bin/sh',
                           '-ec',
-                          std.join('\n', ['sleep 30', std.format('/usr/local/ups/bin/upscmd -u admin -p "%s" apc@127.0.0.1 beeper.disable', std.extVar('secrets').nut.admin)]),
+                          std.join('\n', ['sleep 30', std.format('/usr/bin/upscmd -u admin -p "%s" apc@127.0.0.1 beeper.disable', std.extVar('secrets').nut.admin)]),
                         ]),
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
