@@ -15,6 +15,9 @@
           requests: { memory: '128Mi' },
           limits: { memory: '156Mi' },
         },
+        podAnnotations: {
+          'prometheus.io/port': '3100',
+        },
       },
       promtail: {
         enabled: true,
