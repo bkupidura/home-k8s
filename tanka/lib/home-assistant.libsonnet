@@ -4,7 +4,7 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
-  prometheus+: {
+  monitoring+: {
     extra_scrape+:: {
       home_assistant: {
         bearer_token: std.extVar('secrets').home_assistant.bearer_token,

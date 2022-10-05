@@ -2,7 +2,8 @@
 (import 'custom-resources.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
-(import 'prometheus.libsonnet') +
+(import 'basic-alerts.libsonnet') +
+(import 'victoriametrics.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'kubefledged.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
@@ -74,7 +75,8 @@
           [std.format('storage.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('traefik.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('alertmanager.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('prometheus.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
+          [std.format('vm-server.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
+          [std.format('vm-alert.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('frigate.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('recorder.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('unifi.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,

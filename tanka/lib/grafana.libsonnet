@@ -53,12 +53,6 @@
                   },
                 },
               }),
-              'datasources.yaml': std.manifestYamlDoc({
-                apiVersion: 1,
-                datasources: [
-                  { name: 'Prometheus', type: 'prometheus', url: 'http://prometheus-server.monitoring', access: 'proxy', isDefault: true },
-                ],
-              }),
             })
             + v1.configMap.metadata.withNamespace('monitoring'),
     deployment: d.new('grafana',
@@ -78,7 +72,6 @@
                         })
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
-                          v1.volumeMount.new('grafana-config', '/etc/grafana/provisioning/datasources/datasources.yaml', false) + v1.volumeMount.withSubPath('datasources.yaml'),
                         ])
                         + c.resources.withRequests({ memory: '32Mi' })
                         + c.resources.withLimits({ memory: '64Mi' })

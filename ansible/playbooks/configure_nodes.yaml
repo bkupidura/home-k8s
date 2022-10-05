@@ -56,7 +56,7 @@
         state: present
         dest: /etc/default/grub
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-        line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance intel_pstate=disable"
+        line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance"
       become: true
       register: grub_config
 

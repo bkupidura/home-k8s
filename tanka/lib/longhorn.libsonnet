@@ -1,6 +1,6 @@
 {
   local s = $.k.storage.v1,
-  prometheus+: {
+  monitoring+: {
     rules+:: [
       {
         name: 'longhorn',

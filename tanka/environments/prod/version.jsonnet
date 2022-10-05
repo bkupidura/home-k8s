@@ -107,5 +107,13 @@
     prometheus: {
       chart: '15.12.0',
     },
+    victoria_metrics: {
+      alert: {
+        chart: '0.5.0',
+      },
+      server: {
+        chart: '0.8.37',
+      },
+    },
   },
 }
