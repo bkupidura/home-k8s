@@ -4,7 +4,7 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
-  prometheus+: {
+  monitoring+: {
     rules+:: [
       {
         name: 'recorder',

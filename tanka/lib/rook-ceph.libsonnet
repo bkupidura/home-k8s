@@ -1,5 +1,5 @@
 {
-  prometheus+: {
+  monitoring+: {
     rules+:: [
       {
         name: 'ceph',
