@@ -43,7 +43,7 @@
                 + p.metadata.withNamespace('monitoring')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
                 + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-                + p.spec.resources.withRequests({ storage: '15Gi' }),
+                + p.spec.resources.withRequests({ storage: '20Gi' }),
     pvc_alertmanager: p.new('alertmanager')
                       + p.metadata.withNamespace('monitoring')
                       + p.spec.withAccessModes(['ReadWriteOnce'])

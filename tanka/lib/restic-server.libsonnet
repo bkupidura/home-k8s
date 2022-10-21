@@ -10,7 +10,7 @@
         rules: [
           {
             alert: 'ResticNoNewBackup',
-            expr: 'delta(rest_server_blob_write_bytes_total{type="snapshots"}[5d]) <= 0',
+            expr: 'rest_server_blob_write_bytes_total{type="snapshots"} - rest_server_blob_write_bytes_total offset 3d <= 0',
             'for': '1d',
             labels: { service: 'restic', severity: 'warning' },
             annotations: {
