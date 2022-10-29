@@ -6,7 +6,10 @@
                              $._version.kubefledged.chart,
                              'kube-fledged',
                              {
-                               args: { controllerImageCacheRefreshFrequency: '60m' },
+                               args: {
+                                 controllerImageCacheRefreshFrequency: '60m',
+                                 controllerCRISocketPath: '/run/k3s/containerd/containerd.sock',
+                               },
                                resources: {
                                  requests: { memory: '16Mi' },
                                  limits: { memory: '32Mi' },

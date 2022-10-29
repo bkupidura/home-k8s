@@ -26,8 +26,6 @@ k3s:
     - "default-unreachable-toleration-seconds=120"
     - "--kube-apiserver-arg"
     - "default-not-ready-toleration-seconds=120"
-    - "--kube-apiserver-arg"
-    - "feature-gates=EphemeralContainers=true"
     - "--kubelet-arg"
     - "image-gc-high-threshold=60"
     - "--kubelet-arg"
