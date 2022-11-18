@@ -31,8 +31,8 @@
     namespace: $.k.core.v1.namespace.new('traefik-system'),
     helm: $._custom.helm.new('traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
       resources: {
-        requests: { cpu: '100m', memory: '96Mi' },
-        limits: { cpu: '100m', memory: '96Mi' },
+        requests: { cpu: '150m', memory: '96Mi' },
+        limits: { cpu: '150m', memory: '96Mi' },
       },
       image: { name: $._version.traefik.repo, tag: $._version.traefik.tag },
       env: [

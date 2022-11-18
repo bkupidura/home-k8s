@@ -157,3 +157,24 @@
         realtime: "{{ watchdog.realtime | default('yes') }}"
         k3s_health: true
       include_tasks: tasks/configure_watchdog.yaml
+
+- name: Add stale PODs cleanup
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  tasks:
+    - name: Create k3s stale PODs cleanup script
+      vars:
+        create:
+          stale-pod:
+            dst: /usr/sbin/k3s-stale-pod.sh
+            src: ../templates/k3s-stale-pod.sh
+            permission: "0755"
+      include_tasks: tasks/custom_files.yaml
+    - name: Add k3s PODs cleanup script
+      cron:
+        name: k3s-stale-pod
+        minute: "*/15"
+        hour: "*"
+        job: "/usr/sbin/k3s-stale-pod.sh"
+      become: true
