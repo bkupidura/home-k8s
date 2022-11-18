@@ -96,14 +96,18 @@
   serial: 1
   tasks:
     - block:
+      - stat:
+          path: "/var/run/reboot-required"
+        register: reboot_required
+      - debug:
+          msg: "reboot required"
+        when: reboot_required.stat.exists
+
+    - block:
       - name: Upgrade
         vars:
           upgrade: true
         include_tasks: tasks/manage_packages.yaml
-
-      - stat:
-          path: "/var/run/reboot-required"
-        register: reboot_required
 
       - name: Reboot
         reboot:
@@ -111,8 +115,7 @@
           reboot_timeout: 600
         when: reboot_required.stat.exists
         become: true
-
       when:
-      - operation is defined
-      - operation == 'upgrade'
+        - operation is defined
+        - operation == 'upgrade'
       any_errors_fatal: true

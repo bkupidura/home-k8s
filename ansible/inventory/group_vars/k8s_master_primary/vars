@@ -15,6 +15,7 @@ package:
     - watchdog
     - cpufrequtils
     - avahi-daemon
+    - jq
     - sshpass
   remove:
     - snapd

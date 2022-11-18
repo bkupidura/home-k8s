@@ -1,3 +1,4 @@
+{%- raw -%}
 #!/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -18,14 +19,13 @@ function k8s_health() {
     fi
 }
 
-RC=$(k8s_health)
-if [ "${RC}" -ne 0 ]; then
-    while [ "${RETRIES}" -gt 0 ]; do
+while [ "${RETRIES}" -gt 0 ]; do
+    RC=$(k8s_health)
+    RETRIES=$((${RETRIES} - 1))
+    if [ "${RC}" -eq 0 ]; then
+        break
+    else
         sleep ${SLEEP}
-        RETRIES=$((${RETRIES} - 1))
-        RC=$(k8s_health)
-        if [ "${RC}" -eq 0 ]; then
-            break
-        fi
-    done
-fi
+    fi
+done
+{% endraw %}
