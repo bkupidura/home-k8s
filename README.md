@@ -20,7 +20,7 @@ pip3 install ansible
 ##### Run ansible
 ```
 ./scripts/run_ansible.sh -r configure_nodes.yaml
-./scripts/run_ansible.sh -r install_k3s.yaml -e operation=deploy
+./scripts/run_ansible.sh -r install_k8s.yaml -e operation=deploy
 ```
 
 ##### Source kube-config

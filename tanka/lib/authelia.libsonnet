@@ -139,7 +139,7 @@
                 },
                 default_redirection_url: std.format('https://auth.%s', std.extVar('secrets').domain),
                 webauthn: {
-                  disable: true,
+                  disable: false,
                 },
                 server: {
                   read_buffer_size: 16384,

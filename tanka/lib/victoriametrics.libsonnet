@@ -44,11 +44,6 @@
                 + p.spec.withAccessModes(['ReadWriteOnce'])
                 + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
                 + p.spec.resources.withRequests({ storage: '35Gi' }),
-    pvc_alertmanager: p.new('alertmanager')
-                      + p.metadata.withNamespace('monitoring')
-                      + p.spec.withAccessModes(['ReadWriteOnce'])
-                      + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-                      + p.spec.resources.withRequests({ storage: '1Gi' }),
     ingress_route_alert: $._custom.ingress_route.new('victoria-metrics-alert', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
@@ -69,7 +64,7 @@
       {
         kind: 'Rule',
         match: std.format('Host(`alertmanager.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'prometheus-alertmanager', port: 80, namespace: 'monitoring' }],
+        services: [{ name: 'prometheus-alertmanager', port: 9093, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
@@ -98,7 +93,7 @@
         },
         notifier: {
           alertmanager: {
-            url: 'http://prometheus-alertmanager.monitoring:80',
+            url: 'http://prometheus-alertmanager.monitoring:9093',
           },
         },
         config: {
@@ -124,8 +119,8 @@
         },
         ingress: { enabled: false },
         resources: {
-          requests: { memory: '1024Mi' },
-          limits: { memory: '1024Mi' },
+          requests: { memory: '1280Mi' },
+          limits: { memory: '1280Mi' },
         },
         scrape: {
           enabled: true,
@@ -519,14 +514,6 @@
       },
     }),
     helm_prometheus: $._custom.helm.new('prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'monitoring', {
-      configmapReload: {
-        alertmanager: {
-          resources: {
-            requests: { memory: '16Mi' },
-            limits: { memory: '32Mi' },
-          },
-        },
-      },
       extraEnv: { TZ: $._config.tz },
       alertmanager: {
         resources: {
@@ -534,13 +521,20 @@
           limits: { memory: '64Mi' },
         },
         baseURL: std.format('https://alertmanager.%s', std.extVar('secrets').domain),
-        podLabels: { 'app.kubernetes.io/name': 'alertmanager' },
-        strategy: { type: 'Recreate' },
         enabled: true,
-        persistentVolume: { existingClaim: 'alertmanager' },
-      },
-      alertmanagerFiles: {
-        'alertmanager.yml': {
+        persistence: {
+          enabled: true,
+          storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
+          size: '100Mi',
+        },
+        configmapReload: {
+          enabled: true,
+          resources: {
+            requests: { memory: '16Mi' },
+            limits: { memory: '32Mi' },
+          },
+        },
+        config: {
           global: {},
           receivers: [
             {
@@ -576,22 +570,25 @@
           ],
         },
       },
-      pushgateway: { enabled: false },
-      kubeStateMetrics: { enabled: true },
+      'prometheus-pushgateway': { enabled: false },
       'kube-state-metrics': {
+        enabled: true,
         resources: {
           requests: { memory: '64Mi' },
           limits: { memory: '96Mi' },
         },
       },
-      nodeExporter: {
+      'prometheus-node-exporter': {
         enabled: true,
         resources: {
           requests: { memory: '32Mi' },
           limits: { memory: '64Mi' },
         },
       },
-      server: { enabled: false },
+      server: {
+        replicaCount: 0,
+        persistentVolume: { enabled: false },
+      },
     }),
   },
 }

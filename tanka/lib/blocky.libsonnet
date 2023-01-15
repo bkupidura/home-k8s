@@ -71,7 +71,7 @@
                         + c.withPorts(v1.containerPort.newNamedUDP(53, 'dns'))
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          CONFIG_FILE: '/config/config.yml',
+                          BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
                         + c.resources.withRequests({ memory: '192Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '192Mi', cpu: '100m' })

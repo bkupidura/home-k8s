@@ -27,15 +27,6 @@
             },
           },
           {
-            alert: 'BrokerPublishDroppedHigh',
-            expr: 'delta(broker_publish_dropped[5m]) > 0',
-            'for': '5m',
-            labels: { service: 'broker-ha', severity: 'warning' },
-            annotations: {
-              summary: 'Broker-ha {{ $labels.pod }} starts dropping publish messages',
-            },
-          },
-          {
             alert: 'BrokerInFlightHigh',
             expr: 'delta(broker_inflight_messages[5m]) > 0',
             'for': '15m',
@@ -80,6 +71,14 @@
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),
+    auth_rendered:: [
+      {
+        username: username,
+        password: std.extVar('secrets').broker_ha.mqtt.users[username].password,
+        allow: std.extVar('secrets').broker_ha.mqtt.users[username].allow,
+      }
+      for username in std.objectFields(std.extVar('secrets').broker_ha.mqtt.users)
+    ],
     config: v1.configMap.new('broker-ha-config', {
               'config.yaml': std.manifestYamlDoc({
                 api: {
@@ -90,7 +89,7 @@
                 },
                 mqtt: {
                   port: 1883,
-                  user: std.extVar('secrets').broker_ha.mqtt.user,
+                  auth: $.broker_ha.auth_rendered,
                 },
                 cluster: {
                   config: {

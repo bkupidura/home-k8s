@@ -90,7 +90,7 @@
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
-                                                'apt update',
+                                                'apt update || true',
                                                 'apt install -y restic',
                                                 'mkdir /dump',
                                                 'cd /dump',
@@ -124,7 +124,7 @@
                                                '/bin/sh',
                                                '-ec',
                                                std.join('\n', [
-                                                 'apt update',
+                                                 'apt update || true',
                                                  'apt install -y restic',
                                                  'mkdir /dump',
                                                  'cd /dump',
