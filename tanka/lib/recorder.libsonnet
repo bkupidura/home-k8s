@@ -69,7 +69,7 @@
                   topic: 'recorder',
                   server: 'mqtt.home-infra:1883',
                   user: 'recorder',
-                  password: std.extVar('secrets').broker_ha.mqtt.user.recorder,
+                  password: std.extVar('secrets').broker_ha.mqtt.users.recorder.password,
                 },
                 ssh: { user: 'recorder', key: '/secret/id_rsa', server: std.extVar('secrets').recorder.server },
                 upload: { workers: 4, timeout: 60, max_errors: 30 },

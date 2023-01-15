@@ -59,7 +59,7 @@
           },
           {
             alert: 'SystemLowDisk',
-            expr: 'min by (device, instance) (node_filesystem_free_bytes{device=~"/dev/[a-z]d[a-z][0-9]*"} / node_filesystem_size_bytes) < 0.3',
+            expr: 'min by (device, instance) (node_filesystem_free_bytes{device=~"/dev/[a-z]d[a-z][0-9]*"} / node_filesystem_size_bytes) < 0.1',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
               summary: 'High disk usage on {{ $labels.node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}',
