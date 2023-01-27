@@ -38,7 +38,7 @@
           },
           {
             alert: 'MysqlSlowQueries',
-            expr: 'increase(mysql_global_status_slow_queries[5m]) > 0',
+            expr: 'increase(mysql_global_status_slow_queries[5m]) > 5',
             'for': '10m',
             labels: { service: 'mysql', severity: 'warning' },
             annotations: {

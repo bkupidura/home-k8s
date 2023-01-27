@@ -86,14 +86,22 @@
                 },
                 discovery: {
                   domain: 'broker-headless.home-infra.svc.cluster.local',
+                  subscription_size: {
+                    "cluster:message_to": 2048,
+                  },
                 },
                 mqtt: {
                   port: 1883,
                   auth: $.broker_ha.auth_rendered,
+                  subscription_size: {
+                    "cluster:message_from": 2048,
+                    "cluster:new_member": 10,
+                  },
                 },
                 cluster: {
                   config: {
                     probe_interval: 500,
+                    push_pull_interval: 20000,
                     secret_key: std.extVar('secrets').broker_ha.cluster.config.secret_key,
                   },
                 },
@@ -112,7 +120,7 @@
                         + c.resources.withLimits({ memory: '48Mi', cpu: '100m' })
                         + c.readinessProbe.httpGet.withPath('/ready')
                         + c.readinessProbe.httpGet.withPort(8080)
-                        + c.readinessProbe.withInitialDelaySeconds(10)
+                        + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(2)
                         + c.readinessProbe.withTimeoutSeconds(1)
                         + c.livenessProbe.httpGet.withPath('/healthz')

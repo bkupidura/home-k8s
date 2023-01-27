@@ -70,7 +70,7 @@
       metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.6b1',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.9',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
