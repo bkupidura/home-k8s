@@ -1,5 +1,5 @@
 {
-  k: import 'github.com/jsonnet-libs/k8s-libsonnet/1.24/main.libsonnet',
+  k: import 'github.com/jsonnet-libs/k8s-libsonnet/1.26/main.libsonnet',
   _custom:: {
     helm: {
       new(name, repo, version, targetNamespace, values): {

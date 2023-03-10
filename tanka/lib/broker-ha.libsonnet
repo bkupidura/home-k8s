@@ -36,6 +36,15 @@
             },
           },
           {
+            alert: 'BrokerMessagesDropped',
+            expr: 'delta(broker_messages_dropped[5m]) > 0',
+            'for': '5m',
+            labels: { service: 'broker-ha', severity: 'warning' },
+            annotations: {
+              summary: 'Broker-ha {{ $labels.pod }} starts dropping pub messages',
+            },
+          },
+          {
             alert: 'BrokerRetainedMessagesMismatch',
             expr: 'broker_retained_messages != scalar(max(broker_retained_messages))',
             'for': '5m',
@@ -87,15 +96,15 @@
                 discovery: {
                   domain: 'broker-headless.home-infra.svc.cluster.local',
                   subscription_size: {
-                    "cluster:message_to": 2048,
+                    'cluster:message_to': 2048,
                   },
                 },
                 mqtt: {
                   port: 1883,
                   auth: $.broker_ha.auth_rendered,
                   subscription_size: {
-                    "cluster:message_from": 2048,
-                    "cluster:new_member": 10,
+                    'cluster:message_from': 2048,
+                    'cluster:new_member': 10,
                   },
                 },
                 cluster: {
@@ -116,8 +125,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '48Mi', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '48Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '64Mi', cpu: '100m' })
                         + c.readinessProbe.httpGet.withPath('/ready')
                         + c.readinessProbe.httpGet.withPort(8080)
                         + c.readinessProbe.withInitialDelaySeconds(30)

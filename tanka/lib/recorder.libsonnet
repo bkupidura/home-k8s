@@ -11,20 +11,29 @@
         rules: [
           {
             alert: 'RecorderWorkersHanging',
-            expr: 'recorder_workers > 0',
+            expr: 'working_pool_task_in_progress > 0',
             'for': '30m',
             labels: { service: 'recorder', severity: 'warning' },
             annotations: {
-              summary: 'Recorder worker {{ $labels.service }} is running for more than 30m',
+              summary: 'Recorder worker {{ $labels.pool }} is running for more than 30m',
+            },
+          },
+          {
+            alert: 'RecorderWorkpoolBacklogHigh',
+            expr: 'working_pool_work_backlog > 0',
+            'for': '10m',
+            labels: { service: 'recorder', severity: 'warning' },
+            annotations: {
+              summary: 'Recorder backlog is rising for {{ $labels.pool }}',
             },
           },
           {
             alert: 'RecorderErrors',
-            expr: 'delta(recorder_errors_total[5m]) > 0',
+            expr: 'delta(working_pool_errors_total[5m]) > 0',
             'for': '1m',
             labels: { service: 'recorder', severity: 'warning' },
             annotations: {
-              summary: 'Recorder errors observed for {{ $labels.service }} in last 5m',
+              summary: 'Recorder errors observed for {{ $labels.pool }} in last 5m',
             },
           },
         ],
@@ -36,13 +45,19 @@
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '30Gi' }),
+         + p.spec.resources.withRequests({ storage: '10Gi' }),
     ingress_route: $._custom.ingress_route.new('recorder', 'smart-home', ['websecure'], [
+      {
+        kind: 'Rule',
+        match: std.format('Host(`recorder.%s`) && (Path(`/`) || PathPrefix(`/recordings`))', std.extVar('secrets').domain),
+        services: [{ name: 'recorder', port: 8080 }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
+      },
       {
         kind: 'Rule',
         match: std.format('Host(`recorder.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'recorder', port: 8080 }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
     cronjob_cleanup: $._custom.cronjob.new('recorder-cleanup', 'smart-home', '15 6,18 * * *', [
@@ -65,15 +80,9 @@
                      ),
     config: v1.configMap.new('recorder-config', {
               'config.yml': std.manifestYamlDoc({
-                mqtt: {
-                  topic: 'recorder',
-                  server: 'mqtt.home-infra:1883',
-                  user: 'recorder',
-                  password: std.extVar('secrets').broker_ha.mqtt.users.recorder.password,
-                },
                 ssh: { user: 'recorder', key: '/secret/id_rsa', server: std.extVar('secrets').recorder.server },
                 upload: { workers: 4, timeout: 60, max_errors: 30 },
-                record: { workers: 4, burst_overlap: 2, input_args: { rtsp_transport: 'tcp' } },
+                record: { workers: 4, input_args: { rtsp_transport: 'tcp' }, output_args: { 'c:a': 'aac', 'c:v': 'copy' } },
                 convert: {
                   workers: 1,
                   input_args: { f: 'concat', vaapi_device: '/dev/dri/renderD128', hwaccel: 'vaapi', safe: 0 },
@@ -104,6 +113,11 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
                         ])
+                        + c.readinessProbe.httpGet.withPath('/ready')
+                        + c.readinessProbe.httpGet.withPort(8080)
+                        + c.readinessProbe.withInitialDelaySeconds(5)
+                        + c.readinessProbe.withPeriodSeconds(5)
+                        + c.readinessProbe.withTimeoutSeconds(1)
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
