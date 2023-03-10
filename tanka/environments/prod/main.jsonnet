@@ -18,7 +18,6 @@
 (import 'nut.libsonnet') +
 (import 'authelia.libsonnet') +
 (import 'waf.libsonnet') +
-(import 'k8s-dashboard.libsonnet') +
 (import 'broker-ha.libsonnet') +
 (import 'loki.libsonnet') +
 (import 'mariadb.libsonnet') +
@@ -70,7 +69,6 @@
       custom_dns: {
         mapping: {
           [std.format('esphome.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('k8s.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('grafana.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('storage.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('traefik.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,

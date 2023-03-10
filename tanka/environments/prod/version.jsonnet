@@ -4,16 +4,16 @@
       image: 'coredns/coredns:1.10.0',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:10122022',
+      image: 'ghcr.io/bkupidura/chrony:04022023',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20221130',
+      image: 'ubuntu:jammy-20230126',
     },
     kubefledged: {
       chart: 'v0.10.0',
     },
     kubernetes_descheduler: {
-      chart: '0.24.1',
+      chart: '0.26.0',
     },
     kubernetes_reflector: {
       chart: '6.1.47',
@@ -40,11 +40,11 @@
       image: 'quay.io/ceph/ceph:v16.2.9-20220519',
     },
     restic: {
-      image: 'restic/restic:0.14.0',
+      image: 'restic/restic:0.15.1',
       server: 'restic/rest-server:0.11.0',
     },
     traefik: {
-      chart: '17.0.5',
+      chart: '20.8.0',
       repo: 'traefik',
       tag: 'v2.9.6',
     },
@@ -52,15 +52,15 @@
       image: 'spx01/blocky:v0.20',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:10122022',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:04022023',
     },
     authelia: {
-      image: 'authelia/authelia:4.37.3',
+      image: 'authelia/authelia:4.37.5',
     },
     cert_manager: {
-      chart: 'v1.10.1',
+      chart: 'v1.11.0',
       repo: 'quay.io/jetstack/cert-manager-controller',
-      tag: 'v1.10.1',
+      tag: 'v1.11.0',
     },
     kubernetes_dashboard: {
       chart: '6.0.0',
@@ -70,33 +70,33 @@
       metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.9',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.12',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.28.4',
+      image: 'koenkk/zigbee2mqtt:1.30.0',
     },
     esphome: {
-      image: 'esphome/esphome:2022.11',
+      image: 'esphome/esphome:2022.12',
     },
     grafana: {
-      image: 'grafana/grafana:9.3.1',
+      image: 'grafana/grafana:9.3.6',
     },
     loki: {
-      chart: '2.8.9',
+      chart: '2.9.9',
     },
     frigate: {
       image: 'blakeblackshear/frigate:0.11.1',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.1.4',
+      image: 'homeassistant/home-assistant:2023.2.2',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:0.0.4.6',
+      image: 'ghcr.io/bkupidura/recorder:2.0',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.2',
@@ -105,14 +105,14 @@
       image: 'jacobalberty/unifi:v7.3.76',
     },
     prometheus: {
-      chart: '19.3.0',
+      chart: '19.3.3',
     },
     victoria_metrics: {
       alert: {
-        chart: '0.5.13',
+        chart: '0.5.16',
       },
       server: {
-        chart: '0.8.50',
+        chart: '0.8.53',
       },
     },
   },
