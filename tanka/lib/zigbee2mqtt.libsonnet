@@ -9,7 +9,7 @@
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '1Gi' }),
+         + p.spec.resources.withRequests({ storage: '128Mi' }),
     ingress_route: $._custom.ingress_route.new('zigbee2mqtt', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',
@@ -66,7 +66,7 @@
                         + c.withPorts(v1.containerPort.newNamed(8080, 'http'))
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          ZIGBEE2MQTT_DATA: '/data',
+                          ZIGBEE2MQTT_DATA: '/app/data',
                         })
                         + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
@@ -85,7 +85,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'zigbee2mqtt' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyacm0', '/dev/ttyACM0') + v1.volume.hostPath.withType('CharDevice'))
-                + d.pvcVolumeMount('zigbee2mqtt', '/data', false, {})
+                + d.pvcVolumeMount('zigbee2mqtt', '/app/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ zigbee_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')

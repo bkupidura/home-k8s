@@ -28,7 +28,7 @@
     ],
   },
   victoria_metrics: {
-    extra_scrape_rendered:: [
+    [if $.monitoring.extra_scrape != null then "extra_scrape_rendered"]:: [
       $.monitoring.extra_scrape[extra_scrape]
       for extra_scrape in std.objectFields($.monitoring.extra_scrape)
     ],
@@ -124,7 +124,7 @@
         },
         scrape: {
           enabled: true,
-          extraScrapeConfigs: $.victoria_metrics.extra_scrape_rendered,
+          [if $.victoria_metrics.extra_scrape_rendered != null then 'extraScrapeConfigs']: $.victoria_metrics.extra_scrape_rendered,
           config: {
             scrape_configs: [
               {
@@ -525,7 +525,7 @@
         persistence: {
           enabled: true,
           storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
-          size: '100Mi',
+          size: '128Mi',
         },
         configmapReload: {
           enabled: true,
