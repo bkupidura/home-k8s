@@ -9,7 +9,7 @@
          + p.metadata.withNamespace('monitoring')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '1Gi' }),
+         + p.spec.resources.withRequests({ storage: '128Mi' }),
     service: s.new(
                'grafana',
                { 'app.kubernetes.io/name': 'grafana' },
