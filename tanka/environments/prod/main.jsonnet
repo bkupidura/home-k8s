@@ -41,6 +41,7 @@
       ntp: '10.0.10.45',
       home_assistant: '10.0.10.46',
       waf: '10.0.10.47',
+      webrtc: '10.0.10.48',
     },
     tz: 'Europe/Warsaw',
     chrony: {
@@ -99,7 +100,6 @@
         ads: [
           'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/Ad_filter_list_by_Disconnect.txt',
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/hostfile.txt',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adguard_mobile_host.txt',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adservers.txt',
           'https://blocklistproject.github.io/Lists/ads.txt',
