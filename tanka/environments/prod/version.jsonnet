@@ -4,16 +4,16 @@
       image: 'coredns/coredns:1.10.1',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:11032023',
+      image: 'ghcr.io/bkupidura/chrony:15042023',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20230301',
+      image: 'ubuntu:jammy-20230308',
     },
     kubefledged: {
       chart: 'v0.10.0',
     },
     kubernetes_descheduler: {
-      chart: '0.26.0',
+      chart: '0.26.1',
     },
     kubernetes_reflector: {
       chart: '7.0.151',
@@ -44,29 +44,29 @@
       server: 'restic/rest-server:0.11.0',
     },
     traefik: {
-      chart: '21.2.0',
+      chart: '22.1.0',
       repo: 'traefik',
-      tag: 'v2.9.8',
+      tag: 'v2.9.10',
     },
     blocky: {
-      image: 'spx01/blocky:v0.20',
+      image: 'spx01/blocky:v0.21',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:13032023',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:15042023',
     },
     authelia: {
       image: 'authelia/authelia:4.37.5',
     },
     cert_manager: {
-      chart: 'v1.11.0',
+      chart: 'v1.11.1',
       repo: 'quay.io/jetstack/cert-manager-controller',
-      tag: 'v1.11.0',
+      tag: 'v1.11.1',
     },
     kubernetes_dashboard: {
       chart: '6.0.0',
     },
     mariadb: {
-      image: 'mariadb:10.9.4',
+      image: 'mariadb:10.11.2',
       metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
@@ -75,22 +75,22 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.30.2',
+      image: 'koenkk/zigbee2mqtt:1.30.3',
     },
     esphome: {
-      image: 'esphome/esphome:2023.2.4',
+      image: 'esphome/esphome:2023.3.2',
     },
     grafana: {
-      image: 'grafana/grafana:9.4.3',
+      image: 'grafana/grafana:9.4.7',
     },
     loki: {
-      chart: '2.9.9',
+      chart: '2.9.10',
     },
     frigate: {
-      image: 'blakeblackshear/frigate:0.11.1',
+      image: 'ghcr.io/blakeblackshear/frigate:0.12.0',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.3.6',
+      image: 'homeassistant/home-assistant:2023.4.5',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
@@ -105,14 +105,14 @@
       image: 'jacobalberty/unifi:v7.3.83',
     },
     prometheus: {
-      chart: '19.7.2',
+      chart: '20.2.0',
     },
     victoria_metrics: {
       alert: {
-        chart: '0.5.19',
+        chart: '0.5.22',
       },
       server: {
-        chart: '0.8.55',
+        chart: '0.8.58',
       },
     },
   },

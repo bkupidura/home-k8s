@@ -10,5 +10,5 @@ watchdog:
   module: iTCO_wdt
 k3s:
   labels:
-    video_processing: "true"
     modem_controller: "true"
+    coral_controller: "true"

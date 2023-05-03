@@ -34,7 +34,7 @@
              + s.spec.withPublishNotReadyAddresses(false),
     config: v1.configMap.new('blocky-config', {
               'config.yml': std.manifestYamlDoc({
-                httpPort: 4000,
+                ports: { http: 4000, dns: 53 },
                 prometheus: { enable: true },
                 upstream: {
                   default: ['tcp-tls:8.8.8.8:853', 'tcp-tls:8.8.4.4:853', 'https://1.1.1.1/dns-query', 'https://1.0.0.1/dns-query'],
@@ -48,9 +48,10 @@
                 queryLog: {
                   type: 'none',
                 },
+                log: { level: 'info', format: 'text', timestamp: true },
                 blocking: {
-                  processingConcurrency: 2,
-                  refreshPeriod: 120,
+                  processingConcurrency: 4,
+                  refreshPeriod: '120m',
                   blockType: 'zeroIP',
                   [if $._config.blocky.blacklist != null then 'blackLists']: $._config.blocky.blacklist,
                   [if $._config.blocky.blacklist != null then 'clientGroupsBlock']: {
@@ -59,7 +60,6 @@
                 },
                 [if $._config.blocky.conditional != null then 'conditional']: $._config.blocky.conditional,
                 [if $._config.blocky.custom_dns != null then 'customDNS']: $._config.blocky.custom_dns,
-
               }),
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
@@ -73,13 +73,13 @@
                           TZ: $._config.tz,
                           BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '192Mi', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '192Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '256Mi', cpu: '150m' })
+                        + c.resources.withLimits({ memory: '256Mi', cpu: '150m' })
                         + c.readinessProbe.tcpSocket.withPort(53)
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.tcpSocket.withPort(53)
-                        + c.livenessProbe.withInitialDelaySeconds(120)
+                        + c.livenessProbe.tcpSocket.withPort(4000)
+                        + c.livenessProbe.withInitialDelaySeconds(30)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],

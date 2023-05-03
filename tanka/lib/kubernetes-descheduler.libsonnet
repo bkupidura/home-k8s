@@ -31,7 +31,7 @@
           PodLifeTime: {
             enabled: true,
             params: {
-              podLifeTime: { maxPodLifeTimeSeconds: 259200 },
+              podLifeTime: { maxPodLifeTimeSeconds: 86400 },
               podStatusPhases: ['Running'],
               labelSelector: {
                 matchLabels: { 'app.kubernetes.io/name': 'unifi' },
