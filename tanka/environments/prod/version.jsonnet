@@ -90,7 +90,7 @@
       image: 'ghcr.io/blakeblackshear/frigate:0.12.0',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.4.5',
+      image: 'homeassistant/home-assistant:2023.5.3',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
@@ -114,6 +114,9 @@
       server: {
         chart: '0.8.58',
       },
+    },
+    vaultwarden: {
+        image: 'vaultwarden/server:1.28.1-alpine',
     },
   },
 }
