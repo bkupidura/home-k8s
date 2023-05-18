@@ -31,6 +31,7 @@
 (import 'recorder.libsonnet') +
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
+(import 'vaultwarden.libsonnet') +
 {
   _config:: {
     restore: false,
@@ -84,6 +85,7 @@
           [std.format('ha.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('auth.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('restic.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
+          [std.format('vaultwarden.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('mqtt.%s', std.extVar('secrets').domain)]: $._config.vip.mqtt,
         },
       },
@@ -146,6 +148,29 @@
             'SecRuleRemoveById 920272',
             'SecRuleRemoveById 931130',
             'SecRuleRemoveById 941101',
+          ],
+        },
+        vaultwarden: {
+          rules: [
+            'SecRule ip:too_many45_errors_time "@lt %{TIME_EPOCH}" "phase:3, pass, nolog, setvar:!ip.too_many45_errors_counter, setvar:!ip.too_many45_errors_time, id:990000100"',
+            'SecRule RESPONSE_STATUS "@rx ^[45]" "phase:3, pass, nolog, setvar:ip.too_many45_errors_counter=+1, setvar:ip.too_many45_errors_time=%{TIME_EPOCH}, setvar:ip.too_many45_errors_time=+900, id:990000101"',
+            'SecRule ip:too_many45_errors_counter "@gt 5" "phase:3, log, drop, id:990000103"',
+            'SecRuleRemoveById 942432',
+            'SecRuleRemoveById 920273',
+            'SecRuleRemoveById 942430',
+            'SecRuleRemoveById 942260',
+            'SecRuleRemoveById 942431',
+            'SecRuleRemoveById 942200',
+            'SecRuleRemoveById 942340',
+            'SecRuleRemoveById 942370',
+            'SecRuleRemoveById 942460',
+            'SecRuleRemoveById 949110',
+            'SecRuleRemoveById 920274',
+            'SecRuleRemoveById 920300',
+            'SecRuleRemoveById 920320',
+            'SecRuleRemoveById 911100',
+            'SecRuleRemoveById 920272',
+            'SecRuleRemoveById 942421',
           ],
         },
       },
