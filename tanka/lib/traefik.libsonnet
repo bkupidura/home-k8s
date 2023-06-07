@@ -80,6 +80,15 @@
         web: { expose: true },
         websecure: { expose: true },
       },
+      providers: {
+        kubernetesCRD: {
+          enabled: true,
+          allowCrossNamespace: true,
+        },
+        kubernetesIngress: {
+          enabled: true,
+        },
+      },
       ingressRoute: {
         dashboard: { enabled: false },
       },

@@ -53,7 +53,7 @@
                        + $.k.core.v1.container.withCommand([
                          '/bin/sh',
                          '-ec',
-                        'find /data -type f -name db-backup-*.dump -mtime +60 -delete',
+                         'find /data -type f -name db-backup-*.dump -mtime +60 -delete',
                        ]),
                      ])
                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('data', 'vaultwarden')])
@@ -82,9 +82,9 @@
       },
     ], true),
     service: s.new('vaultwarden', { 'app.kubernetes.io/name': 'vaultwarden' }, [
-        v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
-        v1.servicePort.withPort(3012) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('websockets'),
-    ])
+               v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
+               v1.servicePort.withPort(3012) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('websockets'),
+             ])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'vaultwarden' }),
     deployment: d.new('vaultwarden',

@@ -37,6 +37,10 @@
             repository: $._version.metallb.speaker.repo,
             tag: $._version.metallb.speaker.tag,
           },
+          podAnnotations: {
+            'prometheus.io/port': '7473',
+          },
+          frr: { enabled: true },
         },
         prometheus: { scrapeAnnotations: true },
       }

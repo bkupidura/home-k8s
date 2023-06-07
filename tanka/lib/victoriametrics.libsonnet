@@ -119,8 +119,8 @@
         },
         ingress: { enabled: false },
         resources: {
-          requests: { memory: '1280Mi' },
-          limits: { memory: '1280Mi' },
+          requests: { memory: '1536Mi' },
+          limits: { memory: '1536Mi' },
         },
         scrape: {
           enabled: true,

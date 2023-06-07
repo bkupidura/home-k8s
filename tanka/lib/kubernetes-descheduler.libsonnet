@@ -23,7 +23,7 @@
             params: {
               nodeFit: true,
               nodeResourceUtilizationThresholds: {
-                thresholds: { cpu: 35, memory: 20, pods: 15 },
+                thresholds: { cpu: 45, memory: 20, pods: 15 },
                 targetThresholds: { cpu: 50, memory: 60, pods: 25 },
               },
             },
