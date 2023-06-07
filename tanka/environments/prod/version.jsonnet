@@ -4,10 +4,10 @@
       image: 'coredns/coredns:1.10.1',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:15042023',
+      image: 'ghcr.io/bkupidura/chrony:03062023',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20230308',
+      image: 'ubuntu:jammy-20230522',
     },
     kubefledged: {
       chart: 'v0.10.0',
@@ -16,35 +16,35 @@
       chart: '0.26.1',
     },
     kubernetes_reflector: {
-      chart: '7.0.151',
+      chart: '7.0.173',
     },
     metallb: {
-      chart: '0.13.9',
+      chart: '0.13.10',
       controller: {
         repo: 'quay.io/metallb/controller',
-        tag: 'v0.13.9',
+        tag: 'v0.13.10',
       },
       speaker: {
         repo: 'quay.io/metallb/speaker',
-        tag: 'v0.13.9',
+        tag: 'v0.13.10',
       },
     },
     nut: {
       image: 'ghcr.io/k8s-at-home/network-ups-tools:v2.8.0',
     },
     longhorn: {
-      chart: '1.4.1',
+      chart: '1.4.2',
     },
     ceph: {
       chart: 'v1.9.3',
       image: 'quay.io/ceph/ceph:v16.2.9-20220519',
     },
     restic: {
-      image: 'restic/restic:0.15.1',
-      server: 'restic/rest-server:0.11.0',
+      image: 'restic/restic:0.15.2',
+      server: 'restic/rest-server:0.12.0',
     },
     traefik: {
-      chart: '22.1.0',
+      chart: '23.0.1',
       repo: 'traefik',
       tag: 'v2.9.10',
     },
@@ -52,36 +52,36 @@
       image: 'spx01/blocky:v0.21',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:15042023',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:03062023',
     },
     authelia: {
       image: 'authelia/authelia:4.37.5',
     },
     cert_manager: {
-      chart: 'v1.11.1',
+      chart: 'v1.12.1',
       repo: 'quay.io/jetstack/cert-manager-controller',
-      tag: 'v1.11.1',
+      tag: 'v1.12.1',
     },
     kubernetes_dashboard: {
       chart: '6.0.0',
     },
     mariadb: {
-      image: 'mariadb:10.11.2',
+      image: 'mariadb:10.11.3',
       metrics: 'prom/mysqld-exporter:v0.14.0',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.12',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.13',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.30.3',
+      image: 'koenkk/zigbee2mqtt:1.31.0',
     },
     esphome: {
-      image: 'esphome/esphome:2023.3.2',
+      image: 'esphome/esphome:2023.5',
     },
     grafana: {
-      image: 'grafana/grafana:9.4.7',
+      image: 'grafana/grafana:9.5.2',
     },
     loki: {
       chart: '2.9.10',
@@ -90,29 +90,29 @@
       image: 'ghcr.io/blakeblackshear/frigate:0.12.0',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.5.3',
+      image: 'homeassistant/home-assistant:2023.5.4',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0',
+      image: 'ghcr.io/bkupidura/recorder:2.0.1',
     },
     sms_gammu: {
-      image: 'pajikos/sms-gammu-gateway:1.2',
+      image: 'pajikos/sms-gammu-gateway:1.3.0',
     },
     unifi: {
       image: 'jacobalberty/unifi:v7.3.83',
     },
     prometheus: {
-      chart: '20.2.0',
+      chart: '22.6.2',
     },
     victoria_metrics: {
       alert: {
-        chart: '0.5.22',
+        chart: '0.6.3',
       },
       server: {
-        chart: '0.8.58',
+        chart: '0.8.62',
       },
     },
     vaultwarden: {
