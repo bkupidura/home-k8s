@@ -32,7 +32,6 @@
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
 (import 'vaultwarden.libsonnet') +
-(import 'trilium.libsonnet') +
 {
   _config:: {
     restore: false,
@@ -87,9 +86,7 @@
           [std.format('auth.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('restic.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('vaultwarden.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('trilium.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
           [std.format('mqtt.%s', std.extVar('secrets').domain)]: $._config.vip.mqtt,
-
         },
       },
       blacklist: {
@@ -151,7 +148,6 @@
             'SecRuleRemoveById 920272',
             'SecRuleRemoveById 931130',
             'SecRuleRemoveById 941101',
-            'SecRuleRemoveById 942432',
           ],
         },
         vaultwarden: {
@@ -175,31 +171,6 @@
             'SecRuleRemoveById 911100',
             'SecRuleRemoveById 920272',
             'SecRuleRemoveById 942421',
-          ],
-        },
-        trilium: {
-          rules: [
-            'SecRuleRemoveById 942421',
-            'SecRuleRemoveById 920272',
-            'SecRuleRemoveById 949110',
-            'SecRuleRemoveById 920273',
-            'SecRuleRemoveById 911100',
-            'SecRuleRemoveById 942432',
-            'SecRuleRemoveById 942260',
-            'SecRuleRemoveById 942200',
-            'SecRuleRemoveById 942430',
-            'SecRuleRemoveById 942340',
-            'SecRuleRemoveById 942490',
-            'SecRuleRemoveById 942431',
-            'SecRuleRemoveById 942370',
-            'SecRuleRemoveById 942460',
-            'SecRuleRemoveById 941320',
-            'SecRuleRemoveById 942130',
-            'SecRuleRemoveById 959100',
-            'SecRuleRemoveById 950100',
-            'SecRuleRemoveById 941310',
-            'SecRuleRemoveById 932200',
-            'SecRuleRemoveById 932190',
           ],
         },
       },
