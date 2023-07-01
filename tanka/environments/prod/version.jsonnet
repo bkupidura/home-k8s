@@ -116,10 +116,7 @@
       },
     },
     vaultwarden: {
-      image: 'vaultwarden/server:1.28.1-alpine',
-    },
-    trilium: {
-      image: 'zadam/trilium:0.59.4',
+        image: 'vaultwarden/server:1.28.1-alpine',
     },
   },
 }
