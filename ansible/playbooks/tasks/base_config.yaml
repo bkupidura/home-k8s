@@ -86,7 +86,7 @@
     create:
       custom-sshd-config:
         dst: /etc/ssh/sshd_config
-        src: "../templates/sshd_config.j2"
+        src: "../templates/sshd_config"
         permission: "0644"
         notify: sshd
   include_tasks: custom_files.yaml
