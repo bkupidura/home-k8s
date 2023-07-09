@@ -1,16 +1,19 @@
-- name: watchdog configure
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "{{ item.dst }}"
-  register: watchdog_config
-  become: true
-  with_items:
-    - {"src": "default_watchdog.j2", "dst": "/etc/default/watchdog"}
-    - {"src": "watchdog.conf.j2", "dst": "/etc/watchdog.conf"}
+- name: configure default/watchdog
+  vars:
+    create:
+      custom-default-watchdog:
+        dst: /etc/default/watchdog
+        src: "../templates/default_watchdog.j2"
+        permission: "0644"
+        notify: watchdog
+  include_tasks: custom_files.yaml
 
-- name: watchdog restart
-  systemd:
-    name: watchdog
-    state: restarted
-  when: watchdog_config.changed
-  become: true
+- name: configure watchdog.conf
+  vars:
+    create:
+      custom-default-watchdog:
+        dst: /etc/watchdog.conf
+        src: "../templates/watchdog.conf.j2"
+        permission: "0644"
+        notify: watchdog
+  include_tasks: custom_files.yaml

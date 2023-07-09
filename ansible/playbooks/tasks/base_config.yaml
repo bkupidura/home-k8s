@@ -82,18 +82,14 @@
   become: true
 
 - name: sshd configure
-  template:
-    src: "../templates/sshd_config.j2"
-    dest: /etc/ssh/sshd_config
-  register: sshd_config
-  become: true
-
-- name: sshd restart
-  systemd:
-    name: sshd
-    state: restarted
-  when: sshd_config.changed
-  become: true
+  vars:
+    create:
+      custom-sshd-config:
+        dst: /etc/ssh/sshd_config
+        src: "../templates/sshd_config.j2"
+        permission: "0644"
+        notify: sshd
+  include_tasks: custom_files.yaml
 
 - name: Set sysctl
   sysctl:
@@ -102,3 +98,34 @@
     state: present
   become: true
   with_dict: "{{ sysctl }}"
+
+- name: Create custom avahi-daemon.conf file
+  vars:
+    create:
+      custom-avahi-daemon:
+        dst: /etc/avahi/avahi-daemon.conf
+        src: "../templates/avahi-daemon.conf"
+        permission: "0644"
+        notify: avahi-daemon
+  include_tasks: tasks/custom_files.yaml
+
+- name: Enforce performance cpu governor
+  copy:
+    dest: /etc/default/cpufrequtils
+    content: |
+      GOVERNOR="performance"
+  become: true
+
+- name: Set GRUB_CMDLINE_LINUX_DEFAULT
+  lineinfile:
+    state: present
+    dest: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+    line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance debug ignore_loglevel"
+  become: true
+  register: grub_config
+
+- name: Update grub config
+  command: update-grub
+  when: grub_config.changed
+  become: true

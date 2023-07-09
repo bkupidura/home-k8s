@@ -1,14 +1,12 @@
-- name: netplan configure
-  template:
-    src: "../templates/netplan.yaml.j2"
-    dest: /etc/netplan/00-installer-config.yaml
-  register: netplan_config
-  become: true
-
-- name: netplan apply
-  command: netplan apply
-  when: netplan_config.changed
-  become: true
+- name: configure netplan
+  vars:
+    create:
+      custom-systemd-resolver:
+        dst: /etc/netplan/00-installer-config.yaml
+        src: "../templates/netplan.yaml.j2"
+        permission: "0644"
+        execute: 'netplan apply'
+  include_tasks: custom_files.yaml
 
 - name: Create proper resolv.conf symlink
   file:
@@ -17,16 +15,13 @@
     state: link
   become: true
 
-- name: systemd-resolver configure
-  template:
-    src: "../templates/resolved.conf.j2"
-    dest: /etc/systemd/resolved.conf
-  register: systemd_resolver_config
-  become: true
+- name: configure systemd-resolver
+  vars:
+    create:
+      custom-systemd-resolver:
+        dst: /etc/systemd/resolved.conf
+        src: "../templates/resolved.conf.j2"
+        permission: "0644"
+        notify: systemd-resolved
+  include_tasks: custom_files.yaml
 
-- name: systemd-resolver restart
-  systemd:
-    name: systemd-resolved
-    state: restarted
-  when: systemd_resolver_config.changed
-  become: true
