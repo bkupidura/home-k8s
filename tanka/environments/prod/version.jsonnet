@@ -116,7 +116,7 @@
       },
     },
     vaultwarden: {
-        image: 'vaultwarden/server:1.28.1-alpine',
+      image: 'vaultwarden/server:1.28.1-alpine',
     },
   },
 }

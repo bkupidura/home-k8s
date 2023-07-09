@@ -80,6 +80,14 @@
             },
           },
           {
+            alert: 'K8sVolumeUsageLow',
+            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[:2h]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[:2h] offset 2h)',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using 50% of storage used in last 2h. Possible data loss.',
+            },
+          },
+          {
             alert: 'K8sStatefulSetUnhealthy',
             expr: 'kube_statefulset_status_replicas_ready / kube_statefulset_status_replicas < 0.7',
             'for': '10m',
