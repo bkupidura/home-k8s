@@ -44,27 +44,6 @@
         additional_mounts: "{{ os.additional_mounts | default([]) }}"
       include_tasks: tasks/additional_mounts.yaml
 
-    - name: Enforce performance cpu governor
-      copy:
-        dest: /etc/default/cpufrequtils
-        content: |
-          GOVERNOR="performance"
-      become: true
-
-    - name: Set GRUB_CMDLINE_LINUX_DEFAULT
-      lineinfile:
-        state: present
-        dest: /etc/default/grub
-        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-        line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance"
-      become: true
-      register: grub_config
-
-    - name: Update grub config
-      command: update-grub
-      when: grub_config.changed
-      become: true
-
     - name: Manage packages
       vars:
         install: "{{ package.install | default([]) }}"
@@ -78,15 +57,8 @@
         create: "{{ service.create | default({}) }}"
       include_tasks: tasks/manage_services.yaml
 
-    - name: Create custom avahi-daemon.conf file
-      vars:
-        create:
-          custom-avahi-daemon:
-            dst: /etc/avahi/avahi-daemon.conf
-            src: "../templates/avahi-daemon.conf"
-            permission: "0644"
-            notify: avahi-daemon
-      include_tasks: tasks/custom_files.yaml
+    - name: Enable netconsole
+      include_tasks: tasks/configure_netconsole.yaml
 
 - name: Upgrade k8s master
   hosts:

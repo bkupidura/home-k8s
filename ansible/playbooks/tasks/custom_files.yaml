@@ -26,3 +26,11 @@
     - item.changed
     - item.item.value.notify is defined
   become: true
+
+- name: Run command
+  command: "{{ item.item.value.execute }}"
+  with_list: "{{ custom_file_created.results }}"
+  when:
+    - item.changed
+    - item.item.value.execute is defined
+  become: true

@@ -1,0 +1,56 @@
+- name: Create netconsole.conf file
+  vars:
+    create:
+      custom-netconsole:
+        dst: /etc/modprobe.d/netconsole.conf
+        src: "../templates/netconsole.conf.j2"
+        permission: "0644"
+  include_tasks: tasks/custom_files.yaml
+
+- name: Create rsyslog.d/100-netconsole.conf file
+  vars:
+    create:
+      custom-rsyslog-netconsole:
+        dst: /etc/rsyslog.d/100-netconsole.conf
+        src: "../templates/rsyslog-netconsole.conf.j2"
+        permission: "0644"
+        notify: rsyslog
+  include_tasks: tasks/custom_files.yaml
+
+- name: Create logrotate.d/netconsole.conf file
+  vars:
+    create:
+      custom-logrotate-netconsole:
+        dst: /etc/logrotate.d/netconsole
+        src: "../templates/logrotate-netconsole.conf"
+        permission: "0644"
+  include_tasks: tasks/custom_files.yaml
+
+- name: Add netconsole module
+  lineinfile:
+    state: present
+    dest: /etc/modules
+    regexp: '^netconsole'
+    line: netconsole
+  become: true
+  when:
+    - debug is defined
+    - debug == 'true'
+
+- name: Load netconsole module
+  modprobe:
+    name: netconsole
+    state: present
+  become: true
+  when:
+    - debug is defined
+    - debug == 'true'
+
+- name: Unload netconsole module
+  modprobe:
+    name: netconsole
+    state: absent
+  become: true
+  when:
+    - debug is defined
+    - debug == 'false'
