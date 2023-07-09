@@ -12,7 +12,7 @@
           {
             alert: 'MysqlWrongBufferPoolUsage',
             expr: 'delta(mysql_global_status_innodb_buffer_pool_reads[5m]) / delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) > 0.03',
-            'for': '30m',
+            'for': '60m',
             labels: { service: 'mysql', severity: 'warning' },
             annotations: {
               summary: 'Mysql wrong innodb buffer pool reads, check https://mariadb.com/kb/en/innodb-buffer-pool/#innodb_buffer_pool_size',
