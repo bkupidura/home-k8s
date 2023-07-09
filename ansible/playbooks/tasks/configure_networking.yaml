@@ -20,7 +20,7 @@
     create:
       custom-systemd-resolver:
         dst: /etc/systemd/resolved.conf
-        src: "../templates/resolved.conf.j2"
+        src: "../templates/resolved.conf"
         permission: "0644"
         notify: systemd-resolved
   include_tasks: custom_files.yaml
