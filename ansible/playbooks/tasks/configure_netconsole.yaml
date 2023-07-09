@@ -26,30 +26,32 @@
         permission: "0644"
   include_tasks: tasks/custom_files.yaml
 
-- name: Add netconsole module
-  lineinfile:
-    state: present
-    dest: /etc/modules
-    regexp: '^netconsole'
-    line: netconsole
+- block:
+  - name: Add netconsole module
+    lineinfile:
+      state: present
+      dest: /etc/modules
+      regexp: '^netconsole'
+      line: netconsole
+  - name: Load netconsole module
+    modprobe:
+      name: netconsole
+      state: present
   become: true
   when:
     - debug is defined
     - debug == 'true'
 
-- name: Load netconsole module
-  modprobe:
-    name: netconsole
-    state: present
-  become: true
-  when:
-    - debug is defined
-    - debug == 'true'
-
-- name: Unload netconsole module
-  modprobe:
-    name: netconsole
-    state: absent
+- block:
+  - name: Remove netconsole module
+    lineinfile:
+      state: absent
+      dest: /etc/modules
+      regexp: '^netconsole'
+  - name: Unload netconsole module
+    modprobe:
+      name: netconsole
+      state: absent
   become: true
   when:
     - debug is defined
