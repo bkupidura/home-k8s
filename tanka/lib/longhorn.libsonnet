@@ -49,7 +49,7 @@
                             + s.storageClass.withAllowVolumeExpansion(true)
                             + s.storageClass.withMountOptions(['noatime'])
                             + s.storageClass.withParameters({
-                              numberOfReplicas: '2',
+                              numberOfReplicas: '3',
                               staleReplicaTimeout: '360',
                               fromBackup: '',
                             }),
@@ -58,7 +58,7 @@
                          + s.storageClass.withAllowVolumeExpansion(true)
                          + s.storageClass.withMountOptions(['noatime'])
                          + s.storageClass.withParameters({
-                           numberOfReplicas: '2',
+                           numberOfReplicas: '3',
                            staleReplicaTimeout: '360',
                            fromBackup: '',
                            recurringJobs: '[ { "name":"snap", "task":"snapshot", "cron":"15 */3 * * *", "retain": 8 } ]',
