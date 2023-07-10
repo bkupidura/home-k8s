@@ -15,7 +15,7 @@
                                  limits: { memory: '32Mi' },
                                },
                              }),
-    imageCache: {
+    [if $._config.restore != true then 'imageCache']: {
       apiVersion: 'kubefledged.io/v1alpha2',
       kind: 'ImageCache',
       metadata: {

@@ -65,6 +65,14 @@
               summary: 'High disk usage on {{ $labels.node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}',
             },
           },
+          {
+            alert: 'PhysicalCPUThrotling',
+            expr: 'delta(node_cpu_core_throttles_total[15m]) > 0',
+            labels: { service: 'system', severity: 'warning' },
+            annotations: {
+              summary: 'Physical CPU throtling on {{ $labels.node }}',
+            },
+          },
         ],
       },
       {
@@ -81,10 +89,10 @@
           },
           {
             alert: 'K8sVolumeUsageLow',
-            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[:2h]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[:2h] offset 2h)',
+            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[15m]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[2h] offset 1h)',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using 50% of storage used in last 2h. Possible data loss.',
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is less than 50% of storage used in last 2h. Possible data loss.',
             },
           },
           {
