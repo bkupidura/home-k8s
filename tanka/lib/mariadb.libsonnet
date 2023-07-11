@@ -195,6 +195,14 @@
               |||,
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
+    config_exporter: v1.configMap.new('mariadb-exporter-config', {
+                       'my.cnf': |||
+                         [client]
+                         user = root
+                         password = %(password)s
+                       ||| % { password: std.extVar('secrets').mariadb.password },
+                     })
+                     + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('mariadb',
                       if $._config.restore then 0 else 1,
                       [
@@ -230,12 +238,15 @@
                         + c.livenessProbe.withPeriodSeconds(15)
                         + c.livenessProbe.withTimeoutSeconds(2),
                         c.new('metrics', $._version.mariadb.metrics)
+                        + c.withArgs(['--config.my-cnf', '/config/my.cnf'])
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9104, 'metrics'))
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          DATA_SOURCE_NAME: std.format('root:%s@(localhost:3306)/', std.extVar('secrets').mariadb.password),
                         })
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('mariadb-exporter-config', '/config/', true),
+                        ])
                         + c.readinessProbe.httpGet.withPath('/metrics')
                         + c.readinessProbe.httpGet.withPort('metrics')
                         + c.readinessProbe.withInitialDelaySeconds(20)
@@ -251,6 +262,7 @@
                 + d.spec.template.spec.withVolumes([
                   v1.volume.fromConfigMap('mariadb-init', 'mariadb-init'),
                   v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                  v1.volume.fromConfigMap('mariadb-exporter-config', 'mariadb-exporter-config'),
                   v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                 ])
                 + d.spec.strategy.withType('Recreate')
