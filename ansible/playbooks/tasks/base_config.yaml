@@ -116,14 +116,36 @@
       GOVERNOR="performance"
   become: true
 
-- name: Set GRUB_CMDLINE_LINUX_DEFAULT
-  lineinfile:
-    state: present
-    dest: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-    line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance debug ignore_loglevel"
-  become: true
-  register: grub_config
+- block:
+  - name: Set GRUB_CMDLINE_LINUX_DEFAULT
+    lineinfile:
+      state: present
+      dest: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+      line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance ignore_loglevel"
+    become: true
+    register: grub_config
+  - name: Set ignore_loglevel
+    shell: echo 1 > /sys/module/printk/parameters/ignore_loglevel
+    become: true
+  when:
+    - debug is defined
+    - debug == 'true'
+
+- block:
+  - name: Set GRUB_CMDLINE_LINUX_DEFAULT
+    lineinfile:
+      state: present
+      dest: /etc/default/grub
+      regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+      line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance"
+    become: true
+    register: grub_config
+  - name: Unset ignore_loglevel
+    shell: echo 0 > /sys/module/printk/parameters/ignore_loglevel
+    become: true
+  when:
+    - (debug is defined and debug == 'false') or (debug is not defined)
 
 - name: Update grub config
   command: update-grub

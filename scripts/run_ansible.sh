@@ -19,57 +19,48 @@ Simple bash wrapper around ansible.
 EOF
 }
 
-
-args=$(getopt hve:H:lsfr:c: $*)
-if [ $? != 0 ]; then
-    show_help
-    exit 2
-fi
-
-set -- $args
-
 EXTRA_VARS=()
-HOST_GROUP=all
+HOST_GROUP="all"
 
-for i; do
-    case "${i}" in
-        -h)
+while getopts "hve:H:lsfr:c:" o; do
+    case "${o}" in
+        h)
             show_help
-            exit 0;;
-        -v)
+            exit 0
+            ;;
+        v)
             ANSIBLE_ARGS="${ANSIBLE_ARGS} -v"
-            shift;;
-        -e)
-            EXTRA_VARS+=(${2})
-            shift
-            shift;;
-        -H)
-            HOST_GROUP=${2}
-            shift
-            shift;;
-        -l)
+            ;;
+        e)
+            EXTRA_VARS+=(${OPTARG})
+            ;;
+        H)
+            HOST_GROUP=${OPTARG}
+            ;;
+        l)
             ACTION="list_playbooks"
-            shift;;
-        -s)
+            ;;
+        s)
             ACTION="show_vars"
-            shift;;
-        -f)
+            ;;
+        f)
             ACTION="show_facts"
-            shift;;
-        -r)
+            ;;
+        r)
             ACTION="run_playbook"
-            PLAYBOOK=${2}
-            shift
-            shift;;
-        -c)
+            PLAYBOOK=${OPTARG}
+            ;;
+        c)
             ACTION="run_command"
-            COMMAND=${2}
-            shift
-            shift;;
-        --)
-            shift; break;;
+            COMMAND=${OPTARG}
+            ;;
+        *)
+            show_help
+            ;;
     esac
 done
+
+shift $((OPTIND-1))
 
 case "${ACTION}" in
     run_playbook)
@@ -91,7 +82,7 @@ case "${ACTION}" in
         ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -m setup
         ;;
     run_command)
-        ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -a "${COMMAND}"
+        ansible ${ANSIBLE_ARGS} ${HOST_GROUP} -m ansible.builtin.shell -a "${COMMAND}"
         ;;
     *)
         echo "please provide one of available actions: -l, -s, -f, -r, -c"

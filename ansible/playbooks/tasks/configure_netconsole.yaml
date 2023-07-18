@@ -54,5 +54,4 @@
       state: absent
   become: true
   when:
-    - debug is defined
-    - debug == 'false'
+    - (debug is defined and debug == 'false') or (debug is not defined)
