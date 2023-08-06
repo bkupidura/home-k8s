@@ -44,11 +44,11 @@
     ], true),
     cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '20 04 * * *', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'home-assistant'),
     cronjob_restore: $._custom.cronjob_restore.new('home-assistant', 'smart-home', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host home-assistant --target .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host home-assistant --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'home-assistant'),
     service: s.new('home-assistant', { 'app.kubernetes.io/name': 'home-assistant' }, [v1.servicePort.withPort(8123) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')
@@ -116,6 +116,8 @@
                 + d.spec.template.spec.withEnableServiceLinks(true)
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
+                + d.spec.template.spec.withHostNetwork(true)
+                + d.spec.template.spec.withDnsPolicy('ClusterFirstWithHostNet')
                 + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
                   v1.weightedPodAffinityTerm.withWeight(1)
                   + v1.weightedPodAffinityTerm.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')

@@ -78,8 +78,8 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $.restic_server._custom.cronjob_backup.new('restic-server', 'home-infra', '00 03 * * *', ['/bin/sh', '-ec', std.join('\n', ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.server)])]),
-    cronjob_restore: $.restic_server._custom.cronjob_restore.new('restic-server', 'home-infra', ['/bin/sh', '-ec', std.join('\n', ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host restic-server --target .', std.extVar('secrets').restic.repo.server)])]),
+    cronjob_backup: $.restic_server._custom.cronjob_backup.new('restic-server', 'home-infra', '00 03 * * *', ['/bin/sh', '-ec', std.join('\n', ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.server.connection)])]),
+    cronjob_restore: $.restic_server._custom.cronjob_restore.new('restic-server', 'home-infra', ['/bin/sh', '-ec', std.join('\n', ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host restic-server --target .', std.extVar('secrets').restic.repo.server.connection)])]),
     deployment: d.new('restic-server',
                       1,
                       [
