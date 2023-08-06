@@ -95,7 +95,7 @@
                                                 'mkdir /dump',
                                                 'cd /dump',
                                                 std.format('mariabackup --backup --target-dir=/dump --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default),
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
                                               ]),
                                             ]),
                                           ])
@@ -128,7 +128,7 @@
                                                  'apt install -y restic',
                                                  'mkdir /dump',
                                                  'cd /dump',
-                                                 std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default),
+                                                 std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default.connection),
                                                  'mariabackup --prepare --target-dir=/dump',
                                                  'mariabackup --copy-back --target-dir=/dump',
                                                  'chown -R mysql:mysql /var/lib/mysql/data',

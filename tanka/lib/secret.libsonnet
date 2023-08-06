@@ -1,7 +1,7 @@
 {
   secret: {
     restic_secrets: $.k.core.v1.secret.new('restic-secrets', {
-                      RESTIC_PASSWORD: std.base64(std.extVar('secrets').restic.password),
+                      RESTIC_PASSWORD: std.base64(std.extVar('secrets').restic.repo.default.password),
                     })
                     + $.k.core.v1.secret.metadata.withNamespace('kube-system')
                     + $.k.core.v1.secret.metadata.withAnnotations({

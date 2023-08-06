@@ -47,8 +47,6 @@
                     'vaapi',
                     '-hwaccel_device',
                     '/dev/dri/renderD128',
-                    '-hwaccel_output_format',
-                    'yuv420p',
                   ],
                 },
                 go2rtc: {

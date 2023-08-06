@@ -73,6 +73,15 @@
               summary: 'Physical CPU throtling on {{ $labels.node }}',
             },
           },
+          {
+            alert: 'HighContextSwitch',
+            expr: 'rate(node_context_switches_total[10m]) > rate(node_context_switches_total[60m] offset 60m) * 1.2',
+            'for': '30m',
+            labels: { service: 'system', severity: 'warning' },
+            annotations: {
+              summary: 'High number of context switching observed on {{ $labels.node }}',
+            },
+          },
         ],
       },
       {

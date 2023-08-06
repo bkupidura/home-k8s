@@ -27,11 +27,11 @@
     ], true),
     cronjob_backup: $._custom.cronjob_backup.new('grafana', 'monitoring', '30 04 * * *', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'grafana'),
     cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'grafana'),
     config: v1.configMap.new('grafana-config', {
               'grafana.ini': std.manifestIni({
@@ -74,7 +74,7 @@
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
                         ])
                         + c.resources.withRequests({ memory: '64Mi' })
-                        + c.resources.withLimits({ memory: '96Mi' })
+                        + c.resources.withLimits({ memory: '128Mi' })
                         + c.readinessProbe.httpGet.withPath('/api/health')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(20)

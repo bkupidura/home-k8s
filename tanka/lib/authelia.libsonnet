@@ -64,11 +64,11 @@
     ], true),
     cronjob_backup: $._custom.cronjob_backup.new('authelia', 'home-infra', '20 04 * * *', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'authelia'),
     cronjob_restore: $._custom.cronjob_restore.new('authelia', 'home-infra', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host authelia --target .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host authelia --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'authelia'),
     config: v1.configMap.new('authelia-config', {
               'users.yml': std.manifestYamlDoc({

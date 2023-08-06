@@ -70,7 +70,7 @@
       metrics: 'prom/mysqld-exporter:v0.15.0',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.13',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.14',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
@@ -96,7 +96,7 @@
       image: 'nodered/node-red:3.0.2-18',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0.1',
+      image: 'ghcr.io/bkupidura/recorder:2.0.2',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.3.0',

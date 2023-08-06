@@ -27,7 +27,7 @@
                                                 'apt install -y restic sqlite',
                                                 'cd /data',
                                                 'sqlite3 db.sqlite3 ".backup db-backup-$(date +%s).dump"',
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default),
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
                                               ]),
                                             ]),
                                           ])
@@ -43,7 +43,7 @@
                     ),
     cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'home-infra', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host vaultwarden --target .', std.extVar('secrets').restic.repo.default)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host vaultwarden --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'vaultwarden'),
     cronjob_cleanup: $._custom.cronjob.new('vaultwarden-cleanup', 'home-infra', '00 18 * * *', [
                        $.k.core.v1.container.new('cleanup', $._version.ubuntu.image)

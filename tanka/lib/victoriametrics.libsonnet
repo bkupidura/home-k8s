@@ -217,6 +217,8 @@
               {
                 job_name: 'kubernetes-service-endpoints',
                 honor_labels: true,
+                scrape_interval: '10s',
+                scrape_timeout: '5s',
                 kubernetes_sd_configs: [
                   { role: 'endpoints' },
                 ],
