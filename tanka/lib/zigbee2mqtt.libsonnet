@@ -18,11 +18,11 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('zigbee2mqtt', 'smart-home', '50 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('zigbee2mqtt', 'smart-home', '50 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'zigbee2mqtt'),
-    cronjob_restore: $._custom.cronjob_restore.new('zigbee2mqtt', 'smart-home', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('zigbee2mqtt', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host zigbee2mqtt --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'zigbee2mqtt'),

@@ -25,12 +25,12 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('esphome', 'smart-home', '40 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('esphome', 'smart-home', '40 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
                       '\n',
                       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
                     )], 'esphome')
                     + { spec+: { jobTemplate+: { spec+: { template+: { spec+: { affinity: {} } } } } } },
-    cronjob_restore: $._custom.cronjob_restore.new('esphome', 'smart-home', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('esphome', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host esphome --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'esphome'),

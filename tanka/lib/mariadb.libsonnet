@@ -82,16 +82,17 @@
                                           [
                                             c.new('backup', $._version.mariadb.image)
                                             + c.withVolumeMounts([
+                                              v1.volumeMount.new('ssh', '/root/.ssh', false),
                                               v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                                               v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                                             ])
-                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets'))
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                             + c.withCommand([
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
                                                 'apt update || true',
-                                                'apt install -y restic',
+                                                'apt install -y restic openssh-client',
                                                 'mkdir /dump',
                                                 'cd /dump',
                                                 std.format('mariabackup --backup --target-dir=/dump --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
@@ -101,6 +102,7 @@
                                           ])
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('mariadb')
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                      v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                       v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                       v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
                     ])
@@ -116,16 +118,17 @@
                                            [
                                              c.new('restore', $._version.mariadb.image)
                                              + c.withVolumeMounts([
+                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
                                                v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                                                v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                                              ])
-                                             + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets'))
+                                             + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                              + c.withCommand([
                                                '/bin/sh',
                                                '-ec',
                                                std.join('\n', [
                                                  'apt update || true',
-                                                 'apt install -y restic',
+                                                 'apt install -y restic openssh-client',
                                                  'mkdir /dump',
                                                  'cd /dump',
                                                  std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default.connection),
@@ -138,6 +141,7 @@
                      + $.k.batch.v1.cronJob.spec.withSuspend(true)
                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('mariadb')
                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                       v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                        v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                        v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
                      ]),

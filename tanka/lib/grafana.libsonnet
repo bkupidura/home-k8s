@@ -25,11 +25,11 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('grafana', 'monitoring', '30 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('grafana', 'monitoring', '30 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'grafana'),
-    cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'grafana'),
@@ -38,7 +38,7 @@
                 sections: {
                   server: { domain: std.format('grafana.%s', std.extVar('secrets').domain), root_url: 'https://%(domain)s/' },
                   security: { allow_embedding: true },
-                  auth: { disable_login_form: true },
+                  auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
                   'auth.generic_oauth': {
                     allow_sign_up: true,
                     api_url: 'http://authelia.home-infra:9091/api/oidc/userinfo',

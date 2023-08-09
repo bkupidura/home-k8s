@@ -2,6 +2,7 @@
 (import 'custom-resources.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
+(import 'global-resources.libsonnet') +
 (import 'basic-alerts.libsonnet') +
 (import 'victoriametrics.libsonnet') +
 (import 'coredns.libsonnet') +

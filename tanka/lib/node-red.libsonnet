@@ -18,11 +18,11 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('node-red', 'smart-home', '10 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('node-red', 'smart-home', '10 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'node-red'),
-    cronjob_restore: $._custom.cronjob_restore.new('node-red', 'smart-home', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('node-red', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host node-red --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'node-red'),

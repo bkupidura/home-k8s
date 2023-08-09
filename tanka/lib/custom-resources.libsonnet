@@ -26,35 +26,43 @@
                                                   + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withRestartPolicy('OnFailure'),
     },
     cronjob_backup: {
-      new(name, namespace, schedule, command, pvc): $._custom.cronjob.new(name + '-backup', namespace, schedule, [
-                                                      $.k.core.v1.container.new('backup', $._version.restic.image)
-                                                      + $.k.core.v1.container.withVolumeMounts([
-                                                        $.k.core.v1.volumeMount.new('data', '/data', false),
-                                                      ])
-                                                      + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets'))
-                                                      + $.k.core.v1.container.withCommand(command),
-                                                    ])
-                                                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname(name)
-                                                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('data', pvc)])
-                                                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                                                      $.k.core.v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                                                      + $.k.core.v1.podAffinityTerm.labelSelector.withMatchExpressions(
-                                                        { key: 'app.kubernetes.io/name', operator: 'In', values: [name] }
-                                                      )
-                                                    ),
+      new(name, namespace, schedule, password_secret, ssh_secret, command, pvc): $._custom.cronjob.new(name + '-backup', namespace, schedule, [
+                                                                                   $.k.core.v1.container.new('backup', $._version.restic.image)
+                                                                                   + $.k.core.v1.container.withVolumeMounts([
+                                                                                     $.k.core.v1.volumeMount.new('data', '/data', false),
+                                                                                     if ssh_secret != null then $.k.core.v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                                                                   ])
+                                                                                   + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(password_secret))
+                                                                                   + $.k.core.v1.container.withCommand(command),
+                                                                                 ])
+                                                                                 + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname(name)
+                                                                                 + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                                                                                   $.k.core.v1.volume.fromPersistentVolumeClaim('data', pvc),
+                                                                                   if ssh_secret != null then $.k.core.v1.volume.fromSecret('ssh', ssh_secret) + $.k.core.v1.volume.secret.withDefaultMode(256),
+                                                                                 ])
+                                                                                 + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
+                                                                                   $.k.core.v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                                                                                   + $.k.core.v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                                                                                     { key: 'app.kubernetes.io/name', operator: 'In', values: [name] }
+                                                                                   )
+                                                                                 ),
     },
     cronjob_restore: {
-      new(name, namespace, command, pvc): $._custom.cronjob.new(name + '-restore', namespace, '0 0 * * *', [
-                                            $.k.core.v1.container.new('restore', $._version.restic.image)
-                                            + $.k.core.v1.container.withVolumeMounts([
-                                              $.k.core.v1.volumeMount.new('data', '/data', false),
-                                            ])
-                                            + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets'))
-                                            + $.k.core.v1.container.withCommand(command),
-                                          ])
-                                          + $.k.batch.v1.cronJob.spec.withSuspend(true)
-                                          + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname(name)
-                                          + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('data', pvc)]),
+      new(name, namespace, password_secret, ssh_secret, command, pvc): $._custom.cronjob.new(name + '-restore', namespace, '0 0 * * *', [
+                                                                         $.k.core.v1.container.new('restore', $._version.restic.image)
+                                                                         + $.k.core.v1.container.withVolumeMounts([
+                                                                           $.k.core.v1.volumeMount.new('data', '/data', false),
+                                                                           if ssh_secret != null then $.k.core.v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                                                         ])
+                                                                         + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(password_secret))
+                                                                         + $.k.core.v1.container.withCommand(command),
+                                                                       ])
+                                                                       + $.k.batch.v1.cronJob.spec.withSuspend(true)
+                                                                       + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname(name)
+                                                                       + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                                                                         $.k.core.v1.volume.fromPersistentVolumeClaim('data', pvc),
+                                                                         if ssh_secret != null then $.k.core.v1.volume.fromSecret('ssh', ssh_secret) + $.k.core.v1.volume.secret.withDefaultMode(256),
+                                                                       ]),
     },
     ingress_route: {
       new(name, namespace, entrypoints, routes, tls=false): {
