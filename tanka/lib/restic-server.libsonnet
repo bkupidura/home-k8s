@@ -29,7 +29,7 @@
                                                    + $.k.core.v1.container.withVolumeMounts([
                                                      $.k.core.v1.volumeMount.new('data', '/data', false),
                                                    ])
-                                                   + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets'))
+                                                   + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets-server'))
                                                    + $.k.core.v1.container.withCommand(command),
                                                  ])
                                                  + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname(name)
@@ -46,7 +46,7 @@
                                          + $.k.core.v1.container.withVolumeMounts([
                                            $.k.core.v1.volumeMount.new('data', '/data', false),
                                          ])
-                                         + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets'))
+                                         + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName('restic-secrets-server'))
                                          + $.k.core.v1.container.withCommand(command),
                                        ])
                                        + $.k.batch.v1.cronJob.spec.withSuspend(true)

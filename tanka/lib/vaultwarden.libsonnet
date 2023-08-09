@@ -12,19 +12,20 @@
          + p.spec.resources.withRequests({ storage: '512Mi' }),
     cronjob_backup: $._custom.cronjob.new('vaultwarden-backup',
                                           'home-infra',
-                                          '55 04 * * *',
+                                          '10 05 * * *',
                                           [
                                             c.new('backup', $._version.ubuntu.image)
                                             + c.withVolumeMounts([
+                                              v1.volumeMount.new('ssh', '/root/.ssh', false),
                                               v1.volumeMount.new('vaultwarden-data', '/data', false),
                                             ])
-                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets'))
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                             + c.withCommand([
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
                                                 'apt update || true',
-                                                'apt install -y restic sqlite',
+                                                'apt install -y restic sqlite openssh-client',
                                                 'cd /data',
                                                 'sqlite3 db.sqlite3 ".backup db-backup-$(date +%s).dump"',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
@@ -33,6 +34,7 @@
                                           ])
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('vaultwarden')
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                      v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                       v1.volume.fromPersistentVolumeClaim('vaultwarden-data', 'vaultwarden'),
                     ])
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
@@ -41,7 +43,7 @@
                         { key: 'app.kubernetes.io/name', operator: 'In', values: ['vaultwarden'] }
                       )
                     ),
-    cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'home-infra', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host vaultwarden --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'vaultwarden'),

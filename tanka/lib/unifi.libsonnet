@@ -26,11 +26,11 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], false),
-    cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '00 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '00 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'unifi'),
-    cronjob_restore: $._custom.cronjob_restore.new('unifi', 'home-infra', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('unifi', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host unifi --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'unifi'),

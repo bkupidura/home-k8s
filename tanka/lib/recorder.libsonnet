@@ -80,7 +80,7 @@
                      ),
     config: v1.configMap.new('recorder-config', {
               'config.yml': std.manifestYamlDoc({
-                ssh: { user: 'recorder', key: '/secret/id_rsa', server: std.extVar('secrets').recorder.server },
+                ssh: { user: std.extVar('secrets').recorder.user, key: '/secret/id_rsa', server: std.extVar('secrets').recorder.server },
                 upload: { workers: 4, timeout: 60, max_errors: 30 },
                 record: { workers: 4, input_args: { rtsp_transport: 'tcp' }, output_args: { 'c:a': 'aac', 'c:v': 'copy' } },
                 convert: {
@@ -108,7 +108,7 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '128Mi' })
-                        + c.resources.withLimits({ memory: '256Mi' })
+                        + c.resources.withLimits({ memory: '512Mi' })
                         + c.securityContext.withPrivileged(true)
                         + c.withVolumeMounts([
                           v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),

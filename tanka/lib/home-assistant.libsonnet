@@ -42,11 +42,11 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '20 04 * * *', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '20 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'home-assistant'),
-    cronjob_restore: $._custom.cronjob_restore.new('home-assistant', 'smart-home', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('home-assistant', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host home-assistant --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'home-assistant'),
