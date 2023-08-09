@@ -24,7 +24,6 @@
 (import 'mariadb.libsonnet') +
 (import 'grafana.libsonnet') +
 (import 'unifi.libsonnet') +
-(import 'restic-server.libsonnet') +
 (import 'home-assistant.libsonnet') +
 (import 'node-red.libsonnet') +
 (import 'zigbee2mqtt.libsonnet') +
