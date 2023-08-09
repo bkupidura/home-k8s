@@ -2,10 +2,6 @@ os:
   primary_interface: enp1s0f0
   hostname: k3s-delta
   additional_mounts:
-    - path: /srv/restic
-      opts: defaults,noatime
-      src: /dev/sdb
-      fstype: ext4
     - path: /var/lib/longhorn
       opts: defaults,noatime
       src: /dev/sda3
@@ -16,7 +12,6 @@ k3s:
   labels:
     video_processing: "true"
     ups_controller: "true"
-    restic_controller: "true"
 service:
   create:
     custom-setpci:
