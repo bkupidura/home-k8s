@@ -19,7 +19,7 @@
   cert_manager: {
     namespace: $.k.core.v1.namespace.new('cert-manager'),
     secret: $.k.core.v1.secret.new('cert-manager', {
-              secret_key: std.base64(std.extVar('secrets').cert_manager.secret_key),
+              token: std.base64(std.extVar('secrets').cert_manager.digialocean.token),
             })
             + $.k.core.v1.secret.metadata.withNamespace('cert-manager'),
     helm: $._custom.helm.new('cert-manager', 'https://charts.jetstack.io', $._version.cert_manager.chart, 'cert-manager', {
@@ -64,10 +64,11 @@
           solvers: [
             {
               dns01: {
-                route53: {
-                  region: 'us-east-1',
-                  accessKeyID: std.extVar('secrets').cert_manager.access_key,
-                  secretAccessKeySecretRef: { key: 'secret_key', name: 'cert-manager' },
+                digitalocean: {
+                  tokenSecretRef: {
+                    name: 'cert-manager',
+                    key: 'token',
+                  },
                 },
               },
             },
@@ -88,6 +89,9 @@
             'reflector.v1.k8s.emberstack.com/reflection-allowed': 'true',
             'reflector.v1.k8s.emberstack.com/reflection-auto-enabled': 'true',
           },
+        },
+        privateKey: {
+          rotationPolicy: 'Always',
         },
         dnsNames: [
           std.extVar('secrets').domain,

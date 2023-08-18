@@ -576,8 +576,8 @@
       'kube-state-metrics': {
         enabled: true,
         resources: {
-          requests: { memory: '64Mi' },
-          limits: { memory: '96Mi' },
+          requests: { memory: '32Mi' },
+          limits: { memory: '64Mi' },
         },
       },
       'prometheus-node-exporter': {

@@ -104,8 +104,8 @@
                           WEBSOCKET_ENABLED: 'true',
                           DOMAIN: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         })
-                        + c.resources.withRequests({ memory: '196Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '196Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
