@@ -80,7 +80,7 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '128Mi' })
+                        + c.resources.withLimits({ memory: '96Mi' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd('NET_BIND_SERVICE')

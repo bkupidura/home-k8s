@@ -159,6 +159,15 @@
             },
           },
           {
+            alert: 'K8sHighMemoryPodLimit',
+            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.3',
+            'for': '60m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'POD {{ $labels.pod }} in last 14 days is using only {{ $value | humanizePercentage }} of memory limit',
+            },
+          },
+          {
             alert: 'K8sClusterRunningDifferentK8sVersionComponets',
             expr: 'count (count by (git_version) (kubernetes_build_info)) > 1',
             'for': '10m',
