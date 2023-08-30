@@ -90,7 +90,7 @@
       image: 'ghcr.io/blakeblackshear/frigate:0.12.1',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.7.1',
+      image: 'homeassistant/home-assistant:2023.8.3',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
