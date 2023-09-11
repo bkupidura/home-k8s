@@ -44,6 +44,7 @@
       waf: '10.0.10.47',
       webrtc: '10.0.10.48',
     },
+    kubernetes_internal_cidr: '10.42.0.0/16',
     tz: 'Europe/Warsaw',
     chrony: {
       allow: [
@@ -118,7 +119,7 @@
     traefik: {
       ip_whitelist: [
         '10.0.120.0/24',
-        '10.0.130.0/24',
+        '10.0.20.0/24',
       ],
     },
     waf: {

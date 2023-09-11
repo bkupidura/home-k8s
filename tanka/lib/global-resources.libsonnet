@@ -40,4 +40,15 @@
                                                      ]) else {}
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
   },
+  multus_dhcp: {
+    apiVersion: 'k8s.cni.cncf.io/v1',
+    kind: 'NetworkAttachmentDefinition',
+    metadata: {
+      name: 'multus-dhcp',
+      namespace: 'home-infra',
+    },
+    spec: {
+      config: '{\n            "name": "multus-dhcp",\n            "plugins": [\n                {\n                    "type": "macvlan",\n                    "master": "net0",\n                    "ipam": {\n                        "type": "dhcp"\n                    }\n                }\n            ]\n        }',
+    },
+  },
 }

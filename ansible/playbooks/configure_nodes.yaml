@@ -25,6 +25,19 @@
     - k8s_master
   gather_facts: true
   tasks:
+    - name: Configure networking
+      vars:
+        primary_interface: "{{ os.primary_interface }}"
+        primary_mac: "{{ os.primary_mac | default(false) }}"
+        dns_servers: "{{ global.dns.servers }}"
+      include_tasks: tasks/configure_networking.yaml
+
+- name: Configure k8s master
+  hosts:
+    - k8s_master_primary
+    - k8s_master
+  gather_facts: true
+  tasks:
     - name: Base config
       vars:
         timezone: "{{ global.timezone }}"
@@ -32,12 +45,6 @@
         swap_file: "{{ os.swap_file }}"
         ssh_keys: "{{ os.ssh_keys + [ ansible_global_ssh_key ] }}"
       include_tasks: tasks/base_config.yaml
-
-    - name: Configure networking
-      vars:
-        primary_interface: "{{ os.primary_interface }}"
-        dns_servers: "{{ global.dns.servers }}"
-      include_tasks: tasks/configure_networking.yaml
 
     - name: Mount additional disks
       vars:

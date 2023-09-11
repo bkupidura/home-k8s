@@ -22,3 +22,23 @@
   register: k3s_ready
   until: k3s_ready.rc == 0
   become: true
+
+- name: Unpack CNI
+  unarchive:
+    src: "{{ k3s.cni_url }}"
+    dest: /var/lib/rancher/k3s/data/current/bin/
+    remote_src: yes
+
+- name: Manage services
+  vars:
+    create: "{{ k3s.service.create }}"
+  include_tasks: tasks/manage_services.yaml
+
+- name: Deploy multus CNI
+  vars:
+    create:
+      custom-multus-cni-manifest:
+        dst: /var/lib/rancher/k3s/server/manifests/multus-daemonset.yaml
+        src: "../templates/multus-daemonset.yaml"
+        permission: "0644"
+  include_tasks: tasks/custom_files.yaml

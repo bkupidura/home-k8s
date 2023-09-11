@@ -1,5 +1,6 @@
 os:
-  primary_interface: enp1s0f0
+  primary_interface: net0
+  primary_mac: 68:5b:35:94:95:84
   hostname: k3s-delta
   additional_mounts:
     - path: /var/lib/longhorn
