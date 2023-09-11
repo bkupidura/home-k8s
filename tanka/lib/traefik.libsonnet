@@ -27,7 +27,6 @@
     ],
   },
   traefik: {
-    kubelet_cluster_cidr:: '10.42.0.0/16',
     namespace: $.k.core.v1.namespace.new('traefik-system'),
     helm: $._custom.helm.new('traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
       resources: {
@@ -68,8 +67,8 @@
       additionalArguments: [
         '--accesslog',
         '--serversTransport.insecureSkipVerify=true',
-        std.format('--entryPoints.web.forwardedHeaders.trustedIPs=%s', $.traefik.kubelet_cluster_cidr),
-        std.format('--entryPoints.websecure.forwardedHeaders.trustedIPs=%s', $.traefik.kubelet_cluster_cidr),
+        std.format('--entryPoints.web.forwardedHeaders.trustedIPs=%s', $._config.kubernetes_internal_cidr),
+        std.format('--entryPoints.websecure.forwardedHeaders.trustedIPs=%s', $._config.kubernetes_internal_cidr),
         '--log',
         '--log.level=INFO',
         '--metrics.prometheus=true',

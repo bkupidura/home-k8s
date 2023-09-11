@@ -1,6 +1,11 @@
 network:
   ethernets:
     {{ primary_interface }}:
+{% if primary_mac != false %}
+      match:
+        macaddress: {{ primary_mac }}
+      set-name: {{ primary_interface }}
+{% endif %}
       dhcp4: true
       dhcp4-overrides:
         use-dns: false

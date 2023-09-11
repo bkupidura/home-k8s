@@ -1,5 +1,6 @@
 os:
-  primary_interface: eno1
+  primary_interface: net0
+  primary_mac: 00:23:24:ac:fb:8a
   hostname: k3s-charlie
   additional_mounts:
     - path: /var/lib/longhorn

@@ -1,5 +1,6 @@
 os:
-  primary_interface: eno1
+  primary_interface: net0
+  primary_mac: d8:cb:8a:d1:50:25
   hostname: k3s-bravo
   additional_mounts:
     - path: /var/lib/longhorn
