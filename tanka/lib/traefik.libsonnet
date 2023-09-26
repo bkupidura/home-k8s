@@ -98,11 +98,14 @@
         },
       },
     }),
-    middleware_lan_whitelist: $._custom.traefik_middleware.new('lan-whitelist', {
-      ipWhiteList: {
-        sourceRange: $._config.traefik.ip_whitelist,
-      },
-    }),
+    middleware_whitelist: {
+      [std.format('whitelist_%s', whitelist_name)]: $._custom.traefik_middleware.new(std.format('%s-whitelist', whitelist_name), {
+        ipWhiteList: {
+          sourceRange: $._config.traefik.whitelist[whitelist_name],
+        },
+      })
+      for whitelist_name in std.objectFields($._config.traefik.whitelist)
+    },
     middleware_x_forward_proto_https: $._custom.traefik_middleware.new('x-forwarded-proto-https', {
       headers: {
         customRequestHeaders: {

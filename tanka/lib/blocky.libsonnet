@@ -53,13 +53,13 @@
                   processingConcurrency: 4,
                   refreshPeriod: '120m',
                   blockType: 'zeroIP',
-                  [if $._config.blocky.blacklist != null then 'blackLists']: $._config.blocky.blacklist,
-                  [if $._config.blocky.blacklist != null then 'clientGroupsBlock']: {
+                  [if std.get($._config.blocky, 'blacklist') != null then 'blackLists']: $._config.blocky.blacklist,
+                  [if std.get($._config.blocky, 'blacklist') != null then 'clientGroupsBlock']: {
                     default: std.objectFields($._config.blocky.blacklist),
                   },
                 },
-                [if $._config.blocky.conditional != null then 'conditional']: $._config.blocky.conditional,
-                [if $._config.blocky.custom_dns != null then 'customDNS']: $._config.blocky.custom_dns,
+                [if std.get($._config.blocky, 'conditional') != null then 'conditional']: $._config.blocky.conditional,
+                [if std.get($._config.blocky, 'custom_dns') != null then 'customDNS']: $._config.blocky.custom_dns,
               }),
             })
             + v1.configMap.metadata.withNamespace('home-infra'),

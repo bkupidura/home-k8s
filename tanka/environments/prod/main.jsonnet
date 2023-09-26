@@ -35,6 +35,7 @@
 {
   _config:: {
     restore: false,
+    core_dns: '10.0.120.1',
     vip: {
       dns: '10.0.10.40',
       ingress: '10.0.10.42',
@@ -67,27 +68,9 @@
     },
     blocky: {
       conditional: {
-        mapping: { home: '10.0.120.1' },
-      },
-      custom_dns: {
         mapping: {
-          [std.format('esphome.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('grafana.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('storage.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('traefik.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('alertmanager.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('vm-server.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('vm-alert.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('frigate.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('recorder.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('unifi.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('node-red.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('z2m.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('ha.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('auth.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('restic.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('vaultwarden.%s', std.extVar('secrets').domain)]: $._config.vip.ingress,
-          [std.format('mqtt.%s', std.extVar('secrets').domain)]: $._config.vip.mqtt,
+          home: $._config.core_dns,
+          [std.extVar('secrets').domain]: $._config.core_dns,
         },
       },
       blacklist: {
@@ -117,10 +100,22 @@
       },
     },
     traefik: {
-      ip_whitelist: [
-        '10.0.120.0/24',
-        '10.0.20.0/24',
-      ],
+      whitelist: {
+        lan: [
+          '10.0.120.0/24',
+          '10.0.20.0/24',
+        ],
+        languest: [
+          '10.0.120.0/24',
+          '10.0.20.0/24',
+          '10.0.160.0/24',
+        ],
+        lanmgmt: [
+          '10.0.120.0/24',
+          '10.0.20.0/24',
+          '10.0.100.0/24',
+        ],
+      },
     },
     waf: {
       server: {
@@ -141,15 +136,6 @@
             'SecRuleRemoveById 941100',
             'SecRuleRemoveById 932140',
             'SecRuleRemoveById 942390',
-          ],
-        },
-        auth: {
-          rules: [
-            'SecRuleRemoveById 942421',
-            'SecRuleRemoveById 920273',
-            'SecRuleRemoveById 920272',
-            'SecRuleRemoveById 931130',
-            'SecRuleRemoveById 941101',
           ],
         },
         vaultwarden: {

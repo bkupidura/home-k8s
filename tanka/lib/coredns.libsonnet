@@ -29,15 +29,6 @@
                           ),
     config: v1.configMap.new('coredns', {
               Corefile: |||
-                %(forward_domain)s:53 {
-                    errors
-                    health
-                    ready
-                    forward . %(upstream_server)s:53
-                    loop
-                    reload
-                    loadbalance
-                }
                 .:53 {
                     errors
                     health
@@ -47,13 +38,13 @@
                         fallthrough in-addr.arpa ip6.arpa
                     }
                     prometheus :9153
-                    forward . /etc/resolv.conf
+                    forward . %(upstream_server)s:53
                     cache 30
                     loop
                     reload
                     loadbalance
                 }
-              ||| % { forward_domain: std.join(' ', ['home', std.extVar('secrets').domain]), upstream_server: $._config.vip.dns },
+              ||| % { upstream_server: $._config.core_dns },
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [
