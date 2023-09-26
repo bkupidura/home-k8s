@@ -39,7 +39,7 @@
         kind: 'Rule',
         match: std.format('Host(`ha.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'languest-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], true),
     ingress_route: $._custom.ingress_route.new('home-assistant', 'smart-home', ['web'], [
@@ -47,7 +47,7 @@
         kind: 'Rule',
         match: std.format('Host(`ha.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'languest-whitelist', namespace: 'traefik-system' }],
       },
     ], false),
     cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '20 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(

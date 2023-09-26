@@ -15,7 +15,7 @@
         kind: 'Rule',
         match: std.format('Host(`unifi.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'unifi', port: 443, namespace: 'home-infra', scheme: 'https' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], true),
     ingress_route_http: $._custom.ingress_route.new('unifi-http', 'home-infra', ['web'], [
@@ -23,7 +23,7 @@
         kind: 'Rule',
         match: std.format('Host(`unifi.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'unifi', port: 80, namespace: 'home-infra', scheme: 'http' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }],
       },
     ], false),
     cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '00 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
