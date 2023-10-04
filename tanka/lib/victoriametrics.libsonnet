@@ -2,6 +2,22 @@
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
   monitoring+: {
+    extra_scrape+:: {
+      blackbox_icmp_infra: {
+        job_name: 'blackbox-icmp-infra',
+        relabel_configs: [
+          { source_labels: ['__address__'], target_label: '__param_target'},
+          { source_labels: ['__param_target'], target_label: 'instance'},
+          { target_label: '__address__', replacement: 'prometheus-blackbox-exporter.monitoring:9115'},
+        ],
+        metrics_path: '/probe',
+        params: {
+            module: ['icmp'],
+        },
+        scrape_interval: '10s',
+        static_configs: std.extVar('secrets').monitoring.target.infra,
+      },
+    },
     rules+:: [
       {
         name: 'victoria-metrics',
@@ -13,6 +29,15 @@
             labels: { service: 'victoria-metrics', severity: 'warning' },
             annotations: {
               summary: 'Prometheus instance {{ $labels.instance }} is down for job {{ $labels.job }}',
+            },
+          },
+          {
+            alert: 'BlackboxExporterProbeFailure',
+            expr: '1 - avg_over_time(probe_success[10m]) > 0.25',
+            'for': '5m',
+            labels: { service: 'blackbox-exporter', severity: 'warning' },
+            annotations: {
+              summary: 'Blackbox-exporter {{ $labels.name }} is failing for job {{ $labels.job }}',
             },
           },
           {
@@ -511,6 +536,25 @@
                 ],
               },
             ],
+          },
+        },
+      },
+    }),
+    helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
+      securityContext: {
+        capabilities: {
+          drop: ['ALL'],
+          add: ['NET_RAW'],
+        },
+      },
+      config: {
+        modules: {
+          icmp: {
+            prober: 'icmp',
+            timeout: '2s',
+            icmp: {
+              preferred_ip_protocol: 'ip4',
+            },
           },
         },
       },

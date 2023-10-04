@@ -61,38 +61,6 @@
     service: s.new('home-assistant', { 'app.kubernetes.io/name': 'home-assistant' }, [v1.servicePort.withPort(8123) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' }),
-    service_lb_tcp: s.new(
-                      'home-assistant-vip-tcp',
-                      { 'app.kubernetes.io/name': 'home-assistant' },
-                      [
-                        v1.servicePort.withPort(1400) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('sonos') + v1.servicePort.withTargetPort('sonos'),
-                      ]
-                    )
-                    + s.metadata.withNamespace('smart-home')
-                    + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
-                    + s.metadata.withAnnotations({
-                      'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant,
-                      'metallb.universe.tf/loadBalancerIPs': $._config.vip.home_assistant,
-                    })
-                    + s.spec.withType('LoadBalancer')
-                    + s.spec.withExternalTrafficPolicy('Local')
-                    + s.spec.withPublishNotReadyAddresses(false),
-    service_lb_udp: s.new(
-                      'home-assistant-vip-udp',
-                      { 'app.kubernetes.io/name': 'home-assistant' },
-                      [
-                        v1.servicePort.withPort(5683) + v1.servicePort.withProtocol('UDP') + v1.servicePort.withName('shelly-coap') + v1.servicePort.withTargetPort('shelly-coap'),
-                      ]
-                    )
-                    + s.metadata.withNamespace('smart-home')
-                    + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' })
-                    + s.metadata.withAnnotations({
-                      'metallb.universe.tf/allow-shared-ip': $._config.vip.home_assistant,
-                      'metallb.universe.tf/loadBalancerIPs': $._config.vip.home_assistant,
-                    })
-                    + s.spec.withType('LoadBalancer')
-                    + s.spec.withExternalTrafficPolicy('Local')
-                    + s.spec.withPublishNotReadyAddresses(false),
     deployment: d.new('home-assistant',
                       if $._config.restore then 0 else 1,
                       [
@@ -124,8 +92,9 @@
                 + d.spec.template.spec.withEnableServiceLinks(true)
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
-                + d.spec.template.spec.withHostNetwork(true)
-                + d.spec.template.spec.withDnsPolicy('ClusterFirstWithHostNet')
+                + d.spec.template.metadata.withAnnotations({
+                  'k8s.v1.cni.cncf.io/networks': '[{"name": "multus-dhcp-lan", "mac": "e8:d1:44:8d:65:b0"}, {"name": "multus-dhcp-iot", "mac": "e8:d1:44:8d:65:b1"}]',
+                })
                 + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
                   v1.weightedPodAffinityTerm.withWeight(1)
                   + v1.weightedPodAffinityTerm.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')

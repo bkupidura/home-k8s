@@ -30,6 +30,7 @@
         primary_interface: "{{ os.primary_interface }}"
         primary_mac: "{{ os.primary_mac | default(false) }}"
         dns_servers: "{{ global.dns.servers }}"
+        vlans: "{{ os.vlans | default(false) }}"
       include_tasks: tasks/configure_networking.yaml
 
 - name: Configure k8s master
