@@ -75,7 +75,7 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.32.1',
+      image: 'koenkk/zigbee2mqtt:1.33.1',
     },
     esphome: {
       image: 'esphome/esphome:2023.6',
@@ -90,7 +90,7 @@
       image: 'ghcr.io/blakeblackshear/frigate:0.12.1',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.8.3',
+      image: 'homeassistant/home-assistant:2023.9.3',
     },
     node_red: {
       image: 'nodered/node-red:3.0.2-18',
@@ -106,6 +106,9 @@
     },
     prometheus: {
       chart: '23.0.0',
+    },
+    blackbox_exporter: {
+      chart: '8.4.0',
     },
     victoria_metrics: {
       alert: {

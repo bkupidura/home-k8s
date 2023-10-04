@@ -16,4 +16,12 @@ network:
         - {{ s }}
 {% endif %}
 {% endfor %}
+{% if vlans != false %}
+  vlans:
+{% for v in vlans %}
+    vlan{{ v }}:
+      id: {{ v }}
+      link: {{ primary_interface }}
+{% endfor %}
+{% endif %}
   version: 2

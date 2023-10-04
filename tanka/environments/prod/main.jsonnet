@@ -1,9 +1,9 @@
 (import 'version.jsonnet') +
 (import 'custom-resources.libsonnet') +
+(import 'global-resources.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
-(import 'global-resources.libsonnet') +
-(import 'basic-alerts.libsonnet') +
+(import 'basic-monitoring.libsonnet') +
 (import 'victoriametrics.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'kubefledged.libsonnet') +
@@ -41,7 +41,6 @@
       ingress: '10.0.10.42',
       mqtt: '10.0.10.43',
       ntp: '10.0.10.45',
-      home_assistant: '10.0.10.46',
       waf: '10.0.10.47',
       webrtc: '10.0.10.48',
     },

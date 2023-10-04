@@ -1,6 +1,9 @@
+
 os:
   primary_interface: net0
   primary_mac: 00:23:24:ac:fb:8a
+  vlans:
+    - 200
   hostname: k3s-charlie
   additional_mounts:
     - path: /var/lib/longhorn
