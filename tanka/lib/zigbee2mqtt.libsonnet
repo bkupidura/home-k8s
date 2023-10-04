@@ -78,10 +78,11 @@
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.tcpSocket.withPort('http')
+                        + c.livenessProbe.httpGet.withPath('/')
+                        + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(120)
                         + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(1),
+                        + c.livenessProbe.withTimeoutSeconds(3),
                       ],
                       { 'app.kubernetes.io/name': 'zigbee2mqtt' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyacm0', '/dev/ttyACM0') + v1.volume.hostPath.withType('CharDevice'))
