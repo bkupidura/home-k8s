@@ -8,7 +8,7 @@
     pvc: p.new('vaultwarden')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
+         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '512Mi' }),
     cronjob_backup: $._custom.cronjob.new('vaultwarden-backup',
                                           'home-infra',

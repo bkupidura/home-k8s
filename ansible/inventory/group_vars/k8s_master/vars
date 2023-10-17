@@ -16,6 +16,7 @@ package:
     - cpufrequtils
     - avahi-daemon
     - jq
+    - cryptsetup
   remove:
     - snapd
 os:

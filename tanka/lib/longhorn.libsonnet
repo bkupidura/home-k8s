@@ -43,6 +43,13 @@
       },
     ],
   },
+  secret: {
+    global: $.k.core.v1.secret.new('longhorn-encryption-global', {
+                                                    CRYPTO_KEY_VALUE: std.base64(std.extVar('secrets').longhorn.encryption.global),
+                                                    CRYPTO_KEY_PROVIDER: std.base64('secret'),
+                                                  })
+                                                  + $.k.core.v1.secret.metadata.withNamespace('longhorn-system')
+  },
   storage: {
     class_without_snapshot: s.storageClass.new('longhorn-standard')
                             + s.storageClass.withProvisioner('driver.longhorn.io')
@@ -62,6 +69,23 @@
                            staleReplicaTimeout: '360',
                            fromBackup: '',
                            recurringJobs: '[ { "name":"snap", "task":"snapshot", "cron":"15 */3 * * *", "retain": 8 } ]',
+                         }),
+    class_with_encryption: s.storageClass.new('longhorn-encrypted')
+                         + s.storageClass.withProvisioner('driver.longhorn.io')
+                         + s.storageClass.withAllowVolumeExpansion(true)
+                         + s.storageClass.withMountOptions(['noatime'])
+                         + s.storageClass.withParameters({
+                           numberOfReplicas: '3',
+                           staleReplicaTimeout: '360',
+                           fromBackup: '',
+                           recurringJobs: '[ { "name":"snap", "task":"snapshot", "cron":"15 */3 * * *", "retain": 8 } ]',
+                           encrypted: 'true',
+                           'csi.storage.k8s.io/provisioner-secret-name': 'longhorn-encryption-global',
+                           'csi.storage.k8s.io/provisioner-secret-namespace': 'longhorn-system',
+                           'csi.storage.k8s.io/node-publish-secret-name': 'longhorn-encryption-global',
+                           'csi.storage.k8s.io/node-publish-secret-namespace': 'longhorn-system',
+                           'csi.storage.k8s.io/node-stage-secret-name': 'longhorn-encryption-global',
+                           'csi.storage.k8s.io/node-stage-secret-namespace': 'longhorn-system',
                          }),
   },
   longhorn: {

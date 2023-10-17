@@ -50,7 +50,7 @@
     pvc: p.new('authelia')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
+         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '124Mi' }),
     service: s.new('authelia', { 'app.kubernetes.io/name': 'authelia' }, [v1.servicePort.withPort(9091) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('authelia')])
              + s.metadata.withNamespace('home-infra')
@@ -142,8 +142,10 @@
                   disable: false,
                 },
                 server: {
-                  read_buffer_size: 16384,
-                  write_buffer_size: 16384,
+                  buffers: {
+                    read: 16384,
+                    write: 16384,
+                  },
                 },
               }, std.extVar('secrets').authelia.config)),
             })
