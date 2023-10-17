@@ -6,13 +6,13 @@
       blackbox_icmp_infra: {
         job_name: 'blackbox-icmp-infra',
         relabel_configs: [
-          { source_labels: ['__address__'], target_label: '__param_target'},
-          { source_labels: ['__param_target'], target_label: 'instance'},
-          { target_label: '__address__', replacement: 'prometheus-blackbox-exporter.monitoring:9115'},
+          { source_labels: ['__address__'], target_label: '__param_target' },
+          { source_labels: ['__param_target'], target_label: 'instance' },
+          { target_label: '__address__', replacement: 'prometheus-blackbox-exporter.monitoring:9115' },
         ],
         metrics_path: '/probe',
         params: {
-            module: ['icmp'],
+          module: ['icmp'],
         },
         scrape_interval: '10s',
         static_configs: std.extVar('secrets').monitoring.target.infra,
@@ -546,6 +546,10 @@
           drop: ['ALL'],
           add: ['NET_RAW'],
         },
+      },
+      resources: {
+        requests: { memory: '16Mi', cpu: '20m' },
+        limits: { memory: '32Mi', cpu: '50m' },
       },
       config: {
         modules: {
