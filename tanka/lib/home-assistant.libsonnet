@@ -26,7 +26,7 @@
     pvc: p.new('home-assistant')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_with_snapshot.metadata, 'name'))
+         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '5Gi' }),
     ingress_route_ssl: $._custom.ingress_route.new('home-assistant-ssl', 'smart-home', ['websecure'], [
       {
