@@ -162,8 +162,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '256Mi', cpu: '80m' })
+                        + c.resources.withLimits({ memory: '256Mi', cpu: '80m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
