@@ -32,6 +32,8 @@
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
 (import 'vaultwarden.libsonnet') +
+(import 'redis.libsonnet') +
+(import 'nextcloud.libsonnet') +
 {
   _config:: {
     restore: false,
@@ -158,6 +160,50 @@
             'SecRuleRemoveById 911100',
             'SecRuleRemoveById 920272',
             'SecRuleRemoveById 942421',
+          ],
+        },
+        auth: {
+          rules: [
+            'SecRuleRemoveById 942421',
+            'SecRuleRemoveById 920273',
+            'SecRuleRemoveById 920272',
+            'SecRuleRemoveById 931130',
+            'SecRuleRemoveById 941101',
+            'SecRuleRemoveById 920230',
+            'SecRuleRemoveById 932200',
+            'SecRuleRemoveById 932190',
+            'SecRuleRemoveById 942430',
+            'SecRuleRemoveById 942431',
+            'SecRuleRemoveById 942432',
+            'SecRuleRemoveById 949110',
+          ],
+        },
+        files: {
+          rules: [
+            'SecRuleRemoveById 942421',
+            'SecRuleRemoveById 920273',
+            'SecRuleRemoveById 921110',
+            'SecRuleRemoveById 933190',
+            'SecRuleRemoveById 941100',
+            'SecRuleRemoveById 941130',
+            'SecRuleRemoveById 941330',
+            'SecRuleRemoveById 941340',
+            'SecRuleRemoveById 942110',
+            'SecRuleRemoveById 942210',
+            'SecRuleRemoveById 942340',
+            'SecRuleRemoveById 942490',
+            'SecRuleRemoveById 942431',
+            'SecRuleRemoveById 942460',
+            'SecRuleRemoveById 942432',
+            'SecRuleRemoveById 949110',
+            'SecRuleRemoveById 911100',
+            'SecRuleRemoveById 920272',
+            'SecRuleRemoveById 942430',
+            'SecRuleRemoveById 942130',
+            'SecRuleRemoveById 920420',
+            'SecRuleRemoveById 942440',
+            'SecRuleRemoveById 920274',
+            'SecRuleRemoveById 921422',
           ],
         },
       },

@@ -150,6 +150,9 @@
               CREATE DATABASE homeassistant CHARACTER SET utf8mb4;
               CREATE USER 'homeassistant'@'!!' IDENTIFIED BY '%(homeassistant_password)s';
               GRANT ALL PRIVILEGES ON homeassistant.* TO 'homeassistant'@'!!';
+              CREATE DATABASE nextcloud CHARACTER SET utf8mb4;
+              CREATE USER 'nextcloud'@'!!' IDENTIFIED BY '%(nextcloud_password)s';
+              GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'!!';
               FLUSH PRIVILEGES;
             ||| % std.extVar('secrets').mariadb.init_script, '!!', '%'),
           })
@@ -167,7 +170,7 @@
 
                 max_allowed_packet=1M
                 key_buffer_size=10M
-                max_connections=64
+                max_connections=128
                 myisam_recover_options = FORCE
                 myisam_sort_buffer_size = 8M
                 net_buffer_length = 16K

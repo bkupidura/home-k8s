@@ -5,15 +5,6 @@
         name: 'traefik',
         rules: [
           {
-            alert: 'TraefikServiceErrors4XX',
-            expr: 'sum by (service, protocol) (delta(traefik_service_requests_total{code=~"4.."}[5m])) / sum by(service, protocol) (delta(traefik_service_requests_total{code!~"(4|5).."}[5m])) > 0.3',
-            'for': '10m',
-            labels: { service: 'traefik', severity: 'warning' },
-            annotations: {
-              summary: 'Traefik service requests error (4XX) increase for {{ $labels.protocol }}/{{ $labels.service }}',
-            },
-          },
-          {
             alert: 'TraefikServiceErrors5XX',
             expr: 'sum by (service, protocol) (delta(traefik_service_requests_total{code=~"5.."}[5m])) / sum by(service, protocol) (delta(traefik_service_requests_total{code!~"(4|5).."}[5m])) > 0.1',
             'for': '10m',
