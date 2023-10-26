@@ -13,7 +13,7 @@
           ssl_certificate_key /ssl/tls.key;
           ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
           ssl_prefer_server_ciphers on;
-          ssl_protocols TLSv1.2 TLSv1.3;
+          ssl_protocols TLSv1.3;
           ssl_verify_client off;
           modsecurity_rules '
             %(server_rules)s
@@ -30,7 +30,7 @@
             proxy_http_version 1.1;
             proxy_buffering off;
             proxy_connect_timeout 5s;
-            proxy_read_timeout 15s;
+            proxy_read_timeout 60s;
             proxy_redirect off;
             proxy_pass_header Authorization;
             proxy_pass $upstream;
@@ -67,10 +67,10 @@
                           PARANOIA: '4',
                           ANOMALY_INBOUND: '5',
                           ANOMALY_OUTBOUND: '4',
-                          ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE',
+                          ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
-                        + c.resources.withRequests({ memory: '64Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '64Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
