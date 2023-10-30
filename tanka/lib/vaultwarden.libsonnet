@@ -110,10 +110,11 @@
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.tcpSocket.withPort('http')
+                        + c.livenessProbe.httpGet.withPath('/alive')
+                        + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
                         + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(1),
+                        + c.livenessProbe.withTimeoutSeconds(3),
                       ],
                       { 'app.kubernetes.io/name': 'vaultwarden' })
                 + d.pvcVolumeMount('vaultwarden', '/data', false, {})
