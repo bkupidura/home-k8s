@@ -36,8 +36,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '8Mi', cpu: '20m' })
-                        + c.resources.withLimits({ memory: '64Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '8Mi', cpu: '10m' })
+                        + c.resources.withLimits({ memory: '32Mi', cpu: '30m' })
                         + c.readinessProbe.tcpSocket.withPort('redis')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)

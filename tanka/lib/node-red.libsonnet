@@ -39,8 +39,8 @@
                           TZ: $._config.tz,
                           FLOWS: 'flows.json',
                         })
-                        + c.resources.withRequests({ memory: '384Mi', cpu: '500m' })
-                        + c.resources.withLimits({ memory: '384Mi', cpu: '500m' })
+                        + c.resources.withRequests({ memory: '256Mi', cpu: '500m' })
+                        + c.resources.withLimits({ memory: '256Mi', cpu: '500m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
