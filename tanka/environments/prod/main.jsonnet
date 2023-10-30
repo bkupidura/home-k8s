@@ -34,6 +34,7 @@
 (import 'vaultwarden.libsonnet') +
 (import 'redis.libsonnet') +
 (import 'nextcloud.libsonnet') +
+(import 'freshrss.libsonnet') +
 {
   _config:: {
     restore: false,

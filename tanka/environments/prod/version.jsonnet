@@ -127,5 +127,8 @@
     redis: {
       image: 'redis:7.2.2-alpine',
     },
+    freshrss: {
+      image: 'freshrss/freshrss:1.22.0',
+    },
   },
 }
