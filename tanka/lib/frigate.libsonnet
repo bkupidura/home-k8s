@@ -142,10 +142,11 @@
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.tcpSocket.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
+                        + c.livenessProbe.httpGet.withPath('/api/')
+                        + c.livenessProbe.httpGet.withPort('http')
+                        + c.livenessProbe.withInitialDelaySeconds(60)
                         + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(1),
+                        + c.livenessProbe.withTimeoutSeconds(3),
                       ],
                       { 'app.kubernetes.io/name': 'frigate' })
                 + d.spec.template.spec.withVolumes([

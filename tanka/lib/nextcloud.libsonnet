@@ -51,22 +51,24 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '256Mi', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '768Mi', cpu: '500m' })
+                        + c.resources.withLimits({ memory: '512Mi', cpu: '500m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.tcpSocket.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(10)
-                        + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(1),
+                        + c.livenessProbe.httpGet.withPath('/status.php')
+                        + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
+                        + c.livenessProbe.httpGet.withPort('http')
+                        + c.livenessProbe.withInitialDelaySeconds(30)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(3),
                         c.new('cron', $._version.nextcloud.image)
                         + c.withCommand([
                           '/cron.sh',
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '64Mi' })
-                        + c.resources.withLimits({ memory: '128Mi' }),
+                        + c.resources.withRequests({ memory: '32Mi' })
+                        + c.resources.withLimits({ memory: '96Mi' }),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })
                 + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})
