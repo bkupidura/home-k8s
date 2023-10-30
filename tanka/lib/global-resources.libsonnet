@@ -40,7 +40,7 @@
                                                      ]) else {}
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
   },
-  multus_dhcp_lan: {
+  multus_dhcp_lan_smart_home: {
     apiVersion: 'k8s.cni.cncf.io/v1',
     kind: 'NetworkAttachmentDefinition',
     metadata: {
@@ -51,7 +51,7 @@
       config: '{\n            "name": "multus-dhcp-lan",\n            "plugins": [\n                {\n                    "type": "macvlan",\n                    "master": "net0",\n                    "ipam": {\n                        "type": "dhcp"\n                    }\n                }\n            ]\n        }',
     },
   },
-  multus_dhcp_iot: {
+  multus_dhcp_iot_smart_home: {
     apiVersion: 'k8s.cni.cncf.io/v1',
     kind: 'NetworkAttachmentDefinition',
     metadata: {
