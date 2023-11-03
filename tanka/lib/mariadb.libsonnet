@@ -220,6 +220,7 @@
                           TZ: $._config.tz,
                           LD_PRELOAD: '/usr/lib/x86_64-linux-gnu/libjemalloc.so.2',
                           MARIADB_ROOT_PASSWORD: std.extVar('secrets').mariadb.password,
+                          MARIADB_AUTO_UPGRADE: '1',
                         })
                         + c.withVolumeMounts([
                           v1.volumeMount.new('mariadb-init', '/docker-entrypoint-initdb.d/', true),
@@ -231,7 +232,7 @@
                         + c.readinessProbe.exec.withCommand([
                           '/bin/bash',
                           '-ec',
-                          std.format('/usr/bin/mysqladmin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                          std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
                         ])
                         + c.readinessProbe.withInitialDelaySeconds(20)
                         + c.readinessProbe.withPeriodSeconds(15)
@@ -239,7 +240,7 @@
                         + c.livenessProbe.exec.withCommand([
                           '/bin/bash',
                           '-ec',
-                          std.format('/usr/bin/mysqladmin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                          std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
                         ])
                         + c.livenessProbe.withInitialDelaySeconds(90)
                         + c.livenessProbe.withPeriodSeconds(15)

@@ -31,7 +31,7 @@ pip3 install ansible
 ## Deploy k8s workload
 
 ```
-jb install github.com/jsonnet-libs/k8s-libsonnet/1.26@main
+jb install github.com/jsonnet-libs/k8s-libsonnet/1.27@main
 ./scripts/tanka apply tanka/environments/prod/
 ```
 
