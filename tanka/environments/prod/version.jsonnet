@@ -76,7 +76,8 @@
       image: 'grafana/grafana:10.2.0',
     },
     loki: {
-      chart: '2.9.11',
+      server: '5.36.3',
+      fluentbit: '0.40.0',
     },
     frigate: {
       image: 'ghcr.io/blakeblackshear/frigate:0.12.1',

@@ -103,6 +103,10 @@
                   expiration: 3600,
                   remember_me_duration: 2592000,
                 },
+                log: {
+                  level: 'info',
+                  format: 'json',
+                },
                 notifier: {
                   disable_startup_check: true,
                   smtp: {
@@ -179,6 +183,7 @@
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '9959',
+                  'fluentbit.io/parser': 'json',
                 }),
   },
 }

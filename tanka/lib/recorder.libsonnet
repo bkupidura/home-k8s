@@ -45,7 +45,7 @@
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '10Gi' }),
+         + p.spec.resources.withRequests({ storage: '12Gi' }),
     ingress_route: $._custom.ingress_route.new('recorder', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',

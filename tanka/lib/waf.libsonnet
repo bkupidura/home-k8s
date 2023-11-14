@@ -3,6 +3,18 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  logging+: {
+    parsers+:: {
+      waf: |||
+        [PARSER]
+            name waf
+            format regex
+            regex ^(?<remote_addr>[^ ]*)\/(?<http_x_forwarded_for>[^ ]*) - (?<host>[^ ]*) (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*) (?:"(?<request_filename>[^\"]*)" "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")
+            time_key time
+            time_format %d/%b/%Y:%H:%M:%S %z
+      |||,
+    },
+  },
   waf: {
     nginx_snippet:: |||
       server {
@@ -82,6 +94,7 @@
                 + d.secretVolumeMount(std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls', '/ssl', 256, {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')
+                + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'waf' })
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3),
   },
 }

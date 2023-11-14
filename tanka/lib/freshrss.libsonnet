@@ -34,7 +34,7 @@
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host freshrss --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'freshrss'),
     deployment: d.new('freshrss',
-                      1,
+                      if $._config.restore then 0 else 1,
                       [
                         c.new('freshrss', $._version.freshrss.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -61,6 +61,7 @@
                       { 'app.kubernetes.io/name': 'freshrss' })
                 + d.pvcVolumeMount('freshrss', '/var/www/FreshRSS/data', false, {})
                 + d.spec.strategy.withType('Recreate')
+                + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
                 + d.metadata.withNamespace('home-infra'),
   },
 }

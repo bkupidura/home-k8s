@@ -14,7 +14,7 @@
           chart: name,
           version: version,
           targetNamespace: targetNamespace,
-          valuesContent: std.manifestYamlDoc(values),
+          valuesContent: std.manifestYamlDoc(values, true),
         },
       },
     },

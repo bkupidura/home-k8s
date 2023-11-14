@@ -126,6 +126,9 @@
             groups: std.prune($.victoria_metrics.rules_rendered),
           },
         },
+        podAnnotations: {
+          'fluentbit.io/parser': 'json',
+        },
       },
     }),
     helm_server: $._custom.helm.new('victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {
@@ -146,6 +149,9 @@
         resources: {
           requests: { memory: '1536Mi' },
           limits: { memory: '1536Mi' },
+        },
+        podAnnotations: {
+          'fluentbit.io/parser': 'json',
         },
         scrape: {
           enabled: true,
@@ -547,6 +553,9 @@
           add: ['NET_RAW'],
         },
       },
+      podAnnotations: {
+        'fluentbit.io/parser': 'logfmt',
+      },
       resources: {
         requests: { memory: '16Mi', cpu: '20m' },
         limits: { memory: '32Mi', cpu: '50m' },
@@ -583,6 +592,9 @@
             requests: { memory: '16Mi' },
             limits: { memory: '32Mi' },
           },
+        },
+        podAnnotations: {
+          'fluentbit.io/parser': 'logfmt',
         },
         config: {
           global: {},
@@ -633,6 +645,9 @@
         resources: {
           requests: { memory: '32Mi' },
           limits: { memory: '64Mi' },
+        },
+        podAnnotations: {
+          'fluentbit.io/parser': 'logfmt',
         },
       },
       server: {
