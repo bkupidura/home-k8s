@@ -4,6 +4,37 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  logging+: {
+    rules+:: [
+      {
+        name: 'vaultwarden',
+        interval: '1m',
+        rules: [
+          {
+            record: 'vaultwarden:failed_login:5m',
+            expr: 'count_over_time({kubernetes_container_name="vaultwarden"} |~ "(?i)username or password is incorrect"[5m])',
+          },
+        ],
+      },
+    ],
+  },
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'vaultwarden',
+        rules: [
+          {
+            alert: 'VaultwardenFailedLogin',
+            expr: 'vaultwarden:failed_login:5m > 1',
+            labels: { service: 'vaultwarden', severity: 'info' },
+            annotations: {
+              summary: 'Failed login attempts on {{ $labels.kubernetes_pod_name }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   vaultwarden: {
     pvc: p.new('vaultwarden')
          + p.metadata.withNamespace('home-infra')

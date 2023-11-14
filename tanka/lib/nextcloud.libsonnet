@@ -73,6 +73,7 @@
                       { 'app.kubernetes.io/name': 'nextcloud' })
                 + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})
                 + d.spec.strategy.withType('Recreate')
+                + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
                 + d.metadata.withNamespace('home-infra'),
   },
 }

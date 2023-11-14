@@ -5,6 +5,7 @@
 (import 'secret.libsonnet') +
 (import 'basic-monitoring.libsonnet') +
 (import 'victoriametrics.libsonnet') +
+(import 'loki.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'kubefledged.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
@@ -20,7 +21,6 @@
 (import 'authelia.libsonnet') +
 (import 'waf.libsonnet') +
 (import 'broker-ha.libsonnet') +
-(import 'loki.libsonnet') +
 (import 'mariadb.libsonnet') +
 (import 'grafana.libsonnet') +
 (import 'unifi.libsonnet') +

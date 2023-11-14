@@ -101,6 +101,9 @@
                 )
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('monitoring')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.metadata.withAnnotations({
+                  'fluentbit.io/parser': 'logfmt',
+                }),
   },
 }

@@ -1,4 +1,15 @@
 {
+  logging+: {
+    parsers+:: {
+      traefik: |||
+        [PARSER]
+            name traefik
+            format json
+            time_key time
+            time_format %Y-%m-%dT%H:%M:%S%z
+      |||,
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -52,16 +63,19 @@
         podAnnotations: {
           'prometheus.io/scrape': 'true',
           'prometheus.io/port': '9100',
+          'fluentbit.io/parser': 'traefik',
         },
       },
       persistence: { enabled: false },
       additionalArguments: [
         '--accesslog',
+        '--accesslog.format=json',
         '--serversTransport.insecureSkipVerify=true',
         std.format('--entryPoints.web.forwardedHeaders.trustedIPs=%s', $._config.kubernetes_internal_cidr),
         std.format('--entryPoints.websecure.forwardedHeaders.trustedIPs=%s', $._config.kubernetes_internal_cidr),
         '--log',
         '--log.level=INFO',
+        '--log.format=json',
         '--metrics.prometheus=true',
         '--providers.kubernetescrd.allowCrossNamespace=true',
       ],
