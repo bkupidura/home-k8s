@@ -31,7 +31,7 @@
     )], 'grafana'),
     cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'grafana'),
     config: v1.configMap.new('grafana-config', {
               'grafana.ini': std.manifestIni({
