@@ -18,7 +18,7 @@
   waf: {
     nginx_snippet:: |||
       server {
-          listen 443 ssl;
+          listen 443 ssl http2;
           server_name %(server_name)s.%(domain)s;
           set $upstream https://%(upstream)s;
           ssl_certificate /ssl/tls.crt;

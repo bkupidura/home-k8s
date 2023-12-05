@@ -48,10 +48,12 @@
                 queryLog: {
                   type: 'none',
                 },
-                log: { level: 'info', format: 'text', timestamp: true },
+                log: { level: 'info', format: 'json', timestamp: true, privacy: true },
                 blocking: {
-                  processingConcurrency: 4,
-                  refreshPeriod: '120m',
+                  loading: {
+                    concurrency: 4,
+                    refreshPeriod: '120m',
+                  },
                   blockType: 'zeroIP',
                   [if std.get($._config.blocky, 'blacklist') != null then 'blackLists']: $._config.blocky.blacklist,
                   [if std.get($._config.blocky, 'blacklist') != null then 'clientGroupsBlock']: {
@@ -97,6 +99,7 @@
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '4000',
+                  'fluentbit.io/parser': 'json',
                 }),
   },
 }
