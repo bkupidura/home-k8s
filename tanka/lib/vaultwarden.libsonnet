@@ -58,8 +58,9 @@
                                                 'apt update || true',
                                                 'apt install -y restic sqlite openssh-client',
                                                 'cd /data',
-                                                'sqlite3 db.sqlite3 ".backup db-backup-$(date +%s).dump"',
+                                                'sqlite3 db.sqlite3 ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                'find /data -type f -name db-backup-\\*.dump -mtime +60 -delete',
                                               ]),
                                             ]),
                                           ])
@@ -76,26 +77,8 @@
                     ),
     cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host vaultwarden --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'vaultwarden'),
-    cronjob_cleanup: $._custom.cronjob.new('vaultwarden-cleanup', 'home-infra', '00 18 * * *', [
-                       $.k.core.v1.container.new('cleanup', $._version.ubuntu.image)
-                       + $.k.core.v1.container.withVolumeMounts([
-                         $.k.core.v1.volumeMount.new('data', '/data', false),
-                       ])
-                       + $.k.core.v1.container.withCommand([
-                         '/bin/sh',
-                         '-ec',
-                         'find /data -type f -name db-backup-*.dump -mtime +60 -delete',
-                       ]),
-                     ])
-                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('data', 'vaultwarden')])
-                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                       $.k.core.v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                       + $.k.core.v1.podAffinityTerm.labelSelector.withMatchExpressions(
-                         { key: 'app.kubernetes.io/name', operator: 'In', values: ['vaultwarden'] }
-                       )
-                     ),
     ingress_route: $._custom.ingress_route.new('vaultwarden', 'home-infra', ['websecure'], [
       {
         kind: 'Rule',
@@ -105,18 +88,12 @@
       },
       {
         kind: 'Rule',
-        match: std.format('Host(`vaultwarden.%s`) && Path(`/notifications/hub`)', std.extVar('secrets').domain),
-        services: [{ name: 'vaultwarden', port: 3012, namespace: 'home-infra' }],
-      },
-      {
-        kind: 'Rule',
         match: std.format('Host(`vaultwarden.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'vaultwarden', port: 80, namespace: 'home-infra' }],
       },
     ], true),
     service: s.new('vaultwarden', { 'app.kubernetes.io/name': 'vaultwarden' }, [
                v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
-               v1.servicePort.withPort(3012) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('websockets'),
              ])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'vaultwarden' }),
@@ -127,12 +104,10 @@
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts([
                           v1.containerPort.newNamed(80, 'http'),
-                          v1.containerPort.newNamed(3012, 'websockets'),
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
                           DISABLE_ADMIN_TOKEN: 'true',
-                          WEBSOCKET_ENABLED: 'true',
                           DOMAIN: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         })
                         + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
