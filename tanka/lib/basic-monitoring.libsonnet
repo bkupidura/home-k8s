@@ -42,8 +42,8 @@
           },
           {
             alert: 'System1MLoadHigh',
-            expr: 'node_load1 > on (node) (count by (node) (node_cpu_seconds_total{mode="system"})) * 1.5',
-            'for': '10m',
+            expr: 'node_load1 > on (node) (count by (node) (node_cpu_seconds_total{mode="system"})) * 2',
+            'for': '15m',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
               summary: 'High load avg {{ humanize $value }} from 1m on {{ $labels.node }}',
@@ -95,6 +95,81 @@
         ],
       },
       {
+        name: 'k8s-slow1h',
+        interval: '1h',
+        rules: [
+          {
+            alert: 'K8sHighMemoryPodLimit',
+            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.4',
+            'for': '24h',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'POD {{ $labels.pod }} in last 14 days is using only {{ $value | humanizePercentage }} of memory limit',
+            },
+          },
+        ],
+      },
+      {
+        name: 'k8s-slow5m',
+        interval: '5m',
+        rules: [
+          {
+            alert: 'K8sHighCPUHVLimit',
+            expr: 'sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher CPU limits than total HV capacity',
+            },
+          },
+          {
+            alert: 'K8sHighMemoryHVUsage',
+            expr: 'sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 0.8',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} are using 80% of HV total memory',
+            },
+          },
+          {
+            alert: 'K8sHighMemoryHVLimit',
+            expr: 'sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory',
+            },
+          },
+          {
+            alert: 'K8sHighMemoryPodUsage',
+            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.99',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'POD {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit',
+            },
+          },
+          {
+            alert: 'K8sPodCPUThrotling',
+            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5',
+            'for': '15m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'K8sPodCPUThrotling',
+            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
+            },
+          },
+        ],
+      },
+      {
         name: 'k8s',
         rules: [
           {
@@ -133,51 +208,6 @@
             },
           },
           {
-            alert: 'K8sHighCPUHVLimit',
-            expr: 'sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher CPU limits than total HV capacity',
-            },
-          },
-          {
-            alert: 'K8sHighMemoryHVUsage',
-            expr: 'sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 0.8',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'warning' },
-            annotations: {
-              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} are using 80% of HV total memory',
-            },
-          },
-          {
-            alert: 'K8sHighMemoryHVLimit',
-            expr: 'sum by (kubernetes_io_hostname) (container_spec_memory_limit_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory',
-            },
-          },
-          {
-            alert: 'K8sHighMemoryPodUsage',
-            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.99',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'warning' },
-            annotations: {
-              summary: 'POD {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit',
-            },
-          },
-          {
-            alert: 'K8sHighMemoryPodLimit',
-            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.4',
-            'for': '24h',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: 'POD {{ $labels.pod }} in last 14 days is using only {{ $value | humanizePercentage }} of memory limit',
-            },
-          },
-          {
             alert: 'K8sClusterRunningDifferentK8sVersionComponets',
             expr: 'count (count by (git_version) (kubernetes_build_info)) > 1',
             'for': '10m',
@@ -202,24 +232,6 @@
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: '{{ $labels.node }} is readiness is flapping',
-            },
-          },
-          {
-            alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5',
-            'for': '15m',
-            labels: { service: 'k8s', severity: 'warning' },
-            annotations: {
-              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
-            },
-          },
-          {
-            alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
             },
           },
           {

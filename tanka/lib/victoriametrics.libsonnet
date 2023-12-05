@@ -60,6 +60,7 @@
     rules_rendered:: [
       if std.get(group, 'enabled', true) then {
         name: group.name,
+        [if std.get(group, 'interval') != null then 'interval']: group.interval,
         rules: group.rules,
       }
       for group in $.monitoring.rules
@@ -138,7 +139,7 @@
           'promscrape.suppressDuplicateScrapeTargetErrors': true,
           'search.minStalenessInterval': '5m',
           'promscrape.configCheckInterval': '5m',
-          retentionPeriod: '8w',
+          retentionPeriod: '4w',
           'search.maxPointsSubqueryPerTimeseries': '500000',
         },
         persistentVolume: {
