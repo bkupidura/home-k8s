@@ -31,7 +31,7 @@
     )], 'freshrss'),
     cronjob_restore: $._custom.cronjob_restore.new('freshrss', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host freshrss --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'freshrss'),
     deployment: d.new('freshrss',
                       if $._config.restore then 0 else 1,

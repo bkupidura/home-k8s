@@ -24,7 +24,7 @@
     )], 'node-red'),
     cronjob_restore: $._custom.cronjob_restore.new('node-red', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host node-red --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'node-red'),
     service: s.new('node-red', { 'app.kubernetes.io/name': 'node-red' }, [v1.servicePort.withPort(1880) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')
@@ -39,8 +39,8 @@
                           TZ: $._config.tz,
                           FLOWS: 'flows.json',
                         })
-                        + c.resources.withRequests({ memory: '256Mi', cpu: '500m' })
-                        + c.resources.withLimits({ memory: '256Mi', cpu: '500m' })
+                        + c.resources.withRequests({ memory: '192Mi', cpu: '500m' })
+                        + c.resources.withLimits({ memory: '192Mi', cpu: '500m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)

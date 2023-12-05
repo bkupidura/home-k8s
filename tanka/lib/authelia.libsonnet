@@ -62,13 +62,43 @@
         services: [{ name: 'authelia', port: 9091 }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('authelia', 'home-infra', '00 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'authelia'),
+    cronjob_backup: $._custom.cronjob.new('authelia-backup',
+                                          'home-infra',
+                                          '00 05 * * *',
+                                          [
+                                            c.new('backup', $._version.ubuntu.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                              v1.volumeMount.new('authelia-data', '/data', false),
+                                            ])
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
+                                            + c.withCommand([
+                                              '/bin/sh',
+                                              '-ec',
+                                              std.join('\n', [
+                                                'apt update || true',
+                                                'apt install -y restic sqlite openssh-client',
+                                                'cd /data',
+                                                'sqlite3 db.sqlite ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                'find /data -type f -name db-backup-\\*.dump -mtime +30 -delete',
+                                              ]),
+                                            ]),
+                                          ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('authelia')
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                      v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
+                      v1.volume.fromPersistentVolumeClaim('authelia-data', 'authelia'),
+                    ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
+                      v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                      + v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                        { key: 'app.kubernetes.io/name', operator: 'In', values: ['authelia'] }
+                      )
+                    ),
     cronjob_restore: $._custom.cronjob_restore.new('authelia', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host authelia --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'authelia'),
     config: v1.configMap.new('authelia-config', {
               'users.yml': std.manifestYamlDoc({

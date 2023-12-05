@@ -37,7 +37,7 @@
     )], 'nextcloud'),
     cronjob_restore: $._custom.cronjob_restore.new('nextcloud', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host nextcloud --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'nextcloud'),
     deployment: d.new('nextcloud',
                       if $._config.restore then 0 else 1,
@@ -67,8 +67,8 @@
                           '/cron.sh',
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '32Mi' })
-                        + c.resources.withLimits({ memory: '96Mi' }),
+                        + c.resources.withRequests({ memory: '64Mi' })
+                        + c.resources.withLimits({ memory: '128Mi' }),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })
                 + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})
