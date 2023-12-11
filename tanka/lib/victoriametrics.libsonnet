@@ -3,8 +3,8 @@
   local p = v1.persistentVolumeClaim,
   monitoring+: {
     extra_scrape+:: {
-      blackbox_icmp_infra: {
-        job_name: 'blackbox-icmp-infra',
+      [std.format('blackbox_icmp_%s', group_name)]: {
+        job_name: std.format('blackbox-icmp-%s', group_name),
         relabel_configs: [
           { source_labels: ['__address__'], target_label: '__param_target' },
           { source_labels: ['__param_target'], target_label: 'instance' },
@@ -15,8 +15,9 @@
           module: ['icmp'],
         },
         scrape_interval: '10s',
-        static_configs: std.extVar('secrets').monitoring.target.infra,
-      },
+        static_configs: std.extVar('secrets').monitoring.blackbox_ping[group_name],
+      }
+      for group_name in std.objectFields(std.extVar('secrets').monitoring.blackbox_ping)
     },
     rules+:: [
       {
