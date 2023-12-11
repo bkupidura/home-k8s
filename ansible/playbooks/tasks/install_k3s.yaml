@@ -28,6 +28,7 @@
     src: "{{ k3s.cni_url }}"
     dest: /var/lib/rancher/k3s/data/current/bin/
     remote_src: yes
+  become: true
 
 - name: Manage services
   vars:
