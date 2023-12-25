@@ -151,7 +151,7 @@
           },
           {
             alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5',
+            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5',
             'for': '15m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -160,7 +160,7 @@
           },
           {
             alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!~"^(frigate|)$"}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3',
+            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3',
             'for': '30m',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {

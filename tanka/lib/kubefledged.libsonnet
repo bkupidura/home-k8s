@@ -46,7 +46,6 @@
               $._version.home_assistant.image,
               $._version.node_red.image,
               $._version.recorder.image,
-              $._version.frigate.image,
               $._version.sms_gammu.image,
               $._version.unifi.image,
               $._version.ubuntu.image,

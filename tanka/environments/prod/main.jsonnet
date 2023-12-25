@@ -27,7 +27,6 @@
 (import 'home-assistant.libsonnet') +
 (import 'node-red.libsonnet') +
 (import 'zigbee2mqtt.libsonnet') +
-(import 'frigate.libsonnet') +
 (import 'recorder.libsonnet') +
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
@@ -77,7 +76,7 @@
       },
       blacklist: {
         malware: [
-          'http://hole.cert.pl/domains/domains_hosts.txt',
+          'https://hole.cert.pl/domains/domains_hosts.txt',
           'https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/KADhosts.txt',
           'https://blocklistproject.github.io/Lists/abuse.txt',
@@ -89,8 +88,6 @@
           'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/Ad_filter_list_by_Disconnect.txt',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adguard_mobile_host.txt',
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adservers.txt',
-          'https://blocklistproject.github.io/Lists/ads.txt',
           'https://blocklistproject.github.io/Lists/fraud.txt',
           'https://blocklistproject.github.io/Lists/scam.txt',
         ],
@@ -138,6 +135,7 @@
             'SecRuleRemoveById 941100',
             'SecRuleRemoveById 932140',
             'SecRuleRemoveById 942390',
+            'SecRuleRemoveById 920274',
           ],
         },
         vaultwarden: {
@@ -154,7 +152,6 @@
             'SecRuleRemoveById 942340',
             'SecRuleRemoveById 942370',
             'SecRuleRemoveById 942460',
-            'SecRuleRemoveById 949110',
             'SecRuleRemoveById 920274',
             'SecRuleRemoveById 920300',
             'SecRuleRemoveById 920320',
@@ -176,7 +173,6 @@
             'SecRuleRemoveById 942430',
             'SecRuleRemoveById 942431',
             'SecRuleRemoveById 942432',
-            'SecRuleRemoveById 949110',
           ],
         },
         files: {
@@ -196,7 +192,6 @@
             'SecRuleRemoveById 942431',
             'SecRuleRemoveById 942460',
             'SecRuleRemoveById 942432',
-            'SecRuleRemoveById 949110',
             'SecRuleRemoveById 911100',
             'SecRuleRemoveById 920272',
             'SecRuleRemoveById 942430',
@@ -205,6 +200,7 @@
             'SecRuleRemoveById 942440',
             'SecRuleRemoveById 920274',
             'SecRuleRemoveById 921422',
+            'SecRuleRemoveById 921230',
           ],
         },
       },

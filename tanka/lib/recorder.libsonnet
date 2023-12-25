@@ -131,12 +131,6 @@
                 + d.pvcVolumeMount('recorder', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ video_processing: 'true' })
-                + d.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                  v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                  + v1.podAffinityTerm.labelSelector.withMatchExpressions(
-                    { key: 'app.kubernetes.io/name', operator: 'In', values: ['frigate'] }
-                  )
-                )
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
                 + d.spec.template.metadata.withAnnotations({
