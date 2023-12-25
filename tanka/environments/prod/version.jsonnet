@@ -79,9 +79,6 @@
       server: '5.39.0',
       fluentbit: '0.40.0',
     },
-    frigate: {
-      image: 'ghcr.io/blakeblackshear/frigate:0.12.1',
-    },
     home_assistant: {
       image: 'homeassistant/home-assistant:2023.11.3',
     },

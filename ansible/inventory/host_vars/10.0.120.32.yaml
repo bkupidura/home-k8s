@@ -15,4 +15,4 @@ watchdog:
 k3s:
   labels:
     modem_controller: "true"
-    coral_controller: "true"
+    video_processing: "true"
