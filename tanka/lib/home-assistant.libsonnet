@@ -74,8 +74,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '512Mi', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '512Mi', cpu: '300m' })
+                        + c.resources.withRequests({ memory: '640Mi', cpu: '300m' })
+                        + c.resources.withLimits({ memory: '640Mi', cpu: '300m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(15)
