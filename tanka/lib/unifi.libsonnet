@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   unifi: {
+    restore:: $._config.restore,
     pvc: p.new('unifi')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -41,7 +42,7 @@
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'unifi' }),
     deployment: d.new('unifi',
-                      if $._config.restore then 0 else 1,
+                      if $.unifi.restore then 0 else 1,
                       [
                         c.new('unifi', $._version.unifi.image)
                         + c.withImagePullPolicy('IfNotPresent')

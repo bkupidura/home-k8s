@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   freshrss: {
+    restore:: $._config.restore,
     service: s.new('freshrss',
                    { 'app.kubernetes.io/name': 'freshrss' },
                    [
@@ -34,7 +35,7 @@
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'freshrss'),
     deployment: d.new('freshrss',
-                      if $._config.restore then 0 else 1,
+                      if $.freshrss.restore then 0 else 1,
                       [
                         c.new('freshrss', $._version.freshrss.image)
                         + c.withImagePullPolicy('IfNotPresent')
