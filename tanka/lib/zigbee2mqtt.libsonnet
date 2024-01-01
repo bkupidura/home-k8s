@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   zigbee2mqtt: {
+    restore:: $._config.restore,
     pvc: p.new('zigbee2mqtt')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -59,7 +60,7 @@
              + s.metadata.withNamespace('smart-home')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'zigbee2mqtt' }),
     deployment: d.new('zigbee2mqtt',
-                      if $._config.restore then 0 else 1,
+                      if $.zigbee2mqtt.restore then 0 else 1,
                       [
                         c.new('zigbee2mqtt', $._version.zigbee2mqtt.image)
                         + c.withImagePullPolicy('IfNotPresent')

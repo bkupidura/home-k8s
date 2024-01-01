@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   node_red: {
+    restore:: $._config.restore,
     pvc: p.new('node-red')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -30,7 +31,7 @@
              + s.metadata.withNamespace('smart-home')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'node-red' }),
     deployment: d.new('node-red',
-                      if $._config.restore then 0 else 1,
+                      if $.node_red.restore then 0 else 1,
                       [
                         c.new('node-red', $._version.node_red.image)
                         + c.withImagePullPolicy('IfNotPresent')

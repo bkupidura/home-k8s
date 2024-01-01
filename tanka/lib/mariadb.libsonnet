@@ -75,6 +75,8 @@
     ],
   },
   mariadb: {
+    update:: $._config.update,
+    restore:: $._config.restore,
     pvc: p.new('mariadb')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -218,7 +220,7 @@
                      })
                      + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('mariadb',
-                      if $._config.restore then 0 else 1,
+                      if $.mariadb.restore then 0 else 1,
                       [
                         c.new('mariadb', $._version.mariadb.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -234,24 +236,26 @@
                           v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                           v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                         ])
-                        + c.resources.withRequests({ cpu: '300m', memory: '512Mi' })
-                        + c.resources.withLimits({ cpu: '300m', memory: '512Mi' })
-                        + c.readinessProbe.exec.withCommand([
-                          '/bin/bash',
-                          '-ec',
-                          std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
-                        ])
-                        + c.readinessProbe.withInitialDelaySeconds(20)
-                        + c.readinessProbe.withPeriodSeconds(15)
-                        + c.readinessProbe.withTimeoutSeconds(2)
-                        + c.livenessProbe.exec.withCommand([
-                          '/bin/bash',
-                          '-ec',
-                          std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
-                        ])
-                        + c.livenessProbe.withInitialDelaySeconds(90)
-                        + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(2),
+                        + (if $.mariadb.update == false then
+                             c.resources.withRequests({ cpu: '300m', memory: '512Mi' })
+                             + c.resources.withLimits({ cpu: '300m', memory: '512Mi' })
+                             + c.readinessProbe.exec.withCommand([
+                               '/bin/bash',
+                               '-ec',
+                               std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                             ])
+                             + c.readinessProbe.withInitialDelaySeconds(20)
+                             + c.readinessProbe.withPeriodSeconds(15)
+                             + c.readinessProbe.withTimeoutSeconds(2)
+                             + c.livenessProbe.exec.withCommand([
+                               '/bin/bash',
+                               '-ec',
+                               std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                             ])
+                             + c.livenessProbe.withInitialDelaySeconds(90)
+                             + c.livenessProbe.withPeriodSeconds(15)
+                             + c.livenessProbe.withTimeoutSeconds(2)
+                           else {}),
                         c.new('metrics', $._version.mariadb.metrics)
                         + c.withArgs(['--config.my-cnf', '/config/my.cnf'])
                         + c.withImagePullPolicy('IfNotPresent')
@@ -262,16 +266,18 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('mariadb-exporter-config', '/config/', true),
                         ])
-                        + c.readinessProbe.httpGet.withPath('/metrics')
-                        + c.readinessProbe.httpGet.withPort('metrics')
-                        + c.readinessProbe.withInitialDelaySeconds(20)
-                        + c.readinessProbe.withPeriodSeconds(10)
-                        + c.readinessProbe.withTimeoutSeconds(2)
-                        + c.livenessProbe.httpGet.withPath('/metrics')
-                        + c.livenessProbe.httpGet.withPort('metrics')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
-                        + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(2),
+                        + (if $.mariadb.update == false then
+                             c.readinessProbe.httpGet.withPath('/metrics')
+                             + c.readinessProbe.httpGet.withPort('metrics')
+                             + c.readinessProbe.withInitialDelaySeconds(20)
+                             + c.readinessProbe.withPeriodSeconds(10)
+                             + c.readinessProbe.withTimeoutSeconds(2)
+                             + c.livenessProbe.httpGet.withPath('/metrics')
+                             + c.livenessProbe.httpGet.withPort('metrics')
+                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withPeriodSeconds(10)
+                             + c.livenessProbe.withTimeoutSeconds(2)
+                           else {}),
                       ],
                       { 'app.kubernetes.io/name': 'mariadb' })
                 + d.spec.template.spec.withVolumes([

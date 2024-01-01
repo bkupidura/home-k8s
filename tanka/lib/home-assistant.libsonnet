@@ -23,6 +23,8 @@
     },
   },
   home_assistant: {
+    update:: $._config.update,
+    restore:: $._config.restore,
     pvc: p.new('home-assistant')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -62,7 +64,7 @@
              + s.metadata.withNamespace('smart-home')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'home-assistant' }),
     deployment: d.new('home-assistant',
-                      if $._config.restore then 0 else 1,
+                      if $.home_assistant.restore then 0 else 1,
                       [
                         c.new('home-assistant', $._version.home_assistant.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -73,18 +75,19 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                        })
-                        + c.resources.withRequests({ memory: '640Mi', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '640Mi', cpu: '300m' })
-                        + c.readinessProbe.tcpSocket.withPort('http')
-                        + c.readinessProbe.withInitialDelaySeconds(30)
-                        + c.readinessProbe.withPeriodSeconds(15)
-                        + c.readinessProbe.withTimeoutSeconds(2)
-                        + c.livenessProbe.httpGet.withPath('/healthz')
-                        + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(120)
-                        + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(5),
+                        }) + (if $.home_assistant.update == false then
+                                c.resources.withRequests({ memory: '640Mi', cpu: '300m' })
+                                + c.resources.withLimits({ memory: '640Mi', cpu: '300m' })
+                                + c.readinessProbe.tcpSocket.withPort('http')
+                                + c.readinessProbe.withInitialDelaySeconds(30)
+                                + c.readinessProbe.withPeriodSeconds(15)
+                                + c.readinessProbe.withTimeoutSeconds(2)
+                                + c.livenessProbe.httpGet.withPath('/healthz')
+                                + c.livenessProbe.httpGet.withPort('http')
+                                + c.livenessProbe.withInitialDelaySeconds(120)
+                                + c.livenessProbe.withPeriodSeconds(15)
+                                + c.livenessProbe.withTimeoutSeconds(5)
+                              else {}),
                       ],
                       { 'app.kubernetes.io/name': 'home-assistant' })
                 + d.pvcVolumeMount('home-assistant', '/config', false, {})

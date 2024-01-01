@@ -36,6 +36,7 @@
     ],
   },
   vaultwarden: {
+    restore:: $._config.restore,
     pvc: p.new('vaultwarden')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -98,7 +99,7 @@
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'vaultwarden' }),
     deployment: d.new('vaultwarden',
-                      if $._config.restore then 0 else 1,
+                      if $.vaultwarden.restore then 0 else 1,
                       [
                         c.new('vaultwarden', $._version.vaultwarden.image)
                         + c.withImagePullPolicy('IfNotPresent')

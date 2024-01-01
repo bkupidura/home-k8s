@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   grafana: {
+    restore:: $._config.restore,
     pvc: p.new('grafana')
          + p.metadata.withNamespace('monitoring')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -56,7 +57,7 @@
             })
             + v1.configMap.metadata.withNamespace('monitoring'),
     deployment: d.new('grafana',
-                      if $._config.restore then 0 else 1,
+                      if $.grafana.restore then 0 else 1,
                       [
                         c.new('grafana', $._version.grafana.image)
                         + c.withImagePullPolicy('IfNotPresent')

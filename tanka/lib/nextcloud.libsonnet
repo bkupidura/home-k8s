@@ -5,6 +5,8 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   nextcloud: {
+    update:: $._config.update,
+    restore:: $._config.restore,
     pvc: p.new('nextcloud')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -40,7 +42,7 @@
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'nextcloud'),
     deployment: d.new('nextcloud',
-                      if $._config.restore then 0 else 1,
+                      if $.nextcloud.restore then 0 else 1,
                       [
                         c.new('nextcloud', $._version.nextcloud.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -49,26 +51,29 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                        })
-                        + c.resources.withRequests({ memory: '256Mi', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '512Mi', cpu: '500m' })
-                        + c.readinessProbe.tcpSocket.withPort('http')
-                        + c.readinessProbe.withInitialDelaySeconds(10)
-                        + c.readinessProbe.withPeriodSeconds(10)
-                        + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.httpGet.withPath('/status.php')
-                        + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
-                        + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
-                        + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(3),
+                        }) + (if $.nextcloud.update == false then
+                                c.resources.withRequests({ memory: '256Mi', cpu: '300m' })
+                                + c.resources.withLimits({ memory: '512Mi', cpu: '500m' })
+                                + c.readinessProbe.tcpSocket.withPort('http')
+                                + c.readinessProbe.withInitialDelaySeconds(10)
+                                + c.readinessProbe.withPeriodSeconds(10)
+                                + c.readinessProbe.withTimeoutSeconds(1)
+                                + c.livenessProbe.httpGet.withPath('/status.php')
+                                + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
+                                + c.livenessProbe.httpGet.withPort('http')
+                                + c.livenessProbe.withInitialDelaySeconds(30)
+                                + c.livenessProbe.withPeriodSeconds(10)
+                                + c.livenessProbe.withTimeoutSeconds(3)
+                              else {}),
                         c.new('cron', $._version.nextcloud.image)
                         + c.withCommand([
                           '/cron.sh',
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '64Mi' })
-                        + c.resources.withLimits({ memory: '128Mi' }),
+                        + (if $.nextcloud.update == false then
+                             c.resources.withRequests({ memory: '64Mi' })
+                             + c.resources.withLimits({ memory: '128Mi' })
+                           else {}),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })
                 + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})

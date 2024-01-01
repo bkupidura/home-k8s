@@ -37,6 +37,7 @@
 {
   _config:: {
     restore: false,
+    update: false,
     core_dns: '10.0.120.1',
     vip: {
       dns: '10.0.10.40',

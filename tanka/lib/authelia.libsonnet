@@ -30,6 +30,7 @@
     ],
   },
   authelia: {
+    restore:: $._config.restore,
     oidc_clients:: [
       {
         audience: [],
@@ -185,7 +186,7 @@
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('authelia',
-                      if $._config.restore then 0 else 1,
+                      if $.authelia.restore then 0 else 1,
                       [
                         c.new('authelia', $._version.authelia.image)
                         + c.withImagePullPolicy('IfNotPresent')
