@@ -11,9 +11,9 @@
                    [
                      v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
                    ])
-             + s.metadata.withNamespace('home-infra')
+             + s.metadata.withNamespace('self-hosted')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'freshrss' }),
-    ingress_route: $._custom.ingress_route.new('freshrss', 'home-infra', ['websecure'], [
+    ingress_route: $._custom.ingress_route.new('freshrss', 'self-hosted', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`rss.%s`)', std.extVar('secrets').domain),
@@ -22,15 +22,15 @@
       },
     ], true),
     pvc: p.new('freshrss')
-         + p.metadata.withNamespace('home-infra')
+         + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '2Gi' }),
-    cronjob_backup: $._custom.cronjob_backup.new('freshrss', 'home-infra', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('freshrss', 'self-hosted', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'freshrss'),
-    cronjob_restore: $._custom.cronjob_restore.new('freshrss', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('freshrss', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'freshrss'),
@@ -63,6 +63,6 @@
                 + d.pvcVolumeMount('freshrss', '/var/www/FreshRSS/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
-                + d.metadata.withNamespace('home-infra'),
+                + d.metadata.withNamespace('self-hosted'),
   },
 }
