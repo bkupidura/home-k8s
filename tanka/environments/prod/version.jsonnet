@@ -4,19 +4,19 @@
       image: 'coredns/coredns:1.11.1',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:23122023',
+      image: 'ghcr.io/bkupidura/chrony:20012024',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20231211.1',
+      image: 'ubuntu:jammy-20240111',
     },
     kubefledged: {
       chart: 'v0.10.0',
     },
     kubernetes_descheduler: {
-      chart: '0.27.1',
+      chart: '0.29.0',
     },
     kubernetes_reflector: {
-      chart: '7.1.216',
+      chart: '7.1.238',
     },
     metallb: {
       chart: '0.13.12',
@@ -36,7 +36,7 @@
       chart: '1.5.3',
     },
     restic: {
-      image: 'restic/restic:0.16.2',
+      image: 'restic/restic:0.16.3',
     },
     traefik: {
       chart: '26.0.0',
@@ -44,10 +44,10 @@
       tag: 'v2.10.7',
     },
     blocky: {
-      image: 'spx01/blocky:v0.22',
+      image: 'spx01/blocky:v0.23',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:23122023',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:20012024',
     },
     authelia: {
       image: 'authelia/authelia:4.37.5',
@@ -67,20 +67,20 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.34.0',
+      image: 'koenkk/zigbee2mqtt:1.35.1',
     },
     esphome: {
-      image: 'esphome/esphome:2023.12.5',
+      image: 'esphome/esphome:2023.12.9',
     },
     grafana: {
-      image: 'grafana/grafana:10.2.3',
+      image: 'grafana/grafana:10.3.1',
     },
     loki: {
-      server: '5.41.4',
-      fluentbit: '0.40.0',
+      server: '5.41.8',
+      fluentbit: '0.42.0',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2023.12.4',
+      image: 'homeassistant/home-assistant:2024.1.5',
     },
     node_red: {
       image: 'nodered/node-red:3.1.3-18',
@@ -92,13 +92,13 @@
       image: 'pajikos/sms-gammu-gateway:1.3.0',
     },
     unifi: {
-      image: 'jacobalberty/unifi:v8.0.24',
+      image: 'jacobalberty/unifi:v8.0.26',
     },
     prometheus: {
-      chart: '25.8.2',
+      chart: '25.10.0',
     },
     blackbox_exporter: {
-      chart: '8.6.1',
+      chart: '8.9.0',
     },
     victoria_metrics: {
       alert: {
@@ -115,10 +115,10 @@
       image: 'nextcloud:28.0.1-apache',
     },
     redis: {
-      image: 'redis:7.2.3-alpine',
+      image: 'redis:7.2.4-alpine',
     },
     freshrss: {
-      image: 'freshrss/freshrss:1.23.0',
+      image: 'freshrss/freshrss:1.23.1',
     },
   },
 }

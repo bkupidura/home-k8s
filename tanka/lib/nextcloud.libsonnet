@@ -8,7 +8,7 @@
     update:: $._config.update,
     restore:: $._config.restore,
     pvc: p.new('nextcloud')
-         + p.metadata.withNamespace('home-infra')
+         + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '20Gi' }),
@@ -18,7 +18,7 @@
         replacement: '/remote.php/dav/',
       },
     }),
-    ingress_route: $._custom.ingress_route.new('files', 'home-infra', ['websecure'], [
+    ingress_route: $._custom.ingress_route.new('files', 'self-hosted', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`files.%s`)', std.extVar('secrets').domain),
@@ -31,13 +31,13 @@
                    [
                      v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
                    ])
-             + s.metadata.withNamespace('home-infra')
+             + s.metadata.withNamespace('self-hosted')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'nextcloud' }),
-    cronjob_backup: $._custom.cronjob_backup.new('nextcloud', 'home-infra', '00 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('nextcloud', 'self-hosted', '00 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'nextcloud'),
-    cronjob_restore: $._custom.cronjob_restore.new('nextcloud', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('nextcloud', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'nextcloud'),
@@ -79,6 +79,6 @@
                 + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
-                + d.metadata.withNamespace('home-infra'),
+                + d.metadata.withNamespace('self-hosted'),
   },
 }

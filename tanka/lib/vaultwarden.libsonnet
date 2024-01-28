@@ -38,12 +38,12 @@
   vaultwarden: {
     restore:: $._config.restore,
     pvc: p.new('vaultwarden')
-         + p.metadata.withNamespace('home-infra')
+         + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '512Mi' }),
     cronjob_backup: $._custom.cronjob.new('vaultwarden-backup',
-                                          'home-infra',
+                                          'self-hosted',
                                           '10 05 * * *',
                                           [
                                             c.new('backup', $._version.ubuntu.image)
@@ -76,27 +76,27 @@
                         { key: 'app.kubernetes.io/name', operator: 'In', values: ['vaultwarden'] }
                       )
                     ),
-    cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'vaultwarden'),
-    ingress_route: $._custom.ingress_route.new('vaultwarden', 'home-infra', ['websecure'], [
+    ingress_route: $._custom.ingress_route.new('vaultwarden', 'self-hosted', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`vaultwarden.%s`) && PathPrefix(`/admin`)', std.extVar('secrets').domain),
-        services: [{ name: 'vaultwarden', port: 80, namespace: 'home-infra' }],
+        services: [{ name: 'vaultwarden', port: 80, namespace: 'self-hosted' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
       {
         kind: 'Rule',
         match: std.format('Host(`vaultwarden.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'vaultwarden', port: 80, namespace: 'home-infra' }],
+        services: [{ name: 'vaultwarden', port: 80, namespace: 'self-hosted' }],
       },
     ], true),
     service: s.new('vaultwarden', { 'app.kubernetes.io/name': 'vaultwarden' }, [
                v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
              ])
-             + s.metadata.withNamespace('home-infra')
+             + s.metadata.withNamespace('self-hosted')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'vaultwarden' }),
     deployment: d.new('vaultwarden',
                       if $.vaultwarden.restore then 0 else 1,
@@ -126,7 +126,7 @@
                       { 'app.kubernetes.io/name': 'vaultwarden' })
                 + d.pvcVolumeMount('vaultwarden', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
-                + d.metadata.withNamespace('home-infra')
+                + d.metadata.withNamespace('self-hosted')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
   },
 }
