@@ -120,5 +120,8 @@
     freshrss: {
       image: 'freshrss/freshrss:1.23.1',
     },
+    registry: {
+      image: 'registry:2',
+    },
   },
 }

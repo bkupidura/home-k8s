@@ -34,6 +34,7 @@
 (import 'redis.libsonnet') +
 (import 'nextcloud.libsonnet') +
 (import 'freshrss.libsonnet') +
+(import 'registry.libsonnet') +
 {
   _config:: {
     restore: false,
