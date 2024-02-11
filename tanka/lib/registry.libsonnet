@@ -22,7 +22,6 @@
         kind: 'Rule',
         match: std.format('Host(`registry.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'registry', port: 5000, namespace: 'home-infra' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
     cronjob_backup: $._custom.cronjob_backup.new('registry', 'home-infra', '15 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
@@ -38,6 +37,9 @@
                       [
                         c.new('registry', $._version.registry.image)
                         + c.withImagePullPolicy('IfNotPresent')
+                        + c.withEnvMap({
+                          REGISTRY_STORAGE_DELETE_ENABLED: 'true',
+                        })
                         + c.withPorts(v1.containerPort.newNamed(5000, 'http'))
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')

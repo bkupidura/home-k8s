@@ -75,8 +75,8 @@
                           TZ: $._config.tz,
                           BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '64Mi', cpu: '150m' })
-                        + c.resources.withLimits({ memory: '64Mi', cpu: '150m' })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '150m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '150m' })
                         + c.readinessProbe.tcpSocket.withPort(53)
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
