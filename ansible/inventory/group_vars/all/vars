@@ -5,8 +5,7 @@ global:
   timezone: "Europe/Warsaw"
   dns:
     servers:
-    - "1.1.1.1"
-    - "8.8.8.8"
+    - "10.0.120.1"
 os:
   ssh_keys:
     - user: root
