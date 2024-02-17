@@ -4,6 +4,18 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   logging+: {
+    rules+:: [
+      {
+        name: 'waf',
+        interval: '1m',
+        rules: [
+          {
+            record: 'waf:status_code:5m',
+            expr: 'count by (parsed_code, parsed_host, parsed_method) (count_over_time({kubernetes_container_name="waf"} | json[5m]))',
+          },
+        ],
+      },
+    ],
     parsers+:: {
       waf: |||
         [PARSER]
@@ -14,6 +26,31 @@
             time_format %d/%b/%Y:%H:%M:%S %z
       |||,
     },
+  },
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'waf',
+        rules: [
+          {
+            alert: 'WAF5XXErrors',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"5.."}) > 1',
+            labels: { service: 'waf', severity: 'info' },
+            annotations: {
+              summary: '5XX error codes observed on WAF for {{ $labels.parsed_host }}',
+            },
+          },
+          {
+            alert: 'WAF4XXErrors',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4.."}) > 20',
+            labels: { service: 'waf', severity: 'info' },
+            annotations: {
+              summary: '4XX error codes observed on WAF for {{ $labels.parsed_host }}',
+            },
+          },
+        ],
+      },
+    ],
   },
   waf: {
     nginx_snippet:: |||
