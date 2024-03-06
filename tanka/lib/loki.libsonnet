@@ -1,6 +1,37 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  logging+: {
+    rules+:: [
+      {
+        name: 'fluentbit',
+        interval: '1m',
+        rules: [
+          {
+            record: 'fluentbit:unknown_parser:5m',
+            expr: 'count_over_time({kubernetes_container_name="fluent-bit"} |~ "annotation parser \'.*\' not found"[5m])',
+          },
+        ],
+      },
+    ],
+  },
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'fluentbit',
+        rules: [
+          {
+            alert: 'UnknownParser',
+            expr: 'fluentbit:unknown_parser:5m > 0',
+            labels: { service: 'fluentbit', severity: 'warning' },
+            annotations: {
+              summary: 'Unknown fluentbit parsed configured',
+            },
+          },
+        ],
+      },
+    ],
+  },
   loki: {
     [if $.logging.parsers != null then 'parsers']:: [
       $.logging.parsers[parser]

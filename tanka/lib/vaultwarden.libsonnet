@@ -78,7 +78,7 @@
                     ),
     cronjob_restore: $._custom.cronjob_restore.new('vaultwarden', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host vaultwarden --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'vaultwarden'),
     ingress_route: $._custom.ingress_route.new('vaultwarden', 'self-hosted', ['websecure'], [
       {

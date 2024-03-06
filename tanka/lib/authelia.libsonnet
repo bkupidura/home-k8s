@@ -99,7 +99,7 @@
                     ),
     cronjob_restore: $._custom.cronjob_restore.new('authelia', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host authelia --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'authelia'),
     config: v1.configMap.new('authelia-config', {
               'users.yml': std.manifestYamlDoc({

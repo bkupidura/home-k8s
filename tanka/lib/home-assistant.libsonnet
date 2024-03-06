@@ -58,7 +58,7 @@
     )], 'home-assistant'),
     cronjob_restore: $._custom.cronjob_restore.new('home-assistant', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host home-assistant --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'home-assistant'),
     service: s.new('home-assistant', { 'app.kubernetes.io/name': 'home-assistant' }, [v1.servicePort.withPort(8123) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')
