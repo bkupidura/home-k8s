@@ -39,7 +39,7 @@
     )], 'nextcloud'),
     cronjob_restore: $._custom.cronjob_restore.new('nextcloud', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host nextcloud --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'nextcloud'),
     deployment: d.new('nextcloud',
                       if $.nextcloud.restore then 0 else 1,

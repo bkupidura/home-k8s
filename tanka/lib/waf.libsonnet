@@ -34,7 +34,7 @@
         rules: [
           {
             alert: 'WAF5XXErrors',
-            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"5.."}) > 1',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"5..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 5',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
               summary: '5XX error codes observed on WAF for {{ $labels.parsed_host }}',
@@ -42,7 +42,7 @@
           },
           {
             alert: 'WAF4XXErrors',
-            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4.."}) > 20',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 60',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
               summary: '4XX error codes observed on WAF for {{ $labels.parsed_host }}',
@@ -55,7 +55,8 @@
   waf: {
     nginx_snippet:: |||
       server {
-          listen 443 ssl http2;
+          listen 443 ssl;
+          http2 on;
           server_name %(server_name)s.%(domain)s;
           set $upstream https://%(upstream)s;
           ssl_certificate /ssl/tls.crt;
@@ -118,6 +119,7 @@
                           ANOMALY_OUTBOUND: '4',
                           ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
+                        + c.securityContext.withRunAsUser(0)
                         + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')

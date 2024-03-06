@@ -21,7 +21,7 @@
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
   },
   restic_check_full: {
-    [std.format('restic_check_full_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-check-full-%s', repo_name), 'home-infra', '00 06 * * 6', [
+    [std.format('restic_check_full_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-check-full-%s', repo_name), 'home-infra', '30 06 * * 6', [
                                                        $.k.core.v1.container.new('check', $._version.restic.image)
                                                        + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(std.format('restic-secrets-%s', repo_name)))
                                                        + $.k.core.v1.container.withCommand([

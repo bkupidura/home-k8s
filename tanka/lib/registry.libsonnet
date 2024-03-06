@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   registry: {
+    restore:: $._config.restore,
     pvc: p.new('registry')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -30,10 +31,10 @@
     )], 'registry'),
     cronjob_restore: $._custom.cronjob_restore.new('registry', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host registry --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'registry'),
     deployment: d.new('registry',
-                      1,
+                      if $.registry.restore then 0 else 1,
                       [
                         c.new('registry', $._version.registry.image)
                         + c.withImagePullPolicy('IfNotPresent')

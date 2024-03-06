@@ -1,4 +1,6 @@
 kube-config.yaml
 pocs/*
 tanka/vendor/*
+tanka/environments/dev/*
+tanka/lib/*-dev.libsonnet
 .DS_Store

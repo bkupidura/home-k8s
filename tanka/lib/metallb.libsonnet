@@ -58,7 +58,7 @@
     },
     bgp_peer: [
       {
-        apiVersion: 'metallb.io/v1beta1',
+        apiVersion: 'metallb.io/v1beta2',
         kind: 'BGPPeer',
         metadata: {
           name: std.format('peer-%d', idx),
@@ -81,5 +81,4 @@
       },
     },
   },
-
 }

@@ -33,7 +33,7 @@
     )], 'unifi'),
     cronjob_restore: $._custom.cronjob_restore.new('unifi', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host unifi --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'unifi'),
     service: s.new('unifi', { 'app.kubernetes.io/name': 'unifi' }, [
                v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),

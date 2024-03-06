@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   redis: {
+    restore:: $._config.restore,
     pvc: p.new('redis')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -16,7 +17,7 @@
     )], 'redis'),
     cronjob_restore: $._custom.cronjob_restore.new('redis', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host redis --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'redis'),
     service: s.new('redis',
                    { 'app.kubernetes.io/name': 'redis' },
@@ -43,7 +44,7 @@
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('redis',
-                      1,
+                      if $.redis.restore then 0 else 1,
                       [
                         c.new('redis', $._version.redis.image)
                         + c.withImagePullPolicy('IfNotPresent')

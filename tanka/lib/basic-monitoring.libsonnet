@@ -1,11 +1,6 @@
 {
   logging: {
     parsers:: {
-      logfmt: |||
-        [PARSER]
-            name logfmt
-            format logfmt
-      |||,
     },
     rules:: [],
   },
