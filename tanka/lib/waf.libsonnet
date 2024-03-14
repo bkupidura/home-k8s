@@ -79,8 +79,9 @@
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_http_version 1.1;
             proxy_buffering off;
-            proxy_connect_timeout 5s;
-            proxy_read_timeout 60s;
+            proxy_connect_timeout %(proxy_connect_timeout)s;
+            proxy_read_timeout %(proxy_read_timeout)s;
+            proxy_send_timeout %(proxy_send_timeout)s;
             proxy_redirect off;
             proxy_pass_header Authorization;
             proxy_pass $upstream;
@@ -88,7 +89,7 @@
       }
     |||,
     nginx_config:: [
-      $.waf.nginx_snippet % { server_name: server_name, domain: std.extVar('secrets').domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', $._config.waf.server[server_name].rules) }
+      $.waf.nginx_snippet % { server_name: server_name, domain: std.extVar('secrets').domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', $._config.waf.server[server_name].rules), proxy_connect_timeout: std.get($._config.waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get($._config.waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get($._config.waf.server[server_name], 'proxy_send_timeout', '30s') }
       for server_name in std.objectFields($._config.waf.server)
     ],
     service: s.new(

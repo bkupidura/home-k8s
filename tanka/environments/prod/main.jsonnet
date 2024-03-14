@@ -179,6 +179,9 @@
           ],
         },
         files: {
+          proxy_connect_timeout: '30s',
+          proxy_read_timeout: '120s',
+          proxy_send_timeout: '120s',
           rules: [
             'SecRuleRemoveById 942421',
             'SecRuleRemoveById 920273',

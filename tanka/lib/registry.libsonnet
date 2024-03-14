@@ -41,6 +41,8 @@
                         + c.withEnvMap({
                           REGISTRY_STORAGE_DELETE_ENABLED: 'true',
                         })
+                        + c.resources.withRequests({ memory: '64Mi', cpu: '10m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '30m' })
                         + c.withPorts(v1.containerPort.newNamed(5000, 'http'))
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')
