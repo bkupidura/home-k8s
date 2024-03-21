@@ -38,13 +38,26 @@
                         fallthrough in-addr.arpa ip6.arpa
                     }
                     prometheus :9153
-                    forward . %(upstream_server)s:53
-                    cache 30
+                    forward home %(upstream_server)s:53
+                    forward %(domain)s %(upstream_server)s:53
+                    forward . 127.0.0.1:5301 127.0.0.1:5302
                     loop
                     reload
                     loadbalance
                 }
-              ||| % { upstream_server: $._config.core_dns },
+                .:5301 {
+                    forward . tls://9.9.9.9 {
+                        tls_servername dns.quad9.net
+                    }
+                    cache 600
+                }
+                .:5302 {
+                    forward . tls://1.1.1.1 tls://1.0.0.1 {
+                         tls_servername cloudflare-dns.com
+                    }
+                    cache 600
+                }
+              ||| % { upstream_server: $._config.upstream_dns, domain: std.extVar('secrets').domain},
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [

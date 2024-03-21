@@ -39,7 +39,7 @@
   _config:: {
     restore: false,
     update: false,
-    core_dns: '10.0.120.1',
+    upstream_dns: '10.0.120.1',
     vip: {
       dns: '10.0.10.40',
       ingress: '10.0.10.42',
@@ -71,12 +71,6 @@
       ],
     },
     blocky: {
-      conditional: {
-        mapping: {
-          home: $._config.core_dns,
-          [std.extVar('secrets').domain]: $._config.core_dns,
-        },
-      },
       blacklist: {
         malware: [
           'https://hole.cert.pl/domains/domains_hosts.txt',
@@ -116,6 +110,11 @@
           '10.0.120.0/24',
           '10.0.20.0/24',
           '10.0.100.0/24',
+        ],
+        lanhypervisor: [
+          '10.0.120.0/24',
+          '10.0.20.0/24',
+          $._config.kubernetes_internal_cidr,
         ],
       },
     },
