@@ -23,6 +23,7 @@
         kind: 'Rule',
         match: std.format('Host(`registry.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'registry', port: 5000, namespace: 'home-infra' }],
+        middlewares: [{ name: 'lanhypervisor-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
     cronjob_backup: $._custom.cronjob_backup.new('registry', 'home-infra', '15 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(

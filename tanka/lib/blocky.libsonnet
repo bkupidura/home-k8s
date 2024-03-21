@@ -36,23 +36,32 @@
               'config.yml': std.manifestYamlDoc({
                 ports: { http: 4000, dns: 53 },
                 prometheus: { enable: true },
-                upstream: {
-                  default: ['tcp-tls:8.8.8.8:853', 'tcp-tls:8.8.4.4:853', 'https://1.1.1.1/dns-query', 'https://1.0.0.1/dns-query'],
+                upstreams: {
+                  groups: {
+                      default: [std.format('tcp+udp:%s:53', $.coredns.kubelet_cluster_dns)],
+                  },
                 },
                 caching: {
-                  minTime: '2m',
+                  minTime: '1m',
                   maxTime: '10m',
                   maxItemsCount: 10240,
-                  cacheTimeNegative: '10m',
+                  cacheTimeNegative: '5m',
                 },
                 queryLog: {
                   type: 'none',
                 },
                 log: { level: 'info', format: 'json', timestamp: true, privacy: true },
+                specialUseDomains: {
+                  "rfc6762-appendixG": false,
+                },
                 blocking: {
                   loading: {
                     concurrency: 4,
                     refreshPeriod: '120m',
+                    downloads: {
+                        timeout: '180s',
+                        cooldown: '15s',
+                    },
                   },
                   blockType: 'zeroIP',
                   [if std.get($._config.blocky, 'blacklist') != null then 'blackLists']: $._config.blocky.blacklist,
@@ -75,13 +84,13 @@
                           TZ: $._config.tz,
                           BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '150m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '150m' })
+                        + c.resources.withRequests({ memory: '256Mi', cpu: '150m' })
+                        + c.resources.withLimits({ memory: '256Mi', cpu: '150m' })
                         + c.readinessProbe.tcpSocket.withPort(53)
-                        + c.readinessProbe.withInitialDelaySeconds(30)
+                        + c.readinessProbe.withInitialDelaySeconds(15)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.tcpSocket.withPort(4000)
-                        + c.livenessProbe.withInitialDelaySeconds(30)
+                        + c.livenessProbe.withInitialDelaySeconds(240)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
