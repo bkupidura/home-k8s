@@ -47,8 +47,8 @@
                           CRON_MIN: '*/20',
                           TRUSTED_PROXY: $._config.kubernetes_internal_cidr,
                         })
-                        + c.resources.withRequests({ memory: '32Mi', cpu: '30m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '32Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '130m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
