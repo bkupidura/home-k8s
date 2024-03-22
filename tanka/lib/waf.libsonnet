@@ -121,8 +121,8 @@
                           ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
                         + c.securityContext.withRunAsUser(0)
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '75m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '75m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
