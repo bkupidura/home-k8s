@@ -10,19 +10,11 @@
         name: 'authelia',
         rules: [
           {
-            alert: 'AutheliaAuthFailureFirst',
-            expr: 'round(delta(authelia_authentication_first_factor{success="false"}[10m])) > 2',
+            alert: 'AutheliaAuthFailure',
+            expr: 'round(delta(authelia_authn{success="false"}[10m])) > 2',
             labels: { service: 'authelia', severity: 'info' },
             annotations: {
-              summary: 'Auth failues for first auth factor on {{ $labels.pod }}',
-            },
-          },
-          {
-            alert: 'AutheliaAuthFailureSecond',
-            expr: 'round(delta(authelia_authentication_second_factor{success="false"}[10m])) > 2',
-            labels: { service: 'authelia', severity: 'info' },
-            annotations: {
-              summary: 'Auth failues for second auth factor on {{ $labels.pod }}',
+              summary: 'Auth failues observed by {{ $labels.pod }}',
             },
           },
         ],
@@ -35,16 +27,17 @@
       {
         audience: [],
         authorization_policy: 'two_factor',
-        description: client_name,
+        client_name: client_name,
+        client_id: client_name,
         grant_types: ['refresh_token', 'authorization_code'],
-        id: client_name,
         public: false,
         redirect_uris: std.extVar('secrets').authelia.oidc.client[client_name].redirect_uris,
         response_modes: ['form_post', 'query', 'fragment'],
         response_types: ['code'],
-        scopes: ['openid', 'groups', 'email', 'profile'],
-        userinfo_signing_algorithm: 'none',
-        secret: std.extVar('secrets').authelia.oidc.client[client_name].secret,
+        scopes: ['openid', 'groups', 'email', 'profile', 'offline_access'],
+        userinfo_signed_response_alg: 'none',
+        token_endpoint_auth_method: std.extVar('secrets').authelia.oidc.client[client_name].token_endpoint_auth_method,
+        client_secret: std.extVar('secrets').authelia.oidc.client[client_name].client_secret,
       }
       for client_name in std.objectFields(std.extVar('secrets').authelia.oidc.client)
     ],
@@ -108,11 +101,8 @@
               'configuration.yml': std.manifestYamlDoc(std.mergePatch({
                 identity_providers: {
                   oidc: {
-                    access_token_lifespan: '1h',
-                    authorize_code_lifespan: '1m',
-                    enable_client_debug_messages: true,
-                    id_token_lifespan: '1h',
-                    refresh_token_lifespan: '90m',
+                    enable_client_debug_messages: false,
+                    lifespans: { refresh_token: '90m', authorize_code: '1m', id_token: '1h', access_token: '1h' },
                     clients: $.authelia.oidc_clients,
                   },
                 },
@@ -130,9 +120,11 @@
                   },
                 },
                 session: {
-                  domain: std.extVar('secrets').domain,
                   expiration: 3600,
-                  remember_me_duration: 2592000,
+                  remember_me: 2592000,
+                  cookies: [
+                    { domain: std.extVar('secrets').domain, authelia_url: std.format('https://auth.%s', std.extVar('secrets').domain) },
+                  ],
                 },
                 log: {
                   level: 'info',
@@ -141,11 +133,10 @@
                 notifier: {
                   disable_startup_check: true,
                   smtp: {
-                    host: std.extVar('secrets').smtp.server,
+                    address: std.format('smtp://%s:%d', [std.extVar('secrets').smtp.server, std.extVar('secrets').smtp.port]),
                     username: std.extVar('secrets').smtp.username,
                     password: std.extVar('secrets').smtp.password,
                     sender: std.format('auth@%s', std.extVar('secrets').domain),
-                    port: std.extVar('secrets').smtp.port,
                     subject: '[Authelia] {title}',
                   },
                 },
@@ -172,7 +163,6 @@
                   find_time: 300,
                   ban_time: 900,
                 },
-                default_redirection_url: std.format('https://auth.%s', std.extVar('secrets').domain),
                 webauthn: {
                   disable: false,
                 },
@@ -181,6 +171,7 @@
                     read: 16384,
                     write: 16384,
                   },
+                  address: 'tcp://0.0.0.0:9091',
                 },
               }, std.extVar('secrets').authelia.config)),
             })
@@ -211,6 +202,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
+                + d.spec.template.spec.withEnableServiceLinks(false)
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '9959',
