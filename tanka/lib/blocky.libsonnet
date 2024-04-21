@@ -38,7 +38,7 @@
                 prometheus: { enable: true },
                 upstreams: {
                   groups: {
-                      default: [std.format('tcp+udp:%s:53', $.coredns.kubelet_cluster_dns)],
+                    default: [std.format('tcp+udp:%s:53', $.coredns.kubelet_cluster_dns)],
                   },
                 },
                 caching: {
@@ -52,15 +52,15 @@
                 },
                 log: { level: 'info', format: 'json', timestamp: true, privacy: true },
                 specialUseDomains: {
-                  "rfc6762-appendixG": false,
+                  'rfc6762-appendixG': false,
                 },
                 blocking: {
                   loading: {
                     concurrency: 4,
                     refreshPeriod: '120m',
                     downloads: {
-                        timeout: '180s',
-                        cooldown: '15s',
+                      timeout: '180s',
+                      cooldown: '15s',
                     },
                   },
                   blockType: 'zeroIP',

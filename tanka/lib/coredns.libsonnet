@@ -57,7 +57,7 @@
                     }
                     cache 600
                 }
-              ||| % { upstream_server: $._config.upstream_dns, domain: std.extVar('secrets').domain},
+              ||| % { upstream_server: $._config.upstream_dns, domain: std.extVar('secrets').domain },
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [
