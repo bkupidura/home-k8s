@@ -8,7 +8,7 @@ brew install tanka
 brew install jsonnet-bundler
 brew install esolitos/ipa/sshpass
 brew install sops
-pip3 install ansible
+pip3 install ansible mitogen
 ```
 
 ## Cluster deployment from scratch
