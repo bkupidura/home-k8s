@@ -80,9 +80,9 @@
         '--providers.kubernetescrd.allowCrossNamespace=true',
       ],
       ports: {
-        traefik: { expose: false },
-        web: { expose: true },
-        websecure: { expose: true },
+        traefik: { expose: { default: false } },
+        web: { expose: { default: true } },
+        websecure: { expose: { default: true } },
       },
       providers: {
         kubernetesCRD: {

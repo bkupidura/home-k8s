@@ -125,6 +125,7 @@
                         + c.resources.withLimits({ memory: '128Mi', cpu: '75m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
+                        + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: 'localhost' }])
                         + c.livenessProbe.withInitialDelaySeconds(30)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(2),

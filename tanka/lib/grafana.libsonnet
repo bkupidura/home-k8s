@@ -46,7 +46,7 @@
                     token_url: 'http://authelia.home-infra:9091/api/oidc/token',
                     auth_url: std.format('https://auth.%s/api/oidc/authorize', std.extVar('secrets').domain),
                     client_id: 'grafana',
-                    client_secret: std.extVar('secrets').authelia.oidc.client.grafana.secret,
+                    client_secret: std.extVar('secrets').grafana.oidc.client_secret,
                     enabled: true,
                     name: 'Authelia',
                     role_attribute_path: "contains(groups[*], 'admin') && 'Admin' || 'Viewer'",
