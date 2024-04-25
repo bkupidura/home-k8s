@@ -57,7 +57,7 @@
       server {
           listen 443 ssl;
           http2 on;
-          server_name %(server_name)s.%(domain)s;
+          server_name %(domain)s;
           set $upstream https://%(upstream)s;
           ssl_certificate /ssl/tls.crt;
           ssl_certificate_key /ssl/tls.key;
@@ -89,8 +89,8 @@
       }
     |||,
     nginx_config:: [
-      $.waf.nginx_snippet % { server_name: server_name, domain: std.extVar('secrets').domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', $._config.waf.server[server_name].rules), proxy_connect_timeout: std.get($._config.waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get($._config.waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get($._config.waf.server[server_name], 'proxy_send_timeout', '30s') }
-      for server_name in std.objectFields($._config.waf.server)
+      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s') }
+      for server_name in std.objectFields(std.extVar('secrets').waf.server)
     ],
     service: s.new(
                'waf',
