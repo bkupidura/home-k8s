@@ -50,7 +50,18 @@
         },
         storage: {
           type: 'filesystem',
+          filesystem: {
+            chunks_directory: '/var/loki/data',
+            rules_directory: '/var/loki/rules',
+            admin_api_directory: '/var/loki/admin',
+          },
         },
+        schemaConfig: {
+          configs: [
+            { from: '2024-04-01', store: 'tsdb', object_store: 'filesystem', schema: 'v13', index: { prefix: 'loki_index_', period: '24h' } },
+          ],
+        },
+        ingester: { chunk_encoding: 'snappy' },
         auth_enabled: false,
         rulerConfig: {
           wal: {
@@ -70,7 +81,11 @@
           },
         },
       },
+      deploymentMode: 'SingleBinary',
       test: {
+        enabled: false,
+      },
+      lokiCanary: {
         enabled: false,
       },
       gateway: {
@@ -83,10 +98,20 @@
             installOperator: false,
           },
         },
-        lokiCanary: {
-          enabled: false,
-        },
       },
+      write: { replicas: 0 },
+      read: { replicas: 0 },
+      backend: { replicas: 0 },
+      ingester: { replicas: 0 },
+      querier: { replicas: 0 },
+      queryFrontend: { replicas: 0 },
+      queryScheduler: { replicas: 0 },
+      distributor: { replicas: 0 },
+      compactor: { replicas: 0 },
+      indexGateway: { replicas: 0 },
+      bloomCompactor: { replicas: 0 },
+      bloomGateway: { replicas: 0 },
+      minio: { enabled: false },
       singleBinary: {
         replicas: 1,
         persistence: {

@@ -76,8 +76,8 @@
       image: 'grafana/grafana:11.0.0',
     },
     loki: {
-      server: '5.43.3',
-      fluentbit: '0.46.2',
+      server: '6.6.2',
+      fluentbit: '0.46.7',
     },
     home_assistant: {
       image: 'homeassistant/home-assistant:2024.5.5',
