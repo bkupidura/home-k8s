@@ -64,7 +64,7 @@
                     },
                   },
                   blockType: 'zeroIP',
-                  [if std.get($._config.blocky, 'blacklist') != null then 'blackLists']: $._config.blocky.blacklist,
+                  [if std.get($._config.blocky, 'blacklist') != null then 'denylists']: $._config.blocky.blacklist,
                   [if std.get($._config.blocky, 'blacklist') != null then 'clientGroupsBlock']: {
                     default: std.objectFields($._config.blocky.blacklist),
                   },

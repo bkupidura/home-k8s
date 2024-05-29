@@ -237,8 +237,8 @@
                           v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                         ])
                         + (if $.mariadb.update == false then
-                             c.resources.withRequests({ cpu: '300m', memory: '512Mi' })
-                             + c.resources.withLimits({ cpu: '300m', memory: '512Mi' })
+                             c.resources.withRequests({ cpu: '300m', memory: '768Mi' })
+                             + c.resources.withLimits({ cpu: '300m', memory: '768Mi' })
                              + c.readinessProbe.exec.withCommand([
                                '/bin/bash',
                                '-ec',
