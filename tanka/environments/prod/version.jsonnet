@@ -112,7 +112,7 @@
       image: 'vaultwarden/server:1.30.5-alpine',
     },
     nextcloud: {
-      image: 'nextcloud:29.0.0-apache',
+      image: 'nextcloud:29.0.1-apache',
     },
     redis: {
       image: 'redis:7.2.5-alpine',
