@@ -112,6 +112,30 @@
       bloomCompactor: { replicas: 0 },
       bloomGateway: { replicas: 0 },
       minio: { enabled: false },
+      resultsCache: {
+        resources: {
+          requests: {
+            cpu: '50m',
+            memory: '64Mi',
+          },
+          limits: {
+            cpu: '75m',
+            memory: '128Mi',
+          },
+        },
+      },
+      chunksCache: {
+        resources: {
+          requests: {
+            cpu: '50m',
+            memory: '64Mi',
+          },
+          limits: {
+            cpu: '75m',
+            memory: '196Mi',
+          },
+        },
+      },
       singleBinary: {
         replicas: 1,
         persistence: {
