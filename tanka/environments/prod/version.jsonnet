@@ -9,9 +9,6 @@
     ubuntu: {
       image: 'ubuntu:jammy-20240427',
     },
-    kubefledged: {
-      chart: 'v0.10.0',
-    },
     kubernetes_descheduler: {
       chart: '0.29.0',
     },

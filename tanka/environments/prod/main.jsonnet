@@ -7,7 +7,6 @@
 (import 'victoriametrics.libsonnet') +
 (import 'loki.libsonnet') +
 (import 'coredns.libsonnet') +
-(import 'kubefledged.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
 (import 'kubernetes-reflector.libsonnet') +
 (import 'metallb.libsonnet') +
