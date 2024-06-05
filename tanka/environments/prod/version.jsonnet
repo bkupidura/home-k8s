@@ -4,10 +4,10 @@
       image: 'coredns/coredns:1.11.1',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:25052024',
+      image: 'ghcr.io/bkupidura/chrony:01062024',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20240427',
+      image: 'ubuntu:jammy-20240530',
     },
     kubernetes_descheduler: {
       chart: '0.29.0',
@@ -44,7 +44,7 @@
       image: 'spx01/blocky:v0.24',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:25052024',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:01062024',
     },
     authelia: {
       image: 'authelia/authelia:4.38.8',
@@ -55,7 +55,7 @@
       tag: 'v1.14.5',
     },
     mariadb: {
-      image: 'mariadb:11.3.2',
+      image: 'mariadb:11.4.2',
       metrics: 'prom/mysqld-exporter:v0.15.1',
     },
     broker_ha: {
@@ -64,10 +64,10 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.37.1',
+      image: 'koenkk/zigbee2mqtt:1.38.0',
     },
     esphome: {
-      image: 'esphome/esphome:2024.5.3',
+      image: 'esphome/esphome:2024.5.5',
     },
     grafana: {
       image: 'grafana/grafana:11.0.0',
