@@ -36,9 +36,9 @@
       image: 'restic/restic:0.16.4',
     },
     traefik: {
-      chart: '27.0.2',
+      chart: '28.2.0',
       repo: 'traefik',
-      tag: 'v2.11.3',
+      tag: 'v3.0.1',
     },
     blocky: {
       image: 'spx01/blocky:v0.24',
@@ -59,7 +59,7 @@
       metrics: 'prom/mysqld-exporter:v0.15.1',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.17',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.18',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
@@ -83,7 +83,7 @@
       image: 'nodered/node-red:3.1.9-18',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0.5',
+      image: 'ghcr.io/bkupidura/recorder:2.0.6',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.3.0',

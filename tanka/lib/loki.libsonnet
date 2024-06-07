@@ -132,7 +132,7 @@
           },
           limits: {
             cpu: '75m',
-            memory: '196Mi',
+            memory: '256Mi',
           },
         },
       },
@@ -148,7 +148,7 @@
         },
         resources: {
           requests: { memory: '128Mi' },
-          limits: { memory: '256Mi' },
+          limits: { memory: '384Mi' },
         },
         extraVolumes: [
           {
