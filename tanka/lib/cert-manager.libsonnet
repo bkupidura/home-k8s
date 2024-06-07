@@ -41,12 +41,16 @@
         limits: { memory: '128Mi' },
       },
       webhook: {
-        requests: { memory: '32Mi' },
-        limits: { memory: '64Mi' },
+        resources: {
+          requests: { memory: '32Mi' },
+          limits: { memory: '64Mi' },
+        },
       },
       cainjector: {
-        requests: { memory: '64Mi' },
-        limits: { memory: '128Mi' },
+        resources: {
+          requests: { memory: '64Mi' },
+          limits: { memory: '128Mi' },
+        },
       },
     }),
     issuer: {
