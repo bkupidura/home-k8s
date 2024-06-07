@@ -10,7 +10,7 @@
       image: 'ubuntu:jammy-20240530',
     },
     kubernetes_descheduler: {
-      chart: '0.29.0',
+      chart: '0.30.1',
     },
     kubernetes_reflector: {
       chart: '7.1.262',
