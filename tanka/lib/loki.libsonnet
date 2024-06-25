@@ -125,16 +125,7 @@
         },
       },
       chunksCache: {
-        resources: {
-          requests: {
-            cpu: '50m',
-            memory: '64Mi',
-          },
-          limits: {
-            cpu: '75m',
-            memory: '256Mi',
-          },
-        },
+        enabled: false,
       },
       singleBinary: {
         replicas: 1,

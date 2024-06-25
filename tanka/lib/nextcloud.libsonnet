@@ -71,8 +71,8 @@
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
                         + (if $.nextcloud.update == false then
-                             c.resources.withRequests({ memory: '64Mi' })
-                             + c.resources.withLimits({ memory: '128Mi' })
+                             c.resources.withRequests({ memory: '128Mi' })
+                             + c.resources.withLimits({ memory: '196Mi' })
                            else {}),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })
