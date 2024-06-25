@@ -29,6 +29,8 @@ k3s:
     - "servicelb"
     - "--disable"
     - "coredns"
+    - "--disable"
+    - "local-storage"
     - "--kube-apiserver-arg"
     - "default-unreachable-toleration-seconds=120"
     - "--kube-apiserver-arg"
