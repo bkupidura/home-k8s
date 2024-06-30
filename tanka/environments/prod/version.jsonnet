@@ -120,5 +120,8 @@
     registry: {
       image: 'registry:2',
     },
+    paperless: {
+      image: 'ghcr.io/paperless-ngx/paperless-ngx:2.10.2',
+    },
   },
 }

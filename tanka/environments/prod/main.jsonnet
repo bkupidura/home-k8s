@@ -34,6 +34,7 @@
 (import 'nextcloud.libsonnet') +
 (import 'freshrss.libsonnet') +
 (import 'registry.libsonnet') +
+(import 'paperless.libsonnet') +
 {
   _config:: {
     restore: false,
