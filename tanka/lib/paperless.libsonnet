@@ -39,6 +39,12 @@
                           v1.containerPort.newNamed(8000, 'http'),
                         ])
                         + c.withEnvMap({
+                          PAPERLESS_DBENGINE: 'mariadb',
+                          PAPERLESS_DBHOST: 'mariadb.home-infra',
+                          PAPERLESS_DBPORT: '3306',
+                          PAPERLESS_DBNAME: 'paperless',
+                          PAPERLESS_DBUSER: 'paperless',
+                          PAPERLESS_DBPASS: std.extVar('secrets').paperless.db.password,
                           PAPERLESS_URL: std.format('https://paperless.%s', std.extVar('secrets').domain),
                           PAPERLESS_OCR_LANGUAGE: 'pol+eng',
                           PAPERLESS_OCR_LANGUAGES: 'pol',

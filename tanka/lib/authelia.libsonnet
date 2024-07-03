@@ -22,7 +22,6 @@
     ],
   },
   authelia: {
-    restore:: $._config.restore,
     oidc_clients:: [
       {
         audience: [],
@@ -41,11 +40,6 @@
       }
       for client_name in std.objectFields(std.extVar('secrets').authelia.oidc.client)
     ],
-    pvc: p.new('authelia')
-         + p.metadata.withNamespace('home-infra')
-         + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '124Mi' }),
     service: s.new('authelia', { 'app.kubernetes.io/name': 'authelia' }, [v1.servicePort.withPort(9091) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('authelia')])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'authelia' }),
@@ -56,44 +50,6 @@
         services: [{ name: 'authelia', port: 9091 }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob.new('authelia-backup',
-                                          'home-infra',
-                                          '00 05 * * *',
-                                          [
-                                            c.new('backup', $._version.ubuntu.image)
-                                            + c.withVolumeMounts([
-                                              v1.volumeMount.new('ssh', '/root/.ssh', false),
-                                              v1.volumeMount.new('authelia-data', '/data', false),
-                                            ])
-                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
-                                            + c.withCommand([
-                                              '/bin/sh',
-                                              '-ec',
-                                              std.join('\n', [
-                                                'apt update || true',
-                                                'apt install -y restic sqlite openssh-client',
-                                                'cd /data',
-                                                'sqlite3 db.sqlite ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
-                                                'find /data -type f -name db-backup-\\*.dump -mtime +30 -delete',
-                                              ]),
-                                            ]),
-                                          ])
-                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('authelia')
-                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
-                      v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
-                      v1.volume.fromPersistentVolumeClaim('authelia-data', 'authelia'),
-                    ])
-                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
-                      v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
-                      + v1.podAffinityTerm.labelSelector.withMatchExpressions(
-                        { key: 'app.kubernetes.io/name', operator: 'In', values: ['authelia'] }
-                      )
-                    ),
-    cronjob_restore: $._custom.cronjob_restore.new('authelia', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host authelia --target .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'authelia'),
     config: v1.configMap.new('authelia-config', {
               'users.yml': std.manifestYamlDoc({
                 users: std.extVar('secrets').authelia.users,
@@ -144,8 +100,11 @@
                   metrics: { enabled: true },
                 },
                 storage: {
-                  'local': {
-                    path: '/data/db.sqlite',
+                  mysql: {
+                    address: 'tcp://mariadb.home-infra',
+                    database: 'authelia',
+                    username: 'authelia',
+                    password: std.extVar('secrets').authelia.db.password,
                   },
                 },
                 access_control: {
@@ -177,7 +136,7 @@
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('authelia',
-                      if $.authelia.restore then 0 else 1,
+                      1,
                       [
                         c.new('authelia', $._version.authelia.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -198,8 +157,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'authelia' })
                 + d.configVolumeMount('authelia-config', '/config', {})
-                + d.pvcVolumeMount('authelia', '/data', false, {})
-                + d.spec.strategy.withType('Recreate')
+                + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                 + d.spec.template.spec.withEnableServiceLinks(false)

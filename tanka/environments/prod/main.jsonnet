@@ -13,6 +13,7 @@
 (import 'chrony.libsonnet') +
 (import 'traefik.libsonnet') +
 (import 'longhorn.libsonnet') +
+(import 'mariadb.libsonnet') +
 (import 'debugpod.libsonnet') +
 (import 'blocky.libsonnet') +
 (import 'cert-manager.libsonnet') +
@@ -20,7 +21,6 @@
 (import 'authelia.libsonnet') +
 (import 'waf.libsonnet') +
 (import 'broker-ha.libsonnet') +
-(import 'mariadb.libsonnet') +
 (import 'grafana.libsonnet') +
 (import 'unifi.libsonnet') +
 (import 'home-assistant.libsonnet') +
