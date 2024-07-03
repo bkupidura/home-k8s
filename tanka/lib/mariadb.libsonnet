@@ -163,6 +163,22 @@
               CREATE USER 'nextcloud'@'!!' IDENTIFIED BY '%(nextcloud_password)s';
               GRANT ALL PRIVILEGES ON nextcloud.* TO 'nextcloud'@'!!';
               FLUSH PRIVILEGES;
+              CREATE DATABASE freshrss CHARACTER SET utf8mb4;
+              CREATE USER 'freshrss'@'!!' IDENTIFIED BY '%(freshrss_password)s';
+              GRANT ALL PRIVILEGES ON freshrss.* TO 'freshrss'@'!!';
+              FLUSH PRIVILEGES;
+              CREATE DATABASE authelia CHARACTER SET utf8mb4;
+              CREATE USER 'authelia'@'!!' IDENTIFIED BY '%(authelia_password)s';
+              GRANT ALL PRIVILEGES ON authelia.* TO 'authelia'@'!!';
+              FLUSH PRIVILEGES;
+              CREATE DATABASE grafana CHARACTER SET utf8mb4;
+              CREATE USER 'grafana'@'!!' IDENTIFIED BY '%(grafana_password)s';
+              GRANT ALL PRIVILEGES ON grafana.* TO 'grafana'@'!!';
+              FLUSH PRIVILEGES;
+              CREATE DATABASE paperless CHARACTER SET utf8mb4;
+              CREATE USER 'paperless'@'!!' IDENTIFIED BY '%(paperless_password)s';
+              GRANT ALL PRIVILEGES ON paperless.* TO 'paperless'@'!!';
+              FLUSH PRIVILEGES;
             ||| % std.extVar('secrets').mariadb.init_script, '!!', '%'),
           })
           + v1.configMap.metadata.withNamespace('home-infra'),

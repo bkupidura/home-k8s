@@ -5,12 +5,6 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   grafana: {
-    restore:: $._config.restore,
-    pvc: p.new('grafana')
-         + p.metadata.withNamespace('monitoring')
-         + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '128Mi' }),
     service: s.new(
                'grafana',
                { 'app.kubernetes.io/name': 'grafana' },
@@ -26,19 +20,12 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], true),
-    cronjob_backup: $._custom.cronjob_backup.new('grafana', 'monitoring', '30 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'grafana'),
-    cronjob_restore: $._custom.cronjob_restore.new('grafana', 'monitoring', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host grafana --target .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'grafana'),
     config: v1.configMap.new('grafana-config', {
               'grafana.ini': std.manifestIni({
                 sections: {
                   server: { domain: std.format('grafana.%s', std.extVar('secrets').domain), root_url: 'https://%(domain)s/' },
                   security: { allow_embedding: true },
+                  database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana', password: std.extVar('secrets').grafana.db.password },
                   auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
                   'auth.generic_oauth': {
                     allow_sign_up: true,
@@ -57,7 +44,7 @@
             })
             + v1.configMap.metadata.withNamespace('monitoring'),
     deployment: d.new('grafana',
-                      if $.grafana.restore then 0 else 1,
+                      1,
                       [
                         c.new('grafana', $._version.grafana.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -89,18 +76,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'grafana' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
-                + d.pvcVolumeMount('grafana', '/var/lib/grafana', false, {})
-                + d.spec.template.spec.withInitContainers(
-                  c.new('chown-data', $._version.ubuntu.image)
-                  + c.withImagePullPolicy('IfNotPresent')
-                  + c.withCommand(['chown', '-R', '472:472', '/var/lib/grafana'])
-                  + c.withVolumeMounts([
-                    v1.volumeMount.new('grafana', '/var/lib/grafana', false),
-                  ])
-                  + c.securityContext.withRunAsNonRoot(false)
-                  + c.securityContext.withRunAsUser(0)
-                )
-                + d.spec.strategy.withType('Recreate')
+                + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('monitoring')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
                 + d.spec.template.metadata.withAnnotations({

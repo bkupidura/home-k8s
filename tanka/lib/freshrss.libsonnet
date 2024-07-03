@@ -25,7 +25,7 @@
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '2Gi' }),
+         + p.spec.resources.withRequests({ storage: '128Mi' }),
     cronjob_backup: $._custom.cronjob_backup.new('freshrss', 'self-hosted', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
