@@ -27,7 +27,7 @@
       },
     },
     nut: {
-      image: 'ghcr.io/k8s-at-home/network-ups-tools:v2.8.0',
+      image: 'instantlinux/nut-upsd:2.8.2-r0',
     },
     longhorn: {
       chart: '1.6.2',
