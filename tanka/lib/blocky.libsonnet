@@ -9,11 +9,19 @@
         name: 'blocky',
         rules: [
           {
-            alert: 'BlockyErrorsIncreasing',
-            expr: 'increase(blocky_error_total[10m]) > 10',
+            alert: 'BlockyFailedDownload',
+            expr: 'delta(blocky_failed_download_count[10]) > 0',
             labels: { service: 'blocky', severity: 'info' },
             annotations: {
-              summary: 'Errors increasing on {{ $labels.pod }}',
+              summary: 'Failed downloads increasing on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'BlockyErrorsIncreasing',
+            expr: 'sum by (pod) (delta(blocky_error_total[5m])) / sum by (pod) (delta(blocky_query_total[5m])) * 100 > 40',
+            labels: { service: 'blocky', severity: 'info' },
+            annotations: {
+              summary: '{{ $value | humanizePercentage }} of queries failing on {{ $labels.pod }}',
             },
           },
         ],
