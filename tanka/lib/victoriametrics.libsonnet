@@ -460,6 +460,11 @@
                   },
                   {
                     action: 'labelmap',
+                    regex: '__param_(.+)',
+                    replacement: 'param_${1}',
+                  },
+                  {
+                    action: 'labelmap',
                     regex: '__meta_kubernetes_pod_label_(.+)',
                   },
                   {
