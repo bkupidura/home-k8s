@@ -5,6 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   paperless: {
+    update:: $._config.update,
     restore:: $._config.restore,
     pvc: p.new('paperless')
          + p.metadata.withNamespace('self-hosted')
@@ -68,15 +69,17 @@
                         })
                         + c.resources.withRequests({ memory: '1024Mi', cpu: '300m' })
                         + c.resources.withLimits({ memory: '1500Mi', cpu: '500m' })
-                        + c.readinessProbe.tcpSocket.withPort('http')
-                        + c.readinessProbe.withInitialDelaySeconds(10)
-                        + c.readinessProbe.withPeriodSeconds(10)
-                        + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.httpGet.withPath('/')
-                        + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
-                        + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(3),
+                        + (if $.paperless.update == false then
+                             c.readinessProbe.tcpSocket.withPort('http')
+                             + c.readinessProbe.withInitialDelaySeconds(10)
+                             + c.readinessProbe.withPeriodSeconds(10)
+                             + c.readinessProbe.withTimeoutSeconds(1)
+                             + c.livenessProbe.httpGet.withPath('/')
+                             + c.livenessProbe.httpGet.withPort('http')
+                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withPeriodSeconds(10)
+                             + c.livenessProbe.withTimeoutSeconds(3)
+                           else {}),
                       ],
                       { 'app.kubernetes.io/name': 'paperless' })
                 + d.pvcVolumeMount('paperless', '/data', false, {})
