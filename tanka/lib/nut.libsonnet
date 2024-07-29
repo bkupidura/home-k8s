@@ -3,6 +3,47 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'nut',
+        rules: [
+          {
+            alert: 'NUTLowBattery',
+            expr: 'network_ups_tools_battery_charge < 20',
+            labels: { service: 'nut', severity: 'warning' },
+            annotations: {
+              summary: 'Low UPS battery reported {{ $value }}% on {{ $labels.param_ups }}',
+            },
+          },
+          {
+            alert: 'NUTPowerFailure',
+            expr: 'network_ups_tools_ups_status{flag="OB"} == 1',
+            labels: { service: 'nut', severity: 'info' },
+            annotations: {
+              summary: 'No power, running on batteries ({{ $labels.param_ups }})',
+            },
+          },
+          {
+            alert: 'NUTBatteryFailure',
+            expr: 'network_ups_tools_ups_status{flag="RB"} == 1',
+            labels: { service: 'nut', severity: 'critical' },
+            annotations: {
+              summary: 'Battery failure, replace UPS batteries in {{ $labels.param_ups }}',
+            },
+          },
+          {
+            alert: 'NUTOverload',
+            expr: 'network_ups_tools_ups_status{flag="OVER"} == 1',
+            labels: { service: 'nut', severity: 'warning' },
+            annotations: {
+              summary: 'UPS overload detected on {{ $labels.param_ups }}!',
+            },
+          },
+        ],
+      },
+    ],
+  },
   nut: {
     cron_job_ups_quick_check: $._custom.cronjob.new('quick-ups-battery-check', 'home-infra', '0 20 25 * *', [
       $.k.core.v1.container.new('battery-check', $._version.nut.image)
@@ -48,10 +89,7 @@
                               actions = SET FSD
                               instcmds = ALL
                               upsmon master
-                              [hass]
-                            |||
-                            +
-                            std.format('password = %s\n', std.extVar('secrets').nut.hass),
+                            |||,
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     service: s.new('network-ups-tools', { 'app.kubernetes.io/name': 'network-ups-tools' }, [v1.servicePort.withPort(3493) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('nut')])
@@ -75,7 +113,7 @@
                         + c.resources.withLimits({ memory: '16Mi' })
                         + c.securityContext.withPrivileged(true)
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-bus-usb-003-002', '/dev/bus/usb/003/002', false),
+                          v1.volumeMount.new('dev-usb-hiddev0', '/dev/usb/hiddev0', false),
                         ])
                         + c.readinessProbe.tcpSocket.withPort('nut')
                         + c.readinessProbe.withInitialDelaySeconds(30)
@@ -90,13 +128,39 @@
                           '-ec',
                           std.join('\n', ['sleep 30', std.format('/usr/bin/upscmd -u admin -p "%s" apc@127.0.0.1 beeper.disable', std.extVar('secrets').nut.admin)]),
                         ]),
+                        c.new('exporter', $._version.nut.metrics)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts(v1.containerPort.newNamed(9199, 'metrics'))
+                        + c.withEnvMap({
+                          NUT_EXPORTER_USERNAME: 'admin',
+                          NUT_EXPORTER_PASSWORD: std.extVar('secrets').nut.admin,
+                          NUT_EXPORTER_VARIABLES: 'battery.charge,battery.voltage,battery.voltage.nominal,input.voltage,input.voltage.nominal,ups.load,ups.status,battery.runtime',
+                        })
+                        + c.resources.withRequests({ memory: '8Mi' })
+                        + c.resources.withLimits({ memory: '16Mi' })
+                        + c.readinessProbe.httpGet.withPath('/metrics')
+                        + c.readinessProbe.httpGet.withPort('metrics')
+                        + c.readinessProbe.withInitialDelaySeconds(20)
+                        + c.readinessProbe.withPeriodSeconds(10)
+                        + c.readinessProbe.withTimeoutSeconds(2)
+                        + c.livenessProbe.httpGet.withPath('/metrics')
+                        + c.livenessProbe.httpGet.withPort('metrics')
+                        + c.livenessProbe.withInitialDelaySeconds(30)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-bus-usb-003-002', '/dev/bus/usb/003/002') + v1.volume.hostPath.withType('CharDevice'))
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-usb-hiddev0', '/dev/usb/hiddev0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ ups_controller: 'true' })
                 + d.metadata.withNamespace('home-infra')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(10),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(10)
+                + d.spec.template.metadata.withAnnotations({
+                  'prometheus.io/scrape': 'true',
+                  'prometheus.io/port': '9199',
+                  'prometheus.io/path': '/ups_metrics',
+                  'prometheus.io/param_ups': 'apc',
+                }),
   },
 }
