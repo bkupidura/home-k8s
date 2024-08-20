@@ -114,6 +114,7 @@
     },
     redis: {
       image: 'redis:7.2.5-alpine',
+      metrics: 'oliver006/redis_exporter:v1.62.0',
     },
     freshrss: {
       image: 'freshrss/freshrss:1.24.1',

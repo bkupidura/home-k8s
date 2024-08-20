@@ -80,8 +80,8 @@
           },
           {
             alert: 'HighContextSwitch',
-            expr: 'rate(node_context_switches_total[10m]) > rate(node_context_switches_total[60m] offset 60m) * 1.2',
-            'for': '30m',
+            expr: 'rate(node_context_switches_total[10m]) > rate(node_context_switches_total[60m] offset 60m) * 1.3',
+            'for': '45m',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
               summary: 'High number of context switching observed on {{ $labels.node }}',
@@ -200,6 +200,30 @@
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Deployment {{ $labels.deployment }} have less than 70% of available replicas ready',
+            },
+          },
+          {
+            alert: 'K8sDeploymentCountDifference',
+            expr: 'abs(delta(count(kube_deployment_status_replicas)[1h])) > 0',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Deployment count difference detected',
+            },
+          },
+          {
+            alert: 'K8sSTSCountDifference',
+            expr: 'abs(delta(count(kube_statefulset_status_replicas)[1h])) > 0',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Statefulset count difference detected',
+            },
+          },
+          {
+            alert: 'K8sDaemonSetCountDifference',
+            expr: 'abs(delta(count(kube_daemonset_status_number_available)[1h])) > 0',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'DaemonSet count difference detected',
             },
           },
           {

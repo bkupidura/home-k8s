@@ -4,6 +4,47 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'redis',
+        rules: [
+          {
+            alert: 'RedisAOFEnabled',
+            expr: 'redis_aof_enabled != 1',
+            labels: { service: 'redis', severity: 'critical' },
+            annotations: {
+              summary: 'Redis AOF is disabled on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'RedisCommandFailed',
+            expr: 'delta(redis_commands_failed_calls_total{cmd=~"^(get|set|del|incrby|publish|psubscribe|auth)$"}[5m]) > 0',
+            labels: { service: 'redis', severity: 'warning' },
+            annotations: {
+              summary: 'Observed failed {{ $labels.cmd }} requests on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'RedisClientDisconnect',
+            expr: 'avg_over_time(redis_connected_clients[5m]) * 1.2 < avg_over_time(redis_connected_clients[5m] offset 10m)',
+            labels: { service: 'redis', severity: 'warning' },
+            annotations: {
+              summary: 'Observed client disconects on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'RedisKeysDecrease',
+            expr: 'avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m])) < avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m] offset 15m)) * 0.7',
+            labels: { service: 'redis', severity: 'warning' },
+            annotations: {
+              summary: 'Observed decrease in number of keys on {{ $labels.app_kubernetes_io_name }} for {{ $labels.db }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   redis: {
     restore:: $._config.restore,
     pvc: p.new('redis')
@@ -58,8 +99,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '8Mi', cpu: '10m' })
-                        + c.resources.withLimits({ memory: '32Mi', cpu: '30m' })
+                        + c.resources.withRequests({ memory: '16Mi', cpu: '20m' })
+                        + c.resources.withLimits({ memory: '64Mi', cpu: '40m' })
                         + c.readinessProbe.tcpSocket.withPort('redis')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
@@ -68,11 +109,41 @@
                         + c.livenessProbe.withInitialDelaySeconds(10)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(1),
+                        c.new('metrics', $._version.redis.metrics)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts(v1.containerPort.newNamed(9121, 'metrics'))
+                        + c.withEnvMap({
+                          REDIS_ADDR: 'redis://localhost:6379',
+                          REDIS_USER: 'exporter',
+                          REDIS_PASSWORD: std.extVar('secrets').redis.exporter.password,
+                          REDIS_EXPORTER_LOG_FORMAT: 'json',
+                          REDIS_EXPORTER_INCL_CONFIG_METRICS: 'false',
+                          REDIS_EXPORTER_INCL_SYSTEM_METRICS: 'false',
+                          REDIS_EXPORTER_STREAMS_EXCLUDE_CONSUMER_METRICS: 'true',
+                          REDIS_EXPORTER_EXCLUDE_LATENCY_HISTOGRAM_METRICS: 'true',
+                          REDIS_EXPORTER_DEBUG: 'false',
+                        })
+                        + c.resources.withRequests({ memory: '10Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '24Mi', cpu: '100m' })
+                        + c.readinessProbe.httpGet.withPath('/metrics')
+                        + c.readinessProbe.httpGet.withPort('metrics')
+                        + c.readinessProbe.withInitialDelaySeconds(10)
+                        + c.readinessProbe.withPeriodSeconds(10)
+                        + c.readinessProbe.withTimeoutSeconds(2)
+                        + c.livenessProbe.httpGet.withPath('/metrics')
+                        + c.livenessProbe.httpGet.withPort('metrics')
+                        + c.livenessProbe.withInitialDelaySeconds(15)
+                        + c.livenessProbe.withPeriodSeconds(10)
+                        + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'redis' })
                 + d.pvcVolumeMount('redis', '/data', false, {})
                 + d.configVolumeMount('redis-config', '/config/', {})
                 + d.spec.strategy.withType('Recreate')
-                + d.metadata.withNamespace('home-infra'),
+                + d.metadata.withNamespace('home-infra')
+                + d.spec.template.metadata.withAnnotations({
+                  'prometheus.io/scrape': 'true',
+                  'prometheus.io/port': '9121',
+                }),
   },
 }
