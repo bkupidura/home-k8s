@@ -35,7 +35,7 @@
           {
             alert: 'BlackboxExporterProbeFailure',
             expr: '1 - avg_over_time(probe_success[10m]) > 0.25',
-            'for': '5m',
+            'for': '10m',
             labels: { service: 'blackbox-exporter', severity: 'warning' },
             annotations: {
               summary: 'Blackbox-exporter {{ $labels.name }} is failing for job {{ $labels.job }}',
