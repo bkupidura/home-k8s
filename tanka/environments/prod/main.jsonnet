@@ -39,7 +39,6 @@
   _config:: {
     restore: false,
     update: false,
-    upstream_dns: '10.0.120.1',
     vip: {
       dns: '10.0.10.40',
       ingress: '10.0.10.42',

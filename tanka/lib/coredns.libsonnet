@@ -27,6 +27,13 @@
                               + $.k.rbac.v1.subject.withKind('ServiceAccount'),
                             ]
                           ),
+    forward_snippet:: |||
+      forward %(domain)s %(server)s
+    |||,
+    forward_config:: [
+      $.coredns.forward_snippet % forward
+      for forward in std.extVar('secrets').coredns.forward
+    ],
     config: v1.configMap.new('coredns', {
               Corefile: |||
                 .:53 {
@@ -38,8 +45,7 @@
                         fallthrough in-addr.arpa ip6.arpa
                     }
                     prometheus :9153
-                    forward home %(upstream_server)s:53
-                    forward %(domain)s %(upstream_server)s:53
+                    %(forwards)s
                     forward . 127.0.0.1:5301 127.0.0.1:5302
                     loop
                     reload
@@ -57,7 +63,7 @@
                     }
                     cache 600
                 }
-              ||| % { upstream_server: $._config.upstream_dns, domain: std.extVar('secrets').domain },
+              ||| % { forwards: std.join('\n', $.coredns.forward_config) },
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [
