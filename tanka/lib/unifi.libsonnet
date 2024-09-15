@@ -18,7 +18,7 @@
         services: [{ name: 'unifi', port: 443, namespace: 'home-infra', scheme: 'https' }],
         middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     ingress_route_http: $._custom.ingress_route.new('unifi-http', 'home-infra', ['web'], [
       {
         kind: 'Rule',
@@ -26,7 +26,7 @@
         services: [{ name: 'unifi', port: 80, namespace: 'home-infra', scheme: 'http' }],
         middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }],
       },
-    ], false),
+    ], null),
     cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '00 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]

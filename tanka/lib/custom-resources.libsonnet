@@ -65,7 +65,7 @@
                                                                        ]),
     },
     ingress_route: {
-      new(name, namespace, entrypoints, routes, tls=false): {
+      new(name, namespace, entrypoints, routes, tls): {
         apiVersion: 'traefik.io/v1alpha1',
         kind: 'IngressRoute',
         metadata: {
@@ -75,8 +75,8 @@
         spec: {
           entryPoints: entrypoints,
           routes: routes,
-          [if tls then 'tls']: {
-            secretName: std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls',
+          [if tls != null then 'tls']: {
+            secretName: tls,
           },
 
         },

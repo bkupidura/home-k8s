@@ -105,7 +105,7 @@
     }),
     middleware_whitelist: {
       [std.format('whitelist_%s', whitelist_name)]: $._custom.traefik_middleware.new(std.format('%s-whitelist', whitelist_name), {
-        ipWhiteList: {
+        ipAllowList: {
           sourceRange: $._config.traefik.whitelist[whitelist_name],
         },
       })
@@ -145,6 +145,6 @@
           { name: 'auth-authelia', namespace: 'traefik-system' },
         ],
       },
-    ], tls=true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
   },
 }

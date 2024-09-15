@@ -59,7 +59,7 @@
         services: [{ name: 'recorder', port: 8080 }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_cleanup: $._custom.cronjob.new('recorder-cleanup', 'smart-home', '15 6,18 * * *', [
                        $.k.core.v1.container.new('cleanup', $._version.ubuntu.image)
                        + $.k.core.v1.container.withVolumeMounts([
