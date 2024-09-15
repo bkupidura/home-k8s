@@ -49,7 +49,7 @@
         match: std.format('Host(`auth.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'authelia', port: 9091 }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     config: v1.configMap.new('authelia-config', {
               'users.yml': std.manifestYamlDoc({
                 users: std.extVar('secrets').authelia.users,

@@ -20,7 +20,7 @@
         services: [{ name: 'freshrss', port: 80 }],
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     pvc: p.new('freshrss')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])

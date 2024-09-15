@@ -18,7 +18,7 @@
         services: [{ name: 'zigbee2mqtt', port: 8080, namespace: 'smart-home' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('zigbee2mqtt', 'smart-home', '50 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]

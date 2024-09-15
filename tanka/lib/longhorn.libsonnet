@@ -24,7 +24,7 @@
           },
           {
             alert: 'LonghornNodeDown',
-            expr: 'longhorn_node_status != 1',
+            expr: 'longhorn_node_status{condition=~"(ready|schedulable|allowScheduling)"} != 1',
             labels: { service: 'longhorn', severity: 'critical' },
             annotations: {
               summary: 'Node {{ $labels.node }} is unhealthy ({{ $labels.condition }})',
@@ -101,6 +101,6 @@
         services: [{ name: 'longhorn-frontend', port: 80, namespace: 'longhorn-system' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
   },
 }

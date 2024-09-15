@@ -25,7 +25,7 @@
         services: [{ name: 'registry', port: 5000, namespace: 'home-infra' }],
         middlewares: [{ name: 'lanhypervisor-whitelist', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('registry', 'home-infra', '15 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]

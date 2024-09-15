@@ -59,8 +59,8 @@
           http2 on;
           server_name %(domain)s;
           set $upstream https://%(upstream)s;
-          ssl_certificate /ssl/tls.crt;
-          ssl_certificate_key /ssl/tls.key;
+          ssl_certificate %(cert_dir)s/tls.crt;
+          ssl_certificate_key %(cert_dir)s/tls.key;
           ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
           ssl_prefer_server_ciphers on;
           ssl_protocols TLSv1.3;
@@ -89,7 +89,14 @@
       }
     |||,
     nginx_config:: [
-      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s') }
+      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s'), cert_dir: std.extVar('secrets').waf.server[server_name].cert_dir }
+      for server_name in std.objectFields(std.extVar('secrets').waf.server)
+    ],
+    certs:: [
+      {
+        secret: std.strReplace(std.split(std.extVar('secrets').waf.server[server_name].cert_dir, '/')[2], '.', '-') + '-tls',
+        dir: std.extVar('secrets').waf.server[server_name].cert_dir,
+      }
       for server_name in std.objectFields(std.extVar('secrets').waf.server)
     ],
     service: s.new(
@@ -120,9 +127,13 @@
                           ANOMALY_OUTBOUND: '4',
                           ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
+			+ c.withVolumeMountsMixin([
+			  v1.volumeMount.new(cert.secret, cert.dir)
+			  for cert in $.waf.certs
+			])
                         + c.securityContext.withRunAsUser(0)
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '75m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '75m' })
+                        + c.resources.withRequests({ memory: '128Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '128Mi', cpu: '100m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: 'localhost' }])
@@ -132,10 +143,13 @@
                       ],
                       { 'app.kubernetes.io/name': 'waf' })
                 + d.configVolumeMount('waf-config', '/nginx/conf.d', {})
-                + d.secretVolumeMount(std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls', '/ssl', 256, {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'waf' })
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(3),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
+                + d.spec.template.spec.withVolumesMixin([
+                  v1.volume.fromSecret(cert.secret, cert.secret)
+                  for cert in $.waf.certs
+                ]),
   },
 }

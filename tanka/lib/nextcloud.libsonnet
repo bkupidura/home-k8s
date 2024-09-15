@@ -25,7 +25,7 @@
         services: [{ name: 'nextcloud', port: 80 }],
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'nextcloud-redirect', namespace: 'traefik-system' }],
       },
-    ], true),
+    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     service: s.new('nextcloud',
                    { 'app.kubernetes.io/name': 'nextcloud' },
                    [
