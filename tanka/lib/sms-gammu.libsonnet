@@ -33,6 +33,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'sms-gammu' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyusb0', '/dev/ttyUSB0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.secretVolumeMount('sms-gammu-secret', '/sms-gw/credentials.txt', 256, $.k.core.v1.volumeMount.withSubPath('credentials.txt'))
                 + d.spec.strategy.withType('Recreate')

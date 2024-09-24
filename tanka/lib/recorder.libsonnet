@@ -125,6 +125,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'recorder' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('recorder-config', '/config/', {})
                 + d.secretVolumeMount('recorder-secret', '/secret/', 256, {})

@@ -127,10 +127,10 @@
                           ANOMALY_OUTBOUND: '4',
                           ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
-			+ c.withVolumeMountsMixin([
-			  v1.volumeMount.new(cert.secret, cert.dir)
-			  for cert in $.waf.certs
-			])
+                        + c.withVolumeMountsMixin([
+                          v1.volumeMount.new(cert.secret, cert.dir)
+                          for cert in $.waf.certs
+                        ])
                         + c.securityContext.withRunAsUser(0)
                         + c.resources.withRequests({ memory: '128Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '100m' })

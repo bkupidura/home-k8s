@@ -137,6 +137,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'redis' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.pvcVolumeMount('redis', '/data', false, {})
                 + d.configVolumeMount('redis-config', '/config/', {})
                 + d.spec.strategy.withType('Recreate')

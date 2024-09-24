@@ -150,6 +150,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-usb-hiddev0', '/dev/usb/hiddev0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
                 + d.spec.strategy.withType('Recreate')

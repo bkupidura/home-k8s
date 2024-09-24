@@ -138,6 +138,7 @@
                         + c.livenessProbe.withPeriodSeconds(5),
                       ],
                       { 'app.kubernetes.io/name': 'broker-ha' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.configVolumeMount('broker-ha-config', '/config/', {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
