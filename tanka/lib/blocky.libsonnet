@@ -103,6 +103,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'blocky' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.configVolumeMount('blocky-config', '/config/', {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(

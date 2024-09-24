@@ -296,6 +296,7 @@
                            else {}),
                       ],
                       { 'app.kubernetes.io/name': 'mariadb' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes([
                   v1.volume.fromConfigMap('mariadb-init', 'mariadb-init'),
                   v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),

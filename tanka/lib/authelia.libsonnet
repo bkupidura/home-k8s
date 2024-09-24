@@ -156,6 +156,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'authelia' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.configVolumeMount('authelia-config', '/config', {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')

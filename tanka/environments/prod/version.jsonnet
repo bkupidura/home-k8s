@@ -39,7 +39,7 @@
     traefik: {
       chart: '31.0.0',
       repo: 'traefik',
-      tag: 'v3.1.2',
+      tag: 'v3.1.4',
     },
     blocky: {
       image: 'spx01/blocky:v0.24',
@@ -124,6 +124,9 @@
     },
     paperless: {
       image: 'ghcr.io/paperless-ngx/paperless-ngx:2.12.0',
+    },
+    reloader: {
+      chart: '1.0.121',
     },
   },
 }

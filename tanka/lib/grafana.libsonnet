@@ -75,6 +75,7 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'grafana' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('monitoring')
