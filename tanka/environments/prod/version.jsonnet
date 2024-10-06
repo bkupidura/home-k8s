@@ -4,10 +4,10 @@
       image: 'coredns/coredns:1.11.3',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:07092024',
+      image: 'ghcr.io/bkupidura/chrony:28092024',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20240808',
+      image: 'ubuntu:jammy-20240911.1',
     },
     kubernetes_descheduler: {
       chart: '0.30.1',
@@ -37,7 +37,8 @@
       image: 'restic/restic:0.17.1',
     },
     traefik: {
-      chart: '31.0.0',
+      chart: '32.0.0',
+      registry: 'docker.io',
       repo: 'traefik',
       tag: 'v3.1.4',
     },
@@ -45,10 +46,10 @@
       image: 'spx01/blocky:v0.24',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:07092024',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:28092024',
     },
     authelia: {
-      image: 'authelia/authelia:4.38.10',
+      image: 'authelia/authelia:4.38.15',
     },
     cert_manager: {
       chart: 'v1.15.3',
@@ -60,37 +61,37 @@
       metrics: 'prom/mysqld-exporter:v0.15.1',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.18',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.19',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.40.1',
+      image: 'koenkk/zigbee2mqtt:1.40.2',
     },
     esphome: {
-      image: 'esphome/esphome:2024.8.3',
+      image: 'esphome/esphome:2024.9.2',
     },
     grafana: {
-      image: 'grafana/grafana:11.2.0',
+      image: 'grafana/grafana:11.2.2',
     },
     loki: {
       server: '6.12.0',
-      fluentbit: '0.47.9',
+      fluentbit: '0.47.10',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2024.8.3',
+      image: 'homeassistant/home-assistant:2024.9.3',
     },
     node_red: {
-      image: 'nodered/node-red:4.0.2-22',
+      image: 'nodered/node-red:4.0.3-22',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0.6',
+      image: 'ghcr.io/bkupidura/recorder:2.0.7',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.3.0',
     },
     unifi: {
-      image: 'jacobalberty/unifi:v8.4.59',
+      image: 'jacobalberty/unifi:v8.4.62',
     },
     prometheus: {
       chart: '25.27.0',
@@ -103,14 +104,14 @@
         chart: '0.11.1',
       },
       server: {
-        chart: '0.11.1',
+        chart: '0.11.2',
       },
     },
     vaultwarden: {
       image: 'vaultwarden/server:1.32.0-alpine',
     },
     nextcloud: {
-      image: 'nextcloud:29.0.6-apache',
+      image: 'nextcloud:30.0.0-apache',
     },
     redis: {
       image: 'redis:7.4.0-alpine',
@@ -123,7 +124,7 @@
       image: 'registry:2',
     },
     paperless: {
-      image: 'ghcr.io/paperless-ngx/paperless-ngx:2.12.0',
+      image: 'ghcr.io/paperless-ngx/paperless-ngx:2.12.1',
     },
     reloader: {
       chart: '1.0.121',

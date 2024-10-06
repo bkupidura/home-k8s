@@ -35,7 +35,7 @@
         requests: { cpu: '150m', memory: '96Mi' },
         limits: { cpu: '150m', memory: '96Mi' },
       },
-      image: { name: $._version.traefik.repo, tag: $._version.traefik.tag },
+      image: { registry: $._version.traefik.registry, repository: $._version.traefik.repo, tag: $._version.traefik.tag },
       env: [
         { name: 'TZ', value: $._config.tz },
       ],
