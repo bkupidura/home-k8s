@@ -11,7 +11,7 @@
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '20Gi' }),
+         + p.spec.resources.withRequests({ storage: '10Gi' }),
     middleware_redirect: $._custom.traefik_middleware.new('nextcloud-redirect', {
       replacePathRegex: {
         regex: '^/.well-known/ca(l|rd)dav',

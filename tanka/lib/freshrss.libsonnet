@@ -4,6 +4,20 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('rss.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:rss',
+          policy: 'one_factor',
+        },
+      },
+    ],
+  },
   freshrss: {
     restore:: $._config.restore,
     service: s.new('freshrss',
@@ -47,7 +61,7 @@
                           CRON_MIN: '*/20',
                           TRUSTED_PROXY: $._config.kubernetes_internal_cidr,
                         })
-                        + c.resources.withRequests({ memory: '32Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '130m' })
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)

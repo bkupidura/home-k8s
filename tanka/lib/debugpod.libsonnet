@@ -11,7 +11,7 @@
                     + c.withCommand([
                       '/bin/sh',
                       '-ec',
-                      std.join('\n', ['apt update', 'apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat powertop', 'tail -f /dev/null']),
+                      std.join('\n', ['apt update', 'apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat powertop iperf fio', 'tail -f /dev/null']),
                     ])
                     + c.securityContext.withPrivileged(true)
                     + c.securityContext.withRunAsUser(0)

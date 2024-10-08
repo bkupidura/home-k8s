@@ -35,6 +35,20 @@
       },
     ],
   },
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('vaultwarden.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:admin',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   vaultwarden: {
     restore:: $._config.restore,
     pvc: p.new('vaultwarden')

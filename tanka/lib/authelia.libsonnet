@@ -22,10 +22,24 @@
     ],
   },
   authelia: {
+    access_control:: [
+      {
+        order: 100,
+        rule: {
+          domain: std.format('*.%s', std.extVar('secrets').domain),
+          subject: 'group:admin',
+          policy: 'two_factor',
+        },
+      },
+    ],
+    access_control_rendered:: [
+      acl.rule
+      for acl in std.sort($.authelia.access_control, function(x) x.order)
+    ],
     oidc_clients:: [
       {
         audience: [],
-        authorization_policy: 'two_factor',
+        authorization_policy: std.extVar('secrets').authelia.oidc.client[client_name].authorization_policy,
         client_name: client_name,
         client_id: client_name,
         grant_types: ['refresh_token', 'authorization_code'],
@@ -109,13 +123,7 @@
                 },
                 access_control: {
                   default_policy: 'deny',
-                  rules: [
-                    {
-                      domain: std.format('*.%s', std.extVar('secrets').domain),
-                      subject: 'group:admin',
-                      policy: 'two_factor',
-                    },
-                  ],
+                  rules: $.authelia.access_control_rendered,
                 },
                 regulation: {
                   max_retries: 3,

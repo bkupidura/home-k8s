@@ -53,6 +53,22 @@
       },
     ],
   },
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('vm-alert.%s', std.extVar('secrets').domain),
+            std.format('vm-server.%s', std.extVar('secrets').domain),
+            std.format('alertmanager.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:admin',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   victoria_metrics: {
     [if $.monitoring.extra_scrape != null then 'extra_scrape_rendered']:: [
       $.monitoring.extra_scrape[extra_scrape]
@@ -70,7 +86,7 @@
                 + p.metadata.withNamespace('monitoring')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
                 + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
-                + p.spec.resources.withRequests({ storage: '35Gi' }),
+                + p.spec.resources.withRequests({ storage: '20Gi' }),
     ingress_route_alert: $._custom.ingress_route.new('victoria-metrics-alert', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',

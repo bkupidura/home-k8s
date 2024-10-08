@@ -4,6 +4,20 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('paperless.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:docs',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   paperless: {
     update:: $._config.update,
     restore:: $._config.restore,
@@ -11,7 +25,7 @@
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '5Gi' }),
+         + p.spec.resources.withRequests({ storage: '2Gi' }),
     service: s.new('paperless', { 'app.kubernetes.io/name': 'paperless' }, [v1.servicePort.withPort(8000) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('self-hosted')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'paperless' }),

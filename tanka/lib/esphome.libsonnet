@@ -4,6 +4,20 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('esphome.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:smart-home-infra',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   esphome: {
     pvc: p.new('esphome')
          + p.metadata.withNamespace('smart-home')

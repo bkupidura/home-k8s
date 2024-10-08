@@ -28,6 +28,20 @@
       },
     ],
   },
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('traefik.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:admin',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   traefik: {
     namespace: $.k.core.v1.namespace.new('traefik-system'),
     helm: $._custom.helm.new('traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
