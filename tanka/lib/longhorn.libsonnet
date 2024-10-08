@@ -16,7 +16,7 @@
           },
           {
             alert: 'LonghornHighDiskUsage',
-            expr: 'longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.7',
+            expr: 'longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.9',
             labels: { service: 'longhorn', severity: 'info' },
             annotations: {
               summary: 'High disk usage on {{ $labels.node }}',
@@ -31,6 +31,20 @@
             },
           },
         ],
+      },
+    ],
+  },
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('storage.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:admin',
+          policy: 'two_factor',
+        },
       },
     ],
   },

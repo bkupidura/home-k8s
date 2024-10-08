@@ -29,7 +29,7 @@
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '5Gi' }),
+         + p.spec.resources.withRequests({ storage: '3Gi' }),
     ingress_route_ssl: $._custom.ingress_route.new('home-assistant-ssl', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',
@@ -96,7 +96,7 @@
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
                 + d.spec.template.metadata.withAnnotations({
-                  'k8s.v1.cni.cncf.io/networks': '[{"name": "multus-dhcp-lan", "mac": "e8:d1:44:8d:65:b0"}, {"name": "multus-dhcp-iot", "mac": "e8:d1:44:8d:65:b1"}]',
+                  'k8s.v1.cni.cncf.io/networks': '[{"name": "multus-dhcp-lan", "mac": "e8:d1:44:8d:65:b0", "namespace": "kube-system"}, {"name": "multus-dhcp-iot", "mac": "e8:d1:44:8d:65:b1", "namespace": "kube-system"}]',
                 })
                 + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
                   v1.weightedPodAffinityTerm.withWeight(1)

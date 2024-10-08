@@ -95,7 +95,7 @@
         rules: [
           {
             alert: 'K8sHighMemoryPodLimit',
-            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.3',
+            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.5',
             'for': '24h',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {
@@ -137,7 +137,7 @@
           },
           {
             alert: 'K8sHighMemoryPodUsage',
-            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!=""} / container_spec_memory_limit_bytes < Inf) > 0.99',
+            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!~"(unifi|)"} / container_spec_memory_limit_bytes < Inf) > 0.95',
             'for': '30m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -169,11 +169,11 @@
         rules: [
           {
             alert: 'K8sVolumeUsageHigh',
-            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / kubelet_volume_stats_capacity_bytes > 0.75',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / kubelet_volume_stats_capacity_bytes > 0.90',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 75% os available storage',
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 90% os available storage',
             },
           },
           {

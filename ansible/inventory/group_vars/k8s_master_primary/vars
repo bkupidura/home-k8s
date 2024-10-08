@@ -18,6 +18,7 @@ package:
     - jq
     - cryptsetup
     - sshpass
+    - nfs-common
   remove:
     - snapd
 os:

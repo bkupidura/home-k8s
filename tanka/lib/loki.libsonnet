@@ -132,7 +132,7 @@
         persistence: {
           enabled: true,
           storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
-          size: '20Gi',
+          size: '15Gi',
         },
         podAnnotations: {
           'prometheus.io/port': '3100',

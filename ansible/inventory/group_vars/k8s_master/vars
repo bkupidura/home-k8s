@@ -17,6 +17,7 @@ package:
     - avahi-daemon
     - jq
     - cryptsetup
+    - nfs-common
   remove:
     - snapd
 os:

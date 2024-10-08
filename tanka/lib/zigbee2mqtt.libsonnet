@@ -4,6 +4,20 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  authelia+: {
+    access_control+: [
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('z2m.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:smart-home-infra',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   zigbee2mqtt: {
     restore:: $._config.restore,
     pvc: p.new('zigbee2mqtt')
@@ -69,8 +83,8 @@
                           TZ: $._config.tz,
                           ZIGBEE2MQTT_DATA: '/app/data',
                         })
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '150Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '150Mi', cpu: '50m' })
                         + c.securityContext.withPrivileged(true)
                         + c.withVolumeMounts([
                           v1.volumeMount.new('dev-ttyacm0', '/dev/ttyACM0', false),

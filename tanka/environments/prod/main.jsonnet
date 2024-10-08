@@ -4,6 +4,7 @@
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
 (import 'basic-monitoring.libsonnet') +
+(import 'authelia.libsonnet') +
 (import 'victoriametrics.libsonnet') +
 (import 'loki.libsonnet') +
 (import 'coredns.libsonnet') +
@@ -19,7 +20,6 @@
 (import 'blocky.libsonnet') +
 (import 'cert-manager.libsonnet') +
 (import 'nut.libsonnet') +
-(import 'authelia.libsonnet') +
 (import 'waf.libsonnet') +
 (import 'broker-ha.libsonnet') +
 (import 'grafana.libsonnet') +

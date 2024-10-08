@@ -20,8 +20,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '16Mi' })
-                        + c.resources.withLimits({ memory: '32Mi' })
+                        + c.resources.withRequests({ memory: '25Mi' })
+                        + c.resources.withLimits({ memory: '50Mi' })
                         + c.securityContext.withPrivileged(true)
                         + c.withVolumeMounts([
                           v1.volumeMount.new('dev-ttyusb0', '/dev/mobile', false),
