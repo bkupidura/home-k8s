@@ -111,12 +111,12 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
-    helm_alert: $._custom.helm.new('victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
+    helm_alert: $._custom.helm.new('victoria-metrics-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,
         resources: {
-          requests: { memory: '24Mi' },
-          limits: { memory: '24Mi' },
+          requests: { memory: '30Mi' },
+          limits: { memory: '50Mi' },
         },
         extraArgs: {
           configCheckInterval: '5m',
@@ -149,7 +149,7 @@
         },
       },
     }),
-    helm_server: $._custom.helm.new('victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {
+    helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {
       server: {
         enabled: true,
         extraArgs: {
@@ -569,7 +569,7 @@
         },
       },
     }),
-    helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
+    helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
       securityContext: {
         capabilities: {
           drop: ['ALL'],
@@ -595,7 +595,7 @@
         },
       },
     }),
-    helm_prometheus: $._custom.helm.new('prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'monitoring', {
+    helm_prometheus: $._custom.helm.new('prometheus', 'prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'monitoring', {
       extraEnv: { TZ: $._config.tz },
       alertmanager: {
         resources: {
@@ -650,8 +650,8 @@
             repeat_interval: '24h',
           },
           inhibit_rules: [
-            { equal: ['service'], source_match: { severity: 'critical' }, target_match: { severity: 'warning' } },
-            { equal: ['service'], source_match: { severity: 'warning' }, target_match: { severity: 'info' } },
+            { equal: ['service'], source_matchers: ['severity = critical', 'service !~ system|k8s'], target_matchers: ['severity = warning'] },
+            { equal: ['service'], source_matchers: ['severity = warning', 'service !~ system|k8s'], target_matchers: ['severity = info'] },
           ],
         },
       },

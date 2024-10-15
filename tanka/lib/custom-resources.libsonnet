@@ -2,7 +2,7 @@
   k: import 'github.com/jsonnet-libs/k8s-libsonnet/1.28/main.libsonnet',
   _custom:: {
     helm: {
-      new(name, repo, version, targetNamespace, values): {
+      new(name, chart_name, repo, version, targetNamespace, values): {
         apiVersion: 'helm.cattle.io/v1',
         kind: 'HelmChart',
         metadata: {
@@ -11,7 +11,7 @@
         },
         spec: {
           repo: repo,
-          chart: name,
+          chart: chart_name,
           version: version,
           targetNamespace: targetNamespace,
           valuesContent: std.manifestYamlDoc(values, true),

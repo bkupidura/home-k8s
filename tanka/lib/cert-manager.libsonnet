@@ -22,7 +22,7 @@
               token: std.base64(std.extVar('secrets').cert_manager.digialocean.token),
             })
             + $.k.core.v1.secret.metadata.withNamespace('cert-manager'),
-    helm: $._custom.helm.new('cert-manager', 'https://charts.jetstack.io', $._version.cert_manager.chart, 'cert-manager', {
+    helm: $._custom.helm.new('cert-manager', 'cert-manager', 'https://charts.jetstack.io', $._version.cert_manager.chart, 'cert-manager', {
       image: { repository: $._version.cert_manager.repo, tag: $._version.cert_manager.tag },
       extraEnv: [
         { name: 'TZ', value: $._config.tz },

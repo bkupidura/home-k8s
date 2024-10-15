@@ -44,7 +44,7 @@
   },
   traefik: {
     namespace: $.k.core.v1.namespace.new('traefik-system'),
-    helm: $._custom.helm.new('traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
+    helm: $._custom.helm.new('traefik', 'traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
       resources: {
         requests: { cpu: '150m', memory: '96Mi' },
         limits: { cpu: '150m', memory: '96Mi' },

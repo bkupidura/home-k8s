@@ -4,3 +4,4 @@ tanka/vendor/*
 tanka/environments/dev/*
 tanka/lib/*-dev.libsonnet
 .DS_Store
+venv/*

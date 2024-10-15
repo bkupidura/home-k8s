@@ -43,7 +43,7 @@
                     }),
                   })
                   + v1.configMap.metadata.withNamespace('monitoring'),
-    helm: $._custom.helm.new('loki', 'https://grafana.github.io/helm-charts', $._version.loki.server, 'monitoring', {
+    helm: $._custom.helm.new('loki', 'loki', 'https://grafana.github.io/helm-charts', $._version.loki.server, 'monitoring', {
       loki: {
         commonConfig: {
           replication_factor: 1,
@@ -157,7 +157,7 @@
         ],
       },
     }),
-    helm_fluentbit: $._custom.helm.new('fluent-bit', 'https://fluent.github.io/helm-charts', $._version.loki.fluentbit, 'monitoring', {
+    helm_fluentbit: $._custom.helm.new('fluent-bit', 'fluent-bit', 'https://fluent.github.io/helm-charts', $._version.loki.fluentbit, 'monitoring', {
       config: {
         filters: |||
           [FILTER]
