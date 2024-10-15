@@ -17,7 +17,7 @@
     ],
   },
   reloader: {
-    helm: $._custom.helm.new('reloader', 'https://stakater.github.io/stakater-charts', $._version.reloader.chart, 'kube-system', {
+    helm: $._custom.helm.new('reloader', 'reloader', 'https://stakater.github.io/stakater-charts', $._version.reloader.chart, 'kube-system', {
       reloader: {
         deployment: {
           resources: {

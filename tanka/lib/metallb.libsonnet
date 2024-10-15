@@ -19,7 +19,7 @@
   metallb: {
     namespace: $.k.core.v1.namespace.new('metallb-system'),
     helm: $._custom.helm.new(
-      'metallb', 'https://metallb.github.io/metallb', $._version.metallb.chart, 'metallb-system', {
+      'metallb', 'metallb', 'https://metallb.github.io/metallb', $._version.metallb.chart, 'metallb-system', {
         controller: {
           resources: {
             limits: { cpu: '75m', memory: '64Mi' },

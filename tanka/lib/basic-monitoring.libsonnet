@@ -78,10 +78,16 @@
               summary: 'Physical CPU throtling on {{ $labels.node }}',
             },
           },
+        ],
+      },
+      {
+        name: 'infra-slow30m',
+        interval: '30m',
+        rules: [
           {
             alert: 'HighContextSwitch',
             expr: 'rate(node_context_switches_total[10m]) > rate(node_context_switches_total[60m] offset 60m) * 1.3',
-            'for': '45m',
+            'for': '2h',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
               summary: 'High number of context switching observed on {{ $labels.node }}',
@@ -93,15 +99,6 @@
         name: 'k8s-slow1h',
         interval: '1h',
         rules: [
-          {
-            alert: 'K8sHighMemoryPodLimit',
-            expr: 'max by (pod, namespace) (max_over_time(container_memory_working_set_bytes{container!=""}[14d]) / (128*1024*1024 < container_spec_memory_limit_bytes < Inf)) < 0.5',
-            'for': '24h',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: 'POD {{ $labels.pod }} in last 14 days is using only {{ $value | humanizePercentage }} of memory limit',
-            },
-          },
         ],
       },
       {
@@ -142,24 +139,6 @@
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'POD {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit',
-            },
-          },
-          {
-            alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.5',
-            'for': '15m',
-            labels: { service: 'k8s', severity: 'warning' },
-            annotations: {
-              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
-            },
-          },
-          {
-            alert: 'K8sPodCPUThrotling',
-            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace) > 0.3',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'info' },
-            annotations: {
-              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
             },
           },
         ],
@@ -341,6 +320,28 @@
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Flapping pods on {{ $labels.kubernetes_io_hostname }}',
+            },
+          },
+          {
+            record: 'k8s:container:cpu:throthling:5m',
+            expr: 'sum(increase(container_cpu_cfs_throttled_periods_total{container!=""}[5m])) by (container, pod, namespace) / sum(increase(container_cpu_cfs_periods_total{}[5m])) by (container, pod, namespace)',
+          },
+          {
+            alert: 'K8sPodCPUThrotling',
+            expr: 'k8s:container:cpu:throthling:5m > 0.5',
+            'for': '15m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'K8sPodCPUThrotling',
+            expr: 'k8s:container:cpu:throthling:5m > 0.3',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
             },
           },
         ],

@@ -95,7 +95,7 @@
   },
   longhorn: {
     namespace: $.k.core.v1.namespace.new('longhorn-system'),
-    helm: $._custom.helm.new('longhorn', 'https://charts.longhorn.io', $._version.longhorn.chart, 'longhorn-system', {
+    helm: $._custom.helm.new('longhorn', 'longhorn', 'https://charts.longhorn.io', $._version.longhorn.chart, 'longhorn-system', {
       defaultSettings: {
         storageOverProvisioningPercentage: 100,
         nodeDownPodDeletionPolicy: 'delete-both-statefulset-and-deployment-pod',
