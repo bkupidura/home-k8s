@@ -73,6 +73,7 @@
           {
             alert: 'PhysicalCPUThrotling',
             expr: 'delta(node_cpu_core_throttles_total[15m]) > 0',
+            'for': '60m',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
               summary: 'Physical CPU throtling on {{ $labels.node }}',

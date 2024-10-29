@@ -5,7 +5,7 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   authelia+: {
-    access_control+: [
+    access_control+:: [
       {
         order: 1,
         rule: {

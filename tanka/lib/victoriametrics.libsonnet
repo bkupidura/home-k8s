@@ -54,7 +54,7 @@
     ],
   },
   authelia+: {
-    access_control+: [
+    access_control+:: [
       {
         order: 1,
         rule: {
