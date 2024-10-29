@@ -52,8 +52,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         }) + (if $.nextcloud.update == false then
-                                c.resources.withRequests({ memory: '256Mi', cpu: '300m' })
-                                + c.resources.withLimits({ memory: '512Mi', cpu: '500m' })
+                                c.resources.withRequests({ memory: '256Mi', cpu: '500m' })
+                                + c.resources.withLimits({ memory: '512Mi', cpu: '700m' })
                                 + c.readinessProbe.tcpSocket.withPort('http')
                                 + c.readinessProbe.withInitialDelaySeconds(10)
                                 + c.readinessProbe.withPeriodSeconds(10)

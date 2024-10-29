@@ -27,7 +27,7 @@
           },
           {
             alert: 'RedisClientDisconnect',
-            expr: 'avg_over_time(redis_connected_clients[5m]) * 1.2 < avg_over_time(redis_connected_clients[5m] offset 10m)',
+            expr: 'avg_over_time(redis_connected_clients[15m]) * 1.3 < avg_over_time(redis_connected_clients[15m] offset 30m)',
             labels: { service: 'redis', severity: 'warning' },
             annotations: {
               summary: 'Observed client disconects on {{ $labels.pod }}',
@@ -74,7 +74,7 @@
     config: v1.configMap.new('redis-config', {
               'redis.conf': |||
                 port 6379
-                loglevel notice
+                loglevel verbose
                 protected-mode no
                 dir /data
                 save 360 1 60 10
@@ -99,8 +99,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '16Mi', cpu: '20m' })
-                        + c.resources.withLimits({ memory: '64Mi', cpu: '40m' })
+                        + c.resources.withRequests({ memory: '16Mi', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '64Mi', cpu: '100m' })
                         + c.readinessProbe.tcpSocket.withPort('redis')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)

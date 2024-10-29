@@ -138,8 +138,8 @@
           'prometheus.io/port': '3100',
         },
         resources: {
-          requests: { memory: '128Mi' },
-          limits: { memory: '384Mi' },
+          requests: { memory: '250Mi' },
+          limits: { memory: '500Mi' },
         },
         extraVolumes: [
           {

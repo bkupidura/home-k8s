@@ -81,7 +81,7 @@
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '4Gi' }),
+         + p.spec.resources.withRequests({ storage: '5Gi' }),
     service: s.new('mariadb', { 'app.kubernetes.io/name': 'mariadb' }, [v1.servicePort.withPort(3306) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('mysql')])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mariadb' }),
