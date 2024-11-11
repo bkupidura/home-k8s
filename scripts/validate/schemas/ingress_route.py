@@ -28,6 +28,7 @@ class MiddlewareRequiredSchema(Schema):
 
 validator = [
     {
+        "name": "generic",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "traefik.io/v1alpha1"),
@@ -37,6 +38,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "generic",
                 "schema": Schema(
                     {
                         "metadata": {
@@ -48,6 +50,7 @@ validator = [
                 ),
             },
             {
+                "name": "tls_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -56,12 +59,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": [
-                    "smart-home/home-assistant-http",
-                    "home-infra/unifi-http",
-                ],
             },
             {
+                "name": "required_middlewares",
                 "schema": Schema(
                     {
                         "spec": {
@@ -74,12 +74,6 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": [
-                    "home-infra/authelia",
-                    "smart-home/home-assistant",
-                    "self-hosted/files",
-                    "self-hosted/vaultwarden",
-                ],
             },
         ],
     }
