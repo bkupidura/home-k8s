@@ -2,6 +2,7 @@
 import sys
 import yaml
 import json
+import argparse
 from schema import Schema, And, SchemaError, Or, Optional
 
 from schemas import deployment as schema_deployment
@@ -18,7 +19,12 @@ validator_mapping = {
     "cron_job": schema_cron_job.validator,
 }
 
-with open("scripts/validate/config.yaml", "r") as f:
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--config-file", required=True, help="config file")
+args = parser.parse_args()
+
+
+with open(args.config_file, "r") as f:
     config = yaml.safe_load(f)
 
 k8s_definitions = yaml.safe_load_all(sys.stdin)
