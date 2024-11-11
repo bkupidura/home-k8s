@@ -65,6 +65,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'esphome' })
                 + d.pvcVolumeMount('esphome', '/config', false, {})
+                + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
   },

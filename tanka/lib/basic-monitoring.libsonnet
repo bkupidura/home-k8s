@@ -279,6 +279,15 @@
             },
           },
           {
+            alert: 'K8sPodsUnexpectedPhase',
+            expr: 'sum by (phase) (kube_pod_status_phase{phase=~"(Failed|Pending|Unknown)"}) > 0',
+            'for': '10m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'Pod in {{ $labels.phase }} state observerd',
+            },
+          },
+          {
             alert: 'K8sDaemonSetUnavailable',
             expr: 'kube_daemonset_status_number_unavailable != 0',
             'for': '10m',

@@ -5,3 +5,4 @@ tanka/environments/dev/*
 tanka/lib/*-dev.libsonnet
 .DS_Store
 venv/*
+__pycache__

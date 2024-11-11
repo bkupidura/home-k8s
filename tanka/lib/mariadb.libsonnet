@@ -7,24 +7,17 @@
   monitoring+: {
     rules+:: [
       {
-        name: 'mariadb-disabled',
-        enabled: false,
+        name: 'mariadb',
         rules: [
           {
             alert: 'MysqlWrongBufferPoolUsage',
             expr: 'delta(mysql_global_status_innodb_buffer_pool_reads[5m]) / delta(mysql_global_status_innodb_buffer_pool_read_requests[5m]) > 0.03',
-            comment: 'mysql_global_status_innodb_buffer_pool_read_requests is always 0',
             'for': '60m',
             labels: { service: 'mysql', severity: 'warning' },
             annotations: {
               summary: 'Mysql wrong innodb buffer pool reads, check https://mariadb.com/kb/en/innodb-buffer-pool/#innodb_buffer_pool_size',
             },
           },
-        ],
-      },
-      {
-        name: 'mariadb',
-        rules: [
           {
             alert: 'MysqlDown',
             expr: 'mysql_up == 0',
@@ -273,7 +266,17 @@
                              + c.livenessProbe.withTimeoutSeconds(2)
                            else {}),
                         c.new('metrics', $._version.mariadb.metrics)
-                        + c.withArgs(['--config.my-cnf', '/config/my.cnf'])
+                        + c.withArgs([
+                          '--config.my-cnf',
+                          '/config/my.cnf',
+                          '--collect.global_status',
+                          '--collect.global_variables',
+                          '--no-collect.info_schema.processlist',
+                          '--no-collect.info_schema.innodb_cmp',
+                          '--no-collect.info_schema.innodb_cmpmem',
+                          '--no-collect.info_schema.query_response_time',
+                          '--no-collect.slave_status',
+                        ])
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9104, 'metrics'))
                         + c.withEnvMap({
@@ -283,7 +286,9 @@
                           v1.volumeMount.new('mariadb-exporter-config', '/config/', true),
                         ])
                         + (if $.mariadb.update == false then
-                             c.readinessProbe.httpGet.withPath('/metrics')
+                             c.resources.withRequests({ cpu: '150m', memory: '15Mi' })
+                             + c.resources.withLimits({ cpu: '300m', memory: '30Mi' })
+                             + c.readinessProbe.httpGet.withPath('/metrics')
                              + c.readinessProbe.httpGet.withPort('metrics')
                              + c.readinessProbe.withInitialDelaySeconds(20)
                              + c.readinessProbe.withPeriodSeconds(10)

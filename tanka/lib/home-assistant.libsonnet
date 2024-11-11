@@ -30,7 +30,7 @@
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '3Gi' }),
-    ingress_route_ssl: $._custom.ingress_route.new('home-assistant-ssl', 'smart-home', ['websecure'], [
+    ingress_route_ssl: $._custom.ingress_route.new('home-assistant', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',
         match: std.format('Host(`ha.%s`) && (Path(`/api/websocket`) || Path(`/auth/token`) || Path(`/api/ios/config`) || PathPrefix(`/api/webhook/`) || PathPrefix(`/local/tmp/`))', std.extVar('secrets').domain),
@@ -44,7 +44,7 @@
         middlewares: [{ name: 'languest-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
-    ingress_route: $._custom.ingress_route.new('home-assistant', 'smart-home', ['web'], [
+    ingress_route: $._custom.ingress_route.new('home-assistant-http', 'smart-home', ['web'], [
       {
         kind: 'Rule',
         match: std.format('Host(`ha.%s`)', std.extVar('secrets').domain),

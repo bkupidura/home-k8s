@@ -42,3 +42,12 @@ jb install github.com/jsonnet-libs/k8s-libsonnet/1.28@main
 ## Show ansible facts
 
 `./scripts/run_ansible.sh -f all`
+
+## Validate all manifests
+
+```
+python3 -mvenv scripts/validate/venv
+source scripts/validate/venv/bin/activate
+pip3 install -r scripts/validate/requirements.txt
+./scripts/tanka show tanka/environments/prod --dangerous-allow-redirect | python3 scripts/validate/validate.py
+```

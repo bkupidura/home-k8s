@@ -73,6 +73,14 @@
                         + (if $.nextcloud.update == false then
                              c.resources.withRequests({ memory: '128Mi' })
                              + c.resources.withLimits({ memory: '196Mi' })
+                             + c.livenessProbe.exec.withCommand([
+                               '/bin/bash',
+                               '-ec',
+                               'ps p1',
+                             ])
+                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withPeriodSeconds(15)
+                             + c.livenessProbe.withTimeoutSeconds(2)
                            else {}),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })

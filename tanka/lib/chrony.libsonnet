@@ -43,6 +43,7 @@
                      ],
                      { 'app.kubernetes.io/name': 'chrony' })
                + d.metadata.withNamespace('home-infra')
+               + d.spec.updateStrategy.withType('RollingUpdate')
                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                + d.spec.template.spec.withVolumes([
                  v1.volume.fromHostPath('etc-localtime', '/etc/localtime') + v1.volume.hostPath.withType('File'),
