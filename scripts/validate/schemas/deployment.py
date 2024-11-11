@@ -3,6 +3,7 @@ from schema import Schema, And, Or, Optional, Forbidden
 
 validator = [
     {
+        "name": "with_multiple_replicas",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -15,6 +16,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "podAntiAffinity_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -33,6 +35,7 @@ validator = [
         ],
     },
     {
+        "name": "with_pvc_or_hostpath",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -62,6 +65,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "strategy_recreate",
                 "schema": Schema(
                     {
                         "spec": {
@@ -76,6 +80,7 @@ validator = [
         ],
     },
     {
+        "name": "without_pvc_or_hostpath",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -100,6 +105,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "strategy_rollingupdate",
                 "schema": Schema(
                     {
                         "spec": {
@@ -114,6 +120,7 @@ validator = [
         ],
     },
     {
+        "name": "generic",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -123,6 +130,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "generic",
                 "schema": Schema(
                     {
                         "metadata": {
@@ -131,12 +139,6 @@ validator = [
                         },
                         "spec": {
                             "template": {
-                                "metadata": {
-                                    "labels": {
-                                        "app.kubernetes.io/name": str,
-                                        "name": str,
-                                    },
-                                },
                                 "spec": {
                                     "containers": [
                                         {
@@ -156,6 +158,7 @@ validator = [
                 ),
             },
             {
+                "name": "selector_match_labels",
                 "schema": Schema(
                     And(
                         Schema(
@@ -167,12 +170,13 @@ validator = [
                             },
                             ignore_extra_keys=True,
                         ),
-                        lambda x: x["spec"]["selector"]["matchLabels"].items()
-                        == x["spec"]["template"]["metadata"]["labels"].items(),
+                        lambda x: set(x["spec"]["selector"]["matchLabels"].items())
+                        <= set(x["spec"]["template"]["metadata"]["labels"].items()),
                     ),
-                )
+                ),
             },
             {
+                "name": "privileged_false",
                 "schema": Schema(
                     {
                         "spec": {
@@ -196,15 +200,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": [
-                    "smart-home/zigbee2mqtt",
-                    "smart-home/sms-gammu",
-                    "smart-home/recorder",
-                    "home-infra/network-ups-tools",
-                    "home-infra/debugpod",
-                ],
             },
             {
+                "name": "runasuser_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -228,9 +226,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/debugpod"],
             },
             {
+                "name": "runasgroup_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -256,6 +254,7 @@ validator = [
                 ),
             },
             {
+                "name": "fsgroup_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -281,6 +280,7 @@ validator = [
                 ),
             },
             {
+                "name": "capabilities_add_missing",
                 "schema": Schema(
                     {
                         "spec": {
@@ -304,9 +304,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["kube-system/coredns"],
             },
             {
+                "name": "resources_cpu_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -337,9 +337,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/debugpod", "smart-home/esphome"],
             },
             {
+                "name": "resources_memory_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -366,9 +366,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/debugpod", "smart-home/esphome"],
             },
             {
+                "name": "liveness_probe_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -388,7 +388,6 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/debugpod"],
             },
         ],
     },

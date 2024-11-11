@@ -2,6 +2,7 @@ from schema import Schema, And, Or, Optional, Forbidden
 
 validator = [
     {
+        "name": "with_pvc_or_hostpath",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -31,6 +32,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "strategy_recreate",
                 "schema": Schema(
                     {
                         "spec": {
@@ -41,11 +43,11 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/chrony"],
             },
         ],
     },
     {
+        "name": "without_pvc_or_hostpath",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -70,6 +72,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "strategy_rollingupdate",
                 "schema": Schema(
                     {
                         "spec": {
@@ -84,6 +87,7 @@ validator = [
         ],
     },
     {
+        "name": "generic",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "apps/v1"),
@@ -93,6 +97,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "generic",
                 "schema": Schema(
                     {
                         "metadata": {
@@ -101,12 +106,6 @@ validator = [
                         },
                         "spec": {
                             "template": {
-                                "metadata": {
-                                    "labels": {
-                                        "app.kubernetes.io/name": str,
-                                        "name": str,
-                                    },
-                                },
                                 "spec": {
                                     "containers": [
                                         {
@@ -126,6 +125,7 @@ validator = [
                 ),
             },
             {
+                "name": "selector_match_labels",
                 "schema": Schema(
                     And(
                         Schema(
@@ -137,12 +137,13 @@ validator = [
                             },
                             ignore_extra_keys=True,
                         ),
-                        lambda x: x["spec"]["selector"]["matchLabels"].items()
-                        == x["spec"]["template"]["metadata"]["labels"].items(),
+                        lambda x: set(x["spec"]["selector"]["matchLabels"].items())
+                        <= set(x["spec"]["template"]["metadata"]["labels"].items()),
                     ),
-                )
+                ),
             },
             {
+                "name": "privileged_false",
                 "schema": Schema(
                     {
                         "spec": {
@@ -168,6 +169,7 @@ validator = [
                 ),
             },
             {
+                "name": "runasuser_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -193,6 +195,7 @@ validator = [
                 ),
             },
             {
+                "name": "runasgroup_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -218,6 +221,7 @@ validator = [
                 ),
             },
             {
+                "name": "fsgroup_not_root",
                 "schema": Schema(
                     {
                         "spec": {
@@ -243,6 +247,7 @@ validator = [
                 ),
             },
             {
+                "name": "capabilities_add_missing",
                 "schema": Schema(
                     {
                         "spec": {
@@ -266,9 +271,9 @@ validator = [
                     },
                     ignore_extra_keys=True,
                 ),
-                "exceptions": ["home-infra/chrony"],
             },
             {
+                "name": "resources_cpu_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -301,6 +306,7 @@ validator = [
                 ),
             },
             {
+                "name": "resources_memory_present",
                 "schema": Schema(
                     {
                         "spec": {
@@ -329,6 +335,7 @@ validator = [
                 ),
             },
             {
+                "name": "liveness_probe_present",
                 "schema": Schema(
                     {
                         "spec": {

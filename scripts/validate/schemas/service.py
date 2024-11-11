@@ -2,6 +2,7 @@ from schema import Schema, And, Or, Optional
 
 validator = [
     {
+        "name": "generic",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "v1"),
@@ -11,6 +12,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "generic",
                 "schema": Schema(
                     {
                         "metadata": {
@@ -24,6 +26,7 @@ validator = [
         ],
     },
     {
+        "name": "loadbalancer",
         "filter": Schema(
             {
                 "apiVersion": And(str, lambda x: x == "v1"),
@@ -36,6 +39,7 @@ validator = [
         ),
         "validators": [
             {
+                "name": "externaltrafficpolicy_local",
                 "schema": Schema(
                     {
                         "spec": {
