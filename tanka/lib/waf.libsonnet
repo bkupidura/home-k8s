@@ -99,6 +99,7 @@
       }
       for server_name in std.objectFields(std.extVar('secrets').waf.server)
     ],
+    certs_sorted:: std.uniq(std.sort($.waf.certs, function(x) x.dir), function(x) x.dir),
     service: s.new(
                'waf',
                { 'app.kubernetes.io/name': 'waf' },
@@ -129,9 +130,8 @@
                         })
                         + c.withVolumeMountsMixin([
                           v1.volumeMount.new(cert.secret, cert.dir)
-                          for cert in $.waf.certs
+                          for cert in $.waf.certs_sorted
                         ])
-                        + c.securityContext.withRunAsUser(0)
                         + c.resources.withRequests({ memory: '128Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '100m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
@@ -149,7 +149,7 @@
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                 + d.spec.template.spec.withVolumesMixin([
                   v1.volume.fromSecret(cert.secret, cert.secret)
-                  for cert in $.waf.certs
+                  for cert in $.waf.certs_sorted
                 ]),
   },
 }

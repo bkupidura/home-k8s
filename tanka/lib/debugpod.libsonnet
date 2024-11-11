@@ -8,6 +8,7 @@
                   0,
                   [
                     c.new('debugpod', $._version.ubuntu.image)
+                    + c.withImagePullPolicy('IfNotPresent')
                     + c.withCommand([
                       '/bin/sh',
                       '-ec',
