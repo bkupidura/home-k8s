@@ -10,6 +10,7 @@ from schemas import daemonset as schema_daemonset
 from schemas import service as schema_service
 from schemas import cron_job as schema_cron_job
 from schemas import statefulset as schema_statefulset
+from schemas import pod as schema_pod
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--config-file", required=True, help="config file")
@@ -34,6 +35,7 @@ validator_mapping = {
     "statefulset": schema_statefulset.Validator(
         config["validators"].get("statefulset", dict())
     ),
+    "pod": schema_pod.Validator(config["validators"].get("pod", dict())),
 }
 
 k8s_definitions = yaml.safe_load_all(sys.stdin)
