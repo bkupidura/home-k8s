@@ -5,14 +5,46 @@ from schema import Schema, And, Or, Optional, Forbidden
 class Validator(ValidatorBase):
     def __init__(self, *args, **kwargs):
         super(Validator, self).__init__(*args, **kwargs)
-        self.name = "daemonset"
+        self.name = "statefulset"
         self.validators = [
+            {
+                "name": "with_multiple_replicas",
+                "filter": Schema(
+                    {
+                        "apiVersion": And(str, lambda x: x == "apps/v1"),
+                        "kind": And(str, lambda x: x == "StatefulSet"),
+                        "spec": {
+                            "replicas": And(int, lambda x: x > 1),
+                        },
+                    },
+                    ignore_extra_keys=True,
+                ),
+                "check": [
+                    {
+                        "name": "podAntiAffinity_present",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "affinity": {
+                                                "podAntiAffinity": dict,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                ],
+            },
             {
                 "name": "with_pvc_or_hostpath",
                 "filter": Schema(
                     {
                         "apiVersion": And(str, lambda x: x == "apps/v1"),
-                        "kind": And(str, lambda x: x == "DaemonSet"),
+                        "kind": And(str, lambda x: x == "StatefulSet"),
                         "spec": {
                             "template": {
                                 "spec": {
@@ -57,7 +89,7 @@ class Validator(ValidatorBase):
                 "filter": Schema(
                     {
                         "apiVersion": And(str, lambda x: x == "apps/v1"),
-                        "kind": And(str, lambda x: x == "DaemonSet"),
+                        "kind": And(str, lambda x: x == "StatefulSet"),
                         "spec": {
                             "template": {
                                 "spec": {
@@ -101,7 +133,7 @@ class Validator(ValidatorBase):
                 "filter": Schema(
                     {
                         "apiVersion": And(str, lambda x: x == "apps/v1"),
-                        "kind": And(str, lambda x: x == "DaemonSet"),
+                        "kind": And(str, lambda x: x == "StatefulSet"),
                     },
                     ignore_extra_keys=True,
                 ),
