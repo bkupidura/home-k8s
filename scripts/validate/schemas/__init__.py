@@ -8,13 +8,16 @@ class ValidatorBase(object):
     def run_checks(self, manifest):
         errors = list()
         for validator in self.validators:
+            if validator["name"] not in self.conf.keys():
+                continue
+
             try:
                 validator["filter"].validate(manifest)
             except SchemaError:
                 continue
 
             resource_full_name = f"{manifest['metadata'].get('namespace')}/{manifest['metadata'].get('name')}"
-            validator_config = self.conf.get(validator["name"], dict())
+            validator_config = self.conf[validator["name"]]
 
             if validator_config is None:
                 validator_config = dict()

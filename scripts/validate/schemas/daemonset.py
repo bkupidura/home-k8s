@@ -121,8 +121,11 @@ class Validator(ValidatorBase):
                                                 {
                                                     "image": And(
                                                         str,
-                                                        lambda x: not x.endswith(
-                                                            ":latest"
+                                                        And(
+                                                            lambda x: not x.endswith(
+                                                                ":latest"
+                                                            ),
+                                                            lambda x: ":" in x,
                                                         ),
                                                     ),
                                                     "imagePullPolicy": And(
@@ -368,6 +371,57 @@ class Validator(ValidatorBase):
                                                     ignore_extra_keys=True,
                                                 ),
                                             ],
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "hostpid_false",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            Optional("hostPID"): And(
+                                                bool, lambda x: x == False
+                                            ),
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "hostipc_false",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            Optional("hostIPC"): And(
+                                                bool, lambda x: x == False
+                                            ),
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "hostnetwork_false",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            Optional("hostNetwork"): And(
+                                                bool, lambda x: x == False
+                                            ),
                                         }
                                     },
                                 },

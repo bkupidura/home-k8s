@@ -7,10 +7,6 @@ validators:
                     - ENC[AES256_GCM,data:qQIJbYOwdPHaifxYfCIwTuodM9g=,iv:fYLrjaNDGF2CkMvcs1yqy15NH21jCD45MjlAmdeu/Mg=,tag:PznanpEBBG/GiV/e4dPC5g==,type:str]
                     - ENC[AES256_GCM,data:y6qDmnraHHHh+UUigo5paoSkfg==,iv:wqH/4k1KOpYoRvGI8+/s+FUPHPKVR9+4HI3+hXkAdWw=,tag:xKtTr1UKtVHO10i7X8FlpQ==,type:str]
                     - ENC[AES256_GCM,data:hlgW6YDuQMErJXKHswEMqt7hTGfb4iV1B+fP3Q==,iv:078eVoOOePoWOby+ezmUAzCxHuiTqCJQEanGylaZ5Gs=,tag:TIxKWd9xgNyPE+eHNrXfXg==,type:str]
-                    - ENC[AES256_GCM,data:GHj0DdzMq/bGfVLdXjI9yGqTAQ==,iv:4vg/jME2wkmywl075DRM7OrCaZO8hkqSlLfCmhYQ+RM=,tag:mVPIjXSKiIsoXGCghT7fYQ==,type:str]
-            runasuser_not_root:
-                skip:
-                    - ENC[AES256_GCM,data:BQEGVrUMznvJFboXz76oFHe5sA==,iv:NagBMqWI3zAf9tg9AvaAwc3ifYsxWre/vLmEgcAYxf0=,tag:6i4Wl51yQN3kSA7VXp5D6w==,type:str]
             capabilities_add_missing:
                 skip:
                     - ENC[AES256_GCM,data:vOLop3dzFghh/eBptOkXmnO1UA==,iv:8V5aaHjG2RiPL4FxMCLYcKt6GjK62lS3mF1MGbrphMY=,tag:K30PGISF4eVV7knCK4f/BQ==,type:str]
@@ -107,6 +103,14 @@ validators:
                     - ENC[AES256_GCM,data:etqE8US0bzvHNbrc1inq0ZsammY58h5VaPXCp/UTfFVPZLE=,iv:h7RETvBHo+rCoRdI1GQKt82golIux6OnM+GtGF9wdhA=,tag:hLuvimCiCGx5ifVnRieCSA==,type:str]
                     - ENC[AES256_GCM,data:3QOX8ShtqSxQ9JShflfQxl3xgBmb+xju6PMnULA/LGs=,iv:Li/gQg758Shf9dSc5H6Ljg/HJki/TFU6Sg90Ow9zCOk=,tag:hLtGUKCq3zpL5c74nvUd0g==,type:str]
                     - ENC[AES256_GCM,data:dbfllNfm5IwVfrtwAbxUP5TkEz9U//5UOlCs+XAs,iv:+kGdtqLVIuKKYOpE8qsy2Hjn00ws2y9dGIHP9zVpurU=,tag:9QLdUi+Cq4g5iV8HpR4NVQ==,type:str]
+            hostnetwork_false:
+                skip:
+                    - ENC[AES256_GCM,data:PJeCcoDDbJ9elvmLRQhO0DhpRsUTzuBzSjg=,iv:I+ZXmzcuhLCGuaH/YOz2WdGVTD1/3stqGjSnDnHZDPE=,tag:qxF6o2zIZ3YlmKfQzlVvxg==,type:str]
+                    - ENC[AES256_GCM,data:/+CCAUG/jn44/vA4RVg8hxyuAs2Nb4d+0HXnjC7M,iv:tWDDeaJTh0qdmU4p5noKoJ0mV8uk93Xn0Gbejyqy7vo=,tag:OkXdXuRnesJ5hd+RAsrDpw==,type:str]
+                    - ENC[AES256_GCM,data:OAMpcnwH1GUuO94pqoh5I0n1UOkSWcStqg7y4J3Frc8xML2wNw2kfa7olBY3Yg==,iv:9HGicFYxKROq/dhUUI/kyhHBUpPs/X2LfrkL0xzYooI=,tag:NroHIyNKzgqfHrAWU8Em2Q==,type:str]
+            hostpid_false:
+                skip:
+                    - ENC[AES256_GCM,data:KYzCDoaEeUVf3Jc/eHyytTSY91eXd8m8kB+pNlREGPUXTUMnFJD1XzAgMWdulw==,iv:2a2EqNVjbqu3E+DONqzr9RO0nD4f4/MtvKQf0HzE/QY=,tag:WiTaI5OPDoy/SXpzMvi/Fg==,type:str]
         with_pvc_or_hostpath:
             strategy_recreate:
                 skip:
@@ -165,6 +169,8 @@ validators:
         with_pvc_or_hostpath: null
         without_pvc_or_hostpath: null
         with_multiple_replicas: null
+    pod:
+        generic: null
 sops:
     kms: []
     gcp_kms: []
@@ -180,8 +186,8 @@ sops:
             T0xIaU1VUjA4dXNZcm83Tk8vK043QlUKQreA5skPV0Ut9LzVYNleSMSk8sJRqk6I
             sOIQqvTdrwluaXCXOqZI+8GhCIfb1mK+h97aBywXRumtEyP3OPuO2g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-11-12T15:31:46Z"
-    mac: ENC[AES256_GCM,data:wHibEcwJFV3YiZiZz7P2JBNoMBEexJ8uxtDQuHA2mGaCSvw64wWPX7RTNhTMEeD7V0WlUJgJfPgqvC8l2I+NKqeCbHPKvgcVnaImB6BdPwWUxROhIinXuxWCJWILa0GjFaLC/emSXH2dxLF/cJcm7JmqUKXWMaKzPYhEI5CurnU=,iv:kBc2Twlxc9vcxZ0XYndm05GOsLMqaH5RwKfZkNbBuTA=,tag:BzJ10N8B4iYgzGCjXI77xA==,type:str]
+    lastmodified: "2024-11-12T22:35:42Z"
+    mac: ENC[AES256_GCM,data:joq5EJMPuiq88eiWbLya63AiY7MLMC0tq0zZJrRmrwNdp03RTYEAafQi+3Uiok0+hqUY7hnDYchu4OoXUgP2/oqr+UJE9OpK0/GXae4oKc5seNDq7snqTABIT5nEgIYi2nVG7sn4pbWwuqsOPN5hoEI6L8qd6j6j4bXNf1+5/Nk=,iv:3fE/gG3D6FtC14zlZVrlY1rB3bXTAeFADIvjknNrbY4=,tag:ZYtqKr7JdYGUX8oKG2eZXQ==,type:str]
     pgp: []
     unencrypted_suffix: _unencrypted
     version: 3.9.1
