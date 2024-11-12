@@ -1,14 +1,14 @@
-from schema import Schema, And, Or, Optional, SchemaError
+from . import ValidatorBase
+from schema import Schema, And, SchemaError
 
 
 class MiddlewareRequiredSchema(Schema):
-    _required_anyof_middlewares = [
-        {"name": "auth-authelia", "namespace": "traefik-system"},
-        {"name": "lan-whitelist", "namespace": "traefik-system"},
-        {"name": "languest-whitelist", "namespace": "traefik-system"},
-        {"name": "lanmgmt-whitelist", "namespace": "traefik-system"},
-        {"name": "lanhypervisor-whitelist", "namespace": "traefik-system"},
-    ]
+    def __init__(self, *args, **kwargs):
+        try:
+            self.required_middlewares = kwargs.pop("required_middlewares")
+        except KeyError:
+            pass
+        super(MiddlewareRequiredSchema, self).__init__(*args, **kwargs)
 
     def validate(self, data, _is_middlewareRequired_schema=True):
         data = super(MiddlewareRequiredSchema, self).validate(
@@ -16,65 +16,76 @@ class MiddlewareRequiredSchema(Schema):
         )
         if _is_middlewareRequired_schema:
             anyof_present = False
-            for m in self._required_anyof_middlewares:
+            for m in self.required_middlewares:
                 if m in data:
                     anyof_present = True
             if not anyof_present:
                 raise SchemaError(
-                    f"any of required middlewares not present {self._required_anyof_middlewares}"
+                    f"any of required middlewares not present {self.required_middlewares}"
                 )
         return data
 
 
-validator = [
-    {
-        "name": "generic",
-        "filter": Schema(
-            {
-                "apiVersion": And(str, lambda x: x == "traefik.io/v1alpha1"),
-                "kind": And(str, lambda x: x == "IngressRoute"),
-            },
-            ignore_extra_keys=True,
-        ),
-        "validators": [
+class Validator(ValidatorBase):
+    def __init__(self, *args, **kwargs):
+        super(Validator, self).__init__(*args, **kwargs)
+        self.name = "ingress_route"
+        self.validators = [
             {
                 "name": "generic",
-                "schema": Schema(
+                "filter": Schema(
                     {
-                        "metadata": {
-                            "name": str,
-                            "namespace": str,
-                        },
+                        "apiVersion": And(str, lambda x: x == "traefik.io/v1alpha1"),
+                        "kind": And(str, lambda x: x == "IngressRoute"),
                     },
                     ignore_extra_keys=True,
                 ),
-            },
-            {
-                "name": "tls_present",
-                "schema": Schema(
+                "check": [
                     {
-                        "spec": {
-                            "tls": dict,
-                        },
-                    },
-                    ignore_extra_keys=True,
-                ),
-            },
-            {
-                "name": "required_middlewares",
-                "schema": Schema(
-                    {
-                        "spec": {
-                            "routes": [
-                                {
-                                    "middlewares": MiddlewareRequiredSchema([dict]),
+                        "name": "generic",
+                        "schema": Schema(
+                            {
+                                "metadata": {
+                                    "name": str,
+                                    "namespace": str,
                                 },
-                            ]
-                        }
+                            },
+                            ignore_extra_keys=True,
+                        ),
                     },
-                    ignore_extra_keys=True,
-                ),
-            },
-        ],
-    }
-]
+                    {
+                        "name": "tls_present",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "tls": dict,
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "required_middlewares",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "routes": [
+                                        {
+                                            "middlewares": MiddlewareRequiredSchema(
+                                                [dict],
+                                                required_middlewares=self.conf.get(
+                                                    "generic", dict()
+                                                )
+                                                .get("required_middlewares", dict())
+                                                .get("middleware", list()),
+                                            ),
+                                        },
+                                    ]
+                                }
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                ],
+            }
+        ]

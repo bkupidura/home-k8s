@@ -1,154 +1,169 @@
-from schema import Schema, And, Or, Optional
+from . import ValidatorBase
+from schema import Schema, And, Optional
 
 
-validator = [
-    {
-        "name": "generic",
-        "filter": Schema(
-            {
-                "apiVersion": And(str, lambda x: x == "batch/v1"),
-                "kind": And(str, lambda x: x == "CronJob"),
-            },
-            ignore_extra_keys=True,
-        ),
-        "validators": [
+class Validator(ValidatorBase):
+    def __init__(self, *args, **kwargs):
+        super(Validator, self).__init__(*args, **kwargs)
+        self.name = "cron_job"
+        self.validators = [
             {
                 "name": "generic",
-                "schema": Schema(
+                "filter": Schema(
                     {
-                        "metadata": {
-                            "name": str,
-                            "namespace": str,
-                        },
+                        "apiVersion": And(str, lambda x: x == "batch/v1"),
+                        "kind": And(str, lambda x: x == "CronJob"),
                     },
                     ignore_extra_keys=True,
                 ),
-            },
-            {
-                "name": "restartpolicy_onfailure",
-                "schema": Schema(
+                "check": [
                     {
-                        "spec": {
-                            "jobTemplate": {
+                        "name": "generic",
+                        "schema": Schema(
+                            {
+                                "metadata": {
+                                    "name": str,
+                                    "namespace": str,
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "restartpolicy_onfailure",
+                        "schema": Schema(
+                            {
                                 "spec": {
-                                    "template": {
+                                    "jobTemplate": {
                                         "spec": {
-                                            "restartPolicy": And(
-                                                str, lambda x: x == "OnFailure"
-                                            ),
+                                            "template": {
+                                                "spec": {
+                                                    "restartPolicy": And(
+                                                        str, lambda x: x == "OnFailure"
+                                                    ),
+                                                },
+                                            },
                                         },
                                     },
                                 },
                             },
-                        },
+                            ignore_extra_keys=True,
+                        ),
                     },
-                    ignore_extra_keys=True,
-                ),
+                ],
             },
-        ],
-    },
-    {
-        "name": "backup",
-        "filter": Schema(
             {
-                "apiVersion": And(str, lambda x: x == "batch/v1"),
-                "kind": And(str, lambda x: x == "CronJob"),
-                "metadata": {
-                    "name": And(str, lambda x: x.endswith("-backup")),
-                },
-            },
-            ignore_extra_keys=True,
-        ),
-        "validators": [
-            {
-                "name": "generic",
-                "schema": Schema(
+                "name": "backup",
+                "filter": Schema(
                     {
-                        "spec": {
-                            "concurrencyPolicy": And(str, lambda x: x == "Forbid"),
-                            Optional("suspend"): And(bool, lambda x: x == False),
+                        "apiVersion": And(str, lambda x: x == "batch/v1"),
+                        "kind": And(str, lambda x: x == "CronJob"),
+                        "metadata": {
+                            "name": And(str, lambda x: x.endswith("-backup")),
                         },
                     },
                     ignore_extra_keys=True,
                 ),
-            },
-            {
-                "name": "hostname_set",
-                "schema": Schema(
-                    And(
-                        Schema(
+                "check": [
+                    {
+                        "name": "generic",
+                        "schema": Schema(
                             {
-                                "metadata": {
-                                    "name": str,
-                                },
                                 "spec": {
-                                    "jobTemplate": {
-                                        "spec": {
-                                            "template": {"spec": {"hostname": str}}
-                                        }
-                                    }
+                                    "concurrencyPolicy": And(
+                                        str, lambda x: x == "Forbid"
+                                    ),
+                                    Optional("suspend"): And(
+                                        bool, lambda x: x == False
+                                    ),
                                 },
                             },
                             ignore_extra_keys=True,
                         ),
-                        lambda x: x["metadata"]["name"]
-                        == f"{x['spec']['jobTemplate']['spec']['template']['spec']['hostname']}-backup",
-                    ),
-                    ignore_extra_keys=True,
-                ),
-            },
-        ],
-    },
-    {
-        "name": "restore",
-        "filter": Schema(
-            {
-                "apiVersion": And(str, lambda x: x == "batch/v1"),
-                "kind": And(str, lambda x: x == "CronJob"),
-                "metadata": {
-                    "name": And(str, lambda x: x.endswith("-restore")),
-                },
-            },
-            ignore_extra_keys=True,
-        ),
-        "validators": [
-            {
-                "name": "generic",
-                "schema": Schema(
+                    },
                     {
-                        "spec": {
-                            "concurrencyPolicy": And(str, lambda x: x == "Forbid"),
-                            "suspend": And(bool, lambda x: x == True),
+                        "name": "hostname_set",
+                        "schema": Schema(
+                            And(
+                                Schema(
+                                    {
+                                        "metadata": {
+                                            "name": str,
+                                        },
+                                        "spec": {
+                                            "jobTemplate": {
+                                                "spec": {
+                                                    "template": {
+                                                        "spec": {"hostname": str}
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    },
+                                    ignore_extra_keys=True,
+                                ),
+                                lambda x: x["metadata"]["name"]
+                                == f"{x['spec']['jobTemplate']['spec']['template']['spec']['hostname']}-backup",
+                            ),
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                ],
+            },
+            {
+                "name": "restore",
+                "filter": Schema(
+                    {
+                        "apiVersion": And(str, lambda x: x == "batch/v1"),
+                        "kind": And(str, lambda x: x == "CronJob"),
+                        "metadata": {
+                            "name": And(str, lambda x: x.endswith("-restore")),
                         },
                     },
                     ignore_extra_keys=True,
                 ),
-            },
-            {
-                "name": "hostname_set",
-                "schema": Schema(
-                    And(
-                        Schema(
+                "check": [
+                    {
+                        "name": "generic",
+                        "schema": Schema(
                             {
-                                "metadata": {
-                                    "name": str,
-                                },
                                 "spec": {
-                                    "jobTemplate": {
-                                        "spec": {
-                                            "template": {"spec": {"hostname": str}}
-                                        }
-                                    }
+                                    "concurrencyPolicy": And(
+                                        str, lambda x: x == "Forbid"
+                                    ),
+                                    "suspend": And(bool, lambda x: x == True),
                                 },
                             },
                             ignore_extra_keys=True,
                         ),
-                        lambda x: x["metadata"]["name"]
-                        == f"{x['spec']['jobTemplate']['spec']['template']['spec']['hostname']}-restore",
-                    ),
-                    ignore_extra_keys=True,
-                ),
+                    },
+                    {
+                        "name": "hostname_set",
+                        "schema": Schema(
+                            And(
+                                Schema(
+                                    {
+                                        "metadata": {
+                                            "name": str,
+                                        },
+                                        "spec": {
+                                            "jobTemplate": {
+                                                "spec": {
+                                                    "template": {
+                                                        "spec": {"hostname": str}
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    },
+                                    ignore_extra_keys=True,
+                                ),
+                                lambda x: x["metadata"]["name"]
+                                == f"{x['spec']['jobTemplate']['spec']['template']['spec']['hostname']}-restore",
+                            ),
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                ],
             },
-        ],
-    },
-]
+        ]

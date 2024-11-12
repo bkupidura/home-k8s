@@ -49,5 +49,5 @@ jb install github.com/jsonnet-libs/k8s-libsonnet/1.28@main
 python3 -mvenv scripts/validate/venv
 source scripts/validate/venv/bin/activate
 pip3 install -r scripts/validate/requirements.txt
-sops exec-file scripts/validate/config.yaml "kubectl get deployment,daemonset,service,cronjob,ingressroute -A -o yaml | python3 scripts/validate/validate.py -c {}"
+sops exec-file scripts/validate/config.yaml "kubectl get deployment,daemonset,service,cronjob,ingressroute,statefulset -A -o yaml | python3 scripts/validate/validate.py -c {}"
 ```
