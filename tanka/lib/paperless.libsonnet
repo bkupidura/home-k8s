@@ -43,7 +43,7 @@
     )], 'paperless'),
     cronjob_restore: $._custom.cronjob_restore.new('paperless', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host paperless --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'paperless'),
     deployment: d.new('paperless',
                       if $.paperless.restore then 0 else 1,

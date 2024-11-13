@@ -32,7 +32,7 @@
     )], 'registry'),
     cronjob_restore: $._custom.cronjob_restore.new('registry', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host registry --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'registry'),
     deployment: d.new('registry',
                       if $.registry.restore then 0 else 1,

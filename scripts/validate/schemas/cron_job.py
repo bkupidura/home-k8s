@@ -1,5 +1,23 @@
 from . import ValidatorBase
-from schema import Schema, And, Optional
+from schema import Schema, And, Optional, SchemaError
+
+
+def var_restic_host_set(data):
+    variables = list()
+    for container in data["spec"]["jobTemplate"]["spec"]["template"]["spec"][
+        "containers"
+    ]:
+        for env in container["env"]:
+            if env["name"] == "RESTIC_HOST":
+                variables.append(env["value"])
+
+    if len(variables) != 1:
+        raise SchemaError("zero or multiple RESTIC_HOST variable definition")
+
+    if variables[0] != data["metadata"]["name"].removesuffix("-restore"):
+        raise SchemaError(f"wrong RESTIC_HOST value {variables[0]}")
+
+    return True
 
 
 class Validator(ValidatorBase):
@@ -150,7 +168,7 @@ class Validator(ValidatorBase):
                                             "jobTemplate": {
                                                 "spec": {
                                                     "template": {
-                                                        "spec": {"hostname": str}
+                                                        "spec": {"hostname": str},
                                                     }
                                                 }
                                             }
@@ -160,6 +178,52 @@ class Validator(ValidatorBase):
                                 ),
                                 lambda x: x["metadata"]["name"]
                                 == f"{x['spec']['jobTemplate']['spec']['template']['spec']['hostname']}-restore",
+                            ),
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "env_restic_host_set",
+                        "schema": Schema(
+                            And(
+                                Schema(
+                                    {
+                                        "metadata": {
+                                            "name": str,
+                                        },
+                                        "spec": {
+                                            "jobTemplate": {
+                                                "spec": {
+                                                    "template": {
+                                                        "spec": {
+                                                            "containers": [
+                                                                Schema(
+                                                                    {
+                                                                        "env": [
+                                                                            Schema(
+                                                                                {
+                                                                                    "name": And(
+                                                                                        str,
+                                                                                        lambda x: x
+                                                                                        == "RESTIC_HOST",
+                                                                                    ),
+                                                                                    "value": str,
+                                                                                }
+                                                                            ),
+                                                                        ],
+                                                                    },
+                                                                    ignore_extra_keys=True,
+                                                                ),
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                    },
+                                    ignore_extra_keys=True,
+                                ),
+                                var_restic_host_set,
                             ),
                             ignore_extra_keys=True,
                         ),
