@@ -26,8 +26,16 @@
 - name: Unpack CNI
   unarchive:
     src: "{{ k3s.cni_url }}"
-    dest: /var/lib/rancher/k3s/data/current/bin/
+    dest: /opt/cni/bin/
     remote_src: yes
+  become: true
+
+- name: Create CNI symlinks
+  file:
+    src: "/opt/cni/bin/{{ item }}"
+    dest: "/var/lib/rancher/k3s/data/cni/{{ item }}"
+    state: link
+  with_items: ["dhcp", "macvlan"]
   become: true
 
 - name: Manage services

@@ -13,7 +13,7 @@
                       '/bin/sh',
                       '-ec',
                       std.join('\n', ['apt update', 'apt install -y tcpdump python3 vim curl iputils-ping bind9-host atop sysstat powertop iperf fio', 'tail -f /dev/null']),
-                    ])
+                    ]),
                   ],
                   podLabels={ 'app.kubernetes.io/name': 'debugpod' },
                 )
