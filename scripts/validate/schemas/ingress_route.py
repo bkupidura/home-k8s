@@ -2,30 +2,6 @@ from . import ValidatorBase
 from schema import Schema, And, SchemaError
 
 
-class MiddlewareRequiredSchema(Schema):
-    def __init__(self, *args, **kwargs):
-        try:
-            self.required_middlewares = kwargs.pop("required_middlewares")
-        except KeyError:
-            pass
-        super(MiddlewareRequiredSchema, self).__init__(*args, **kwargs)
-
-    def validate(self, data, _is_middlewareRequired_schema=True):
-        data = super(MiddlewareRequiredSchema, self).validate(
-            data, _is_middlewareRequired_schema=False
-        )
-        if _is_middlewareRequired_schema:
-            anyof_present = False
-            for m in self.required_middlewares:
-                if m in data:
-                    anyof_present = True
-            if not anyof_present:
-                raise SchemaError(
-                    f"any of required middlewares not present {self.required_middlewares}"
-                )
-        return data
-
-
 class Validator(ValidatorBase):
     def __init__(self, *args, **kwargs):
         super(Validator, self).__init__(*args, **kwargs)
@@ -71,13 +47,8 @@ class Validator(ValidatorBase):
                                 "spec": {
                                     "routes": [
                                         {
-                                            "middlewares": MiddlewareRequiredSchema(
-                                                [dict],
-                                                required_middlewares=self.conf.get(
-                                                    "generic", dict()
-                                                )
-                                                .get("required_middlewares", dict())
-                                                .get("middleware", list()),
+                                            "middlewares": And(
+                                                [dict], self.validate_middleware
                                             ),
                                         },
                                     ]
@@ -89,3 +60,21 @@ class Validator(ValidatorBase):
                 ],
             }
         ]
+
+    def validate_middleware(self, data):
+        any_of_required_middlewares = (
+            self.conf.get("generic", dict())
+            .get("required_middlewares", dict())
+            .get("middleware", list())
+        )
+        any_of_required_middleware_present = False
+        for middleware in data:
+            if middleware in any_of_required_middlewares:
+                any_of_required_middleware_present = True
+
+        if not any_of_required_middleware_present:
+            raise SchemaError(
+                f"any of required middlewares not present {any_of_required_middlewares}"
+            )
+
+        return True

@@ -55,6 +55,9 @@
                                                                            if ssh_secret != null then $.k.core.v1.volumeMount.new('ssh', '/root/.ssh', false),
                                                                          ])
                                                                          + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(password_secret))
+                                                                         + $.k.core.v1.container.withEnvMap({
+                                                                           RESTIC_HOST: name,
+                                                                         })
                                                                          + $.k.core.v1.container.withCommand(command),
                                                                        ])
                                                                        + $.k.batch.v1.cronJob.spec.withSuspend(true)

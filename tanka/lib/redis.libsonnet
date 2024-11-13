@@ -58,7 +58,7 @@
     )], 'redis'),
     cronjob_restore: $._custom.cronjob_restore.new('redis', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --host redis --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'redis'),
     service: s.new('redis',
                    { 'app.kubernetes.io/name': 'redis' },

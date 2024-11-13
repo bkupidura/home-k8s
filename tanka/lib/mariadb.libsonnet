@@ -125,6 +125,9 @@
                                                v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                                              ])
                                              + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
+                                             + c.withEnvMap({
+                                               RESTIC_HOST: 'mariadb',
+                                             })
                                              + c.withCommand([
                                                '/bin/sh',
                                                '-ec',
@@ -133,7 +136,7 @@
                                                  'apt install -y restic openssh-client',
                                                  'mkdir /dump',
                                                  'cd /dump',
-                                                 std.format('restic --repo "%s" --verbose restore latest --host mariadb --target .', std.extVar('secrets').restic.repo.default.connection),
+                                                 std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection),
                                                  'mariabackup --prepare --target-dir=/dump',
                                                  'mariabackup --copy-back --target-dir=/dump',
                                                  'chown -R mysql:mysql /var/lib/mysql/data',
