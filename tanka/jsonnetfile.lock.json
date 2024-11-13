@@ -100,6 +100,16 @@
       },
       "version": "3e32f80d1493d1579d273d1522af1fae2cc7c97f",
       "sum": "3MdwG7YiDlyZHbuSnN52Kvv4XZ3JmYuNKjXx7ocoChQ="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
+          "subdir": "1.30"
+        }
+      },
+      "version": "6ecbb7709baf27f44b2e48f3529741ae6754ae6a",
+      "sum": "0OMrWr4xnhN5VWLXwPzCmdcENsifLNAZNzPvrHAnUAo="
     }
   ],
   "legacyImports": false
