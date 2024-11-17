@@ -19,6 +19,11 @@ package:
     - cryptsetup
     - sshpass
     - nfs-common
+    - open-iscsi
+    - lsscsi
+    - sg3-utils
+    - multipath-tools
+    - scsitools
   remove:
     - snapd
 os:

@@ -338,8 +338,8 @@
           },
           {
             alert: 'K8sPodCPUThrotling',
-            expr: 'k8s:container:cpu:throthling:5m > 0.5',
-            'for': '15m',
+            expr: 'k8s:container:cpu:throthling:5m > 0.7',
+            'for': '30m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',
@@ -347,8 +347,8 @@
           },
           {
             alert: 'K8sPodCPUThrotling',
-            expr: 'k8s:container:cpu:throthling:5m > 0.3',
-            'for': '30m',
+            expr: 'k8s:container:cpu:throthling:5m > 0.5',
+            'for': '60m',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {
               summary: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }}',

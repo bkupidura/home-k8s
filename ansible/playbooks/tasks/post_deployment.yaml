@@ -1,0 +1,9 @@
+- name: iscsi configure
+  vars:
+    create:
+      custom-iscsi-config:
+        dst: /etc/iscsi/initiatorname.iscsi
+        src: "../templates/initiatorname.iscsi.j2"
+        permission: "0644"
+        notify: iscsid
+  include_tasks: custom_files.yaml

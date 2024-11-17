@@ -7,7 +7,7 @@
       image: 'ghcr.io/bkupidura/chrony:28092024',
     },
     ubuntu: {
-      image: 'ubuntu:jammy-20240911.1',
+      image: 'ubuntu:noble-20241011',
     },
     kubernetes_descheduler: {
       chart: '0.30.1',
@@ -128,6 +128,10 @@
     },
     reloader: {
       chart: '1.0.121',
+    },
+    democratic_csi: {
+      chart: '0.14.6',
+      image: 'democraticcsi/democratic-csi:v1.9.3',
     },
   },
 }
