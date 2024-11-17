@@ -58,7 +58,7 @@
          + p.spec.resources.withRequests({ storage: '512Mi' }),
     cronjob_backup: $._custom.cronjob.new('vaultwarden-backup',
                                           'self-hosted',
-                                          '10 05 * * *',
+                                          '10 05,17 * * *',
                                           [
                                             c.new('backup', $._version.ubuntu.image)
                                             + c.withVolumeMounts([
@@ -71,7 +71,7 @@
                                               '-ec',
                                               std.join('\n', [
                                                 'apt update || true',
-                                                'apt install -y restic sqlite openssh-client',
+                                                'apt install -y restic sqlite3 openssh-client',
                                                 'cd /data',
                                                 'sqlite3 db.sqlite3 ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),

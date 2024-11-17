@@ -80,7 +80,7 @@
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mariadb' }),
     cronjob_backup: $._custom.cronjob.new('mariadb-backup',
                                           'home-infra',
-                                          '40 03 * * *',
+                                          '40 03,15 * * *',
                                           [
                                             c.new('backup', $._version.mariadb.image)
                                             + c.withVolumeMounts([

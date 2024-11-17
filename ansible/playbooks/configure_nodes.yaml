@@ -68,6 +68,9 @@
     - name: Enable netconsole
       include_tasks: tasks/configure_netconsole.yaml
 
+    - name: Post deployment
+      include_tasks: tasks/post_deployment.yaml
+
 - name: Upgrade k8s master
   hosts:
     - k8s_master_primary

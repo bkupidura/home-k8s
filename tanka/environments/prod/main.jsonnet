@@ -3,6 +3,7 @@
 (import 'global-resources.libsonnet') +
 (import 'namespace.libsonnet') +
 (import 'secret.libsonnet') +
+(import 'storage.libsonnet') +
 (import 'basic-monitoring.libsonnet') +
 (import 'authelia.libsonnet') +
 (import 'victoriametrics.libsonnet') +
@@ -15,6 +16,7 @@
 (import 'chrony.libsonnet') +
 (import 'traefik.libsonnet') +
 (import 'longhorn.libsonnet') +
+(import 'democratic-csi.libsonnet') +
 (import 'mariadb.libsonnet') +
 (import 'debugpod.libsonnet') +
 (import 'blocky.libsonnet') +
