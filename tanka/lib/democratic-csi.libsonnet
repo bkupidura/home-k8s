@@ -48,40 +48,40 @@
         externalAttacher: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },
         externalProvisioner: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },
         externalResizer: {
           resources: {
             requests: {
-              memory: '15Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '30Mi',
+              memory: '40Mi',
             },
           },
         },
         externalSnapshotter: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },
@@ -187,40 +187,40 @@
         externalAttacher: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },
         externalProvisioner: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },
         externalResizer: {
           resources: {
             requests: {
-              memory: '15Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '30Mi',
+              memory: '40Mi',
             },
           },
         },
         externalSnapshotter: {
           resources: {
             requests: {
-              memory: '10Mi',
+              memory: '20Mi',
             },
             limits: {
-              memory: '20Mi',
+              memory: '40Mi',
             },
           },
         },

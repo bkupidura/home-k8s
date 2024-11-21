@@ -133,5 +133,20 @@
       chart: '0.14.6',
       image: 'democraticcsi/democratic-csi:v1.9.3',
     },
+    bazarr: {
+      image: 'linuxserver/bazarr:v1.4.5-ls277',
+    },
+    radarr: {
+      image: 'linuxserver/radarr:5.14.0.9383-ls245',
+    },
+    sonarr: {
+      image: 'linuxserver/sonarr:4.0.10.2544-ls258',
+    },
+    nzbget: {
+      image: 'nzbgetcom/nzbget:v24.3',
+    },
+    jellyfin: {
+      image: 'jellyfin/jellyfin:10.10.1',
+    },
   },
 }

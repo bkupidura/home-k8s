@@ -7,6 +7,7 @@ validators:
                     - ENC[AES256_GCM,data:qQIJbYOwdPHaifxYfCIwTuodM9g=,iv:fYLrjaNDGF2CkMvcs1yqy15NH21jCD45MjlAmdeu/Mg=,tag:PznanpEBBG/GiV/e4dPC5g==,type:str]
                     - ENC[AES256_GCM,data:y6qDmnraHHHh+UUigo5paoSkfg==,iv:wqH/4k1KOpYoRvGI8+/s+FUPHPKVR9+4HI3+hXkAdWw=,tag:xKtTr1UKtVHO10i7X8FlpQ==,type:str]
                     - ENC[AES256_GCM,data:hlgW6YDuQMErJXKHswEMqt7hTGfb4iV1B+fP3Q==,iv:078eVoOOePoWOby+ezmUAzCxHuiTqCJQEanGylaZ5Gs=,tag:TIxKWd9xgNyPE+eHNrXfXg==,type:str]
+                    - ENC[AES256_GCM,data:9KHuwymLTAk69dK6,iv:2YfUHck4m0AAMPDinikj3QRvf4pDfHCnayfl0kAq8Og=,tag:KIG9u4i4R47Wl7QvVEoilQ==,type:str]
             capabilities_add_missing:
                 skip:
                     - ENC[AES256_GCM,data:vOLop3dzFghh/eBptOkXmnO1UA==,iv:8V5aaHjG2RiPL4FxMCLYcKt6GjK62lS3mF1MGbrphMY=,tag:K30PGISF4eVV7knCK4f/BQ==,type:str]
@@ -204,8 +205,8 @@ sops:
             T0xIaU1VUjA4dXNZcm83Tk8vK043QlUKQreA5skPV0Ut9LzVYNleSMSk8sJRqk6I
             sOIQqvTdrwluaXCXOqZI+8GhCIfb1mK+h97aBywXRumtEyP3OPuO2g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2024-11-15T22:52:25Z"
-    mac: ENC[AES256_GCM,data:/6sJy1l7jjCQ4GBlXFNzHS1kHW1cYvdDrlFk1W/ZUI0OVSxvuSXLqS8MbtqfQ344BZCXdUWTFhVyXYXeQTctjEbUx3CW54T2lW9P39GpY4TXAtlHZKZpyRSqtnXYp+r7NlMGm52Zun/6Wnku+G3lICqXRuYg1Arb1J7OmxEA//E=,iv:5H04pRfiHAkvmtuLUbAZg1kkNOqJ6X/t7gd7rq3vd9c=,tag:h0KysUYVWFZtvmYj0HZ6XA==,type:str]
+    lastmodified: "2024-11-18T07:23:12Z"
+    mac: ENC[AES256_GCM,data:EKyHaBLkJSTxc0M0qdFTP7A+tIv+CXWv19Nos9lf+xiP7bx9BHaITHQhV8zk9DC/lPYx2p24ry82a8HmyMX52eE32RGkQXoc9brPSafTIclWJCPFpfeoN2LnZ0Yqx4IJafT0KldPQ/x7xI7UcBI/mfBNiTiPBgotvO8xKnk0QYc=,iv:Mh6c4kzAzK0siouWt8bEZa2sKDzXzepkZNUaMzUnmmY=,tag:AGeb//bmp8f5MNef+mVJtw==,type:str]
     pgp: []
     unencrypted_suffix: _unencrypted
     version: 3.9.1

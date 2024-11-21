@@ -89,10 +89,10 @@
   longhorn: {
     namespace: $.k.core.v1.namespace.new('longhorn-system'),
     secret_encryption: $.k.core.v1.secret.new('longhorn-encryption-global', {
-              CRYPTO_KEY_VALUE: std.base64(std.extVar('secrets').longhorn.encryption.global),
-              CRYPTO_KEY_PROVIDER: std.base64('secret'),
-            })
-            + $.k.core.v1.secret.metadata.withNamespace('longhorn-system'),
+                         CRYPTO_KEY_VALUE: std.base64(std.extVar('secrets').longhorn.encryption.global),
+                         CRYPTO_KEY_PROVIDER: std.base64('secret'),
+                       })
+                       + $.k.core.v1.secret.metadata.withNamespace('longhorn-system'),
     helm: $._custom.helm.new('longhorn', 'longhorn', 'https://charts.longhorn.io', $._version.longhorn.chart, 'longhorn-system', {
       defaultSettings: {
         storageOverProvisioningPercentage: 100,

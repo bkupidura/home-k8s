@@ -7,6 +7,7 @@
 (import 'basic-monitoring.libsonnet') +
 (import 'authelia.libsonnet') +
 (import 'victoriametrics.libsonnet') +
+(import 'truenas.libsonnet') +
 (import 'loki.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'reloader.libsonnet') +
@@ -38,6 +39,12 @@
 (import 'freshrss.libsonnet') +
 (import 'registry.libsonnet') +
 (import 'paperless.libsonnet') +
+(import 'arr.libsonnet') +
+(import 'radarr.libsonnet') +
+(import 'sonarr.libsonnet') +
+(import 'bazarr.libsonnet') +
+(import 'nzbget.libsonnet') +
+(import 'jellyfin.libsonnet') +
 {
   _config:: {
     restore: false,
@@ -57,6 +64,7 @@
       allow: [
         '10.0.120.0/24',
         '10.0.150.0/24',
+        '10.0.100.0/24',
       ],
       pool: '0.pl.pool.ntp.org',
     },
