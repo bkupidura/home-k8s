@@ -79,8 +79,8 @@
                           TZ: $._config.tz,
                         })
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ cpu: '150m', memory: '300Mi' })
-                        + c.resources.withLimits({ cpu: '300m', memory: '600Mi' })
+                        + c.resources.withRequests({ cpu: '150m', memory: '400Mi' })
+                        + c.resources.withLimits({ cpu: '300m', memory: '800Mi' })
                         + c.readinessProbe.httpGet.withPath('/ping')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(60)
