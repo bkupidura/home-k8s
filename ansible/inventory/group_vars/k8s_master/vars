@@ -17,6 +17,10 @@ package:
     - avahi-daemon
     - jq
     - cryptsetup
+    - cron
+    - rsyslog
+    - iptables
+    - usb-modeswitch
     - nfs-common
     - open-iscsi
     - lsscsi

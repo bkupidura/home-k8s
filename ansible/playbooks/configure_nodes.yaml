@@ -39,6 +39,12 @@
     - k8s_master
   gather_facts: true
   tasks:
+    - name: Manage packages
+      vars:
+        install: "{{ package.install | default([]) }}"
+        remove: "{{ package.remove | default([]) }}"
+      include_tasks: tasks/manage_packages.yaml
+
     - name: Base config
       vars:
         timezone: "{{ global.timezone }}"
@@ -51,12 +57,6 @@
       vars:
         additional_mounts: "{{ os.additional_mounts | default([]) }}"
       include_tasks: tasks/additional_mounts.yaml
-
-    - name: Manage packages
-      vars:
-        install: "{{ package.install | default([]) }}"
-        remove: "{{ package.remove | default([]) }}"
-      include_tasks: tasks/manage_packages.yaml
 
     - name: Manage services
       vars:

@@ -63,7 +63,7 @@
                           PAPERLESS_URL: std.format('https://paperless.%s', std.extVar('secrets').domain),
                           PAPERLESS_OCR_LANGUAGE: 'pol+eng',
                           PAPERLESS_OCR_LANGUAGES: 'pol',
-                          PAPERLESS_FILENAME_FORMAT: '{document_type}/{created_year}/{created_month}/{title}',
+                          PAPERLESS_FILENAME_FORMAT: '{{ document_type }}/{{ created_year }}/{{ created_month }}/{{ title }}',
                           PAPERLESS_CONSUMPTION_DIR: '/data/consume',
                           PAPERLESS_DATA_DIR: '/data/data',
                           PAPERLESS_EMPTY_TRASH_DIR: '/data/trash',
@@ -90,7 +90,7 @@
                              + c.readinessProbe.withTimeoutSeconds(1)
                              + c.livenessProbe.httpGet.withPath('/')
                              + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withInitialDelaySeconds(90)
                              + c.livenessProbe.withPeriodSeconds(10)
                              + c.livenessProbe.withTimeoutSeconds(3)
                            else {}),

@@ -23,6 +23,12 @@
   until: k3s_ready.rc == 0
   become: true
 
+- name: Create CNI dirs
+  file:
+    path: /opt/cni/bin
+    state: directory
+  become: true
+
 - name: Unpack CNI
   unarchive:
     src: "{{ k3s.cni_url }}"

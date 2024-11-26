@@ -70,8 +70,8 @@
                           TZ: $._config.tz,
                         })
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '200Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '300Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '200Mi', cpu: '75m' })
+                        + c.resources.withLimits({ memory: '500Mi', cpu: '150m' })
                         + c.readinessProbe.httpGet.withPath('/ping')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
@@ -79,7 +79,7 @@
                         + c.readinessProbe.withTimeoutSeconds(3)
                         + c.livenessProbe.httpGet.withPath('/ping')
                         + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
+                        + c.livenessProbe.withInitialDelaySeconds(60)
                         + c.livenessProbe.withPeriodSeconds(15)
                         + c.livenessProbe.withTimeoutSeconds(5),
                       ],
