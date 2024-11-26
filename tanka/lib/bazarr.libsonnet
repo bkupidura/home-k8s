@@ -5,24 +5,6 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
-  monitoring+: {
-    rules+:: [
-      {
-        name: 'bazarr',
-        rules: [
-          {
-            alert: 'K8sHighMemoryPodUsage',
-            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container="bazarr"}) / 1024 / 1024 > 500',
-            'for': '30m',
-            labels: { service: 'k8s', severity: 'warning' },
-            annotations: {
-              summary: 'POD {{ $labels.pod }} is using {{ $value | printf "%.0f" }} megabytes of memory',
-            },
-          },
-        ],
-      },
-    ],
-  },
   authelia+: {
     access_control+:: [
       {

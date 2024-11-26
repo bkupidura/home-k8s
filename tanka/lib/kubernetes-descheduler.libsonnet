@@ -8,37 +8,41 @@
         limits: { cpu: '50m', memory: '64Mi' },
       },
       deschedulerPolicy: {
-        strategies: {
-          RemoveDuplicates: { enabled: false },
-          RemovePodsViolatingNodeTaints: { enabled: false },
-          RemovePodsViolatingNodeAffinity: { enabled: false },
-          RemovePodsViolatingInterPodAntiAffinity: {
-            enabled: true,
-            params: {
-              nodeFit: true,
-            },
-          },
-          LowNodeUtilization: {
-            enabled: true,
-            params: {
-              nodeFit: true,
-              nodeResourceUtilizationThresholds: {
-                thresholds: { cpu: 45, memory: 20, pods: 15 },
-                targetThresholds: { cpu: 50, memory: 60, pods: 25 },
+        profiles: [
+          {
+            name: 'default',
+            pluginConfig: [
+              {
+                name: 'LowNodeUtilization',
+                args: {
+                  thresholds: { cpu: 45, memory: 20, pods: 20 },
+                  targetThresholds: { cpu: 50, memory: 60, pods: 25 },
+                },
+              },
+              {
+                name: 'RemovePodsViolatingInterPodAntiAffinity',
+              },
+              {
+                name: 'PodLifeTime',
+                args: {
+                  maxPodLifeTimeSeconds: 86400,
+                  states: ['Running'],
+                  labelSelector: {
+                    matchLabels: { 'app.kubernetes.io/name': 'unifi' },
+                  },
+                },
+              },
+            ],
+            plugins: {
+              balance: {
+                enabled: ['LowNodeUtilization'],
+              },
+              deschedule: {
+                enabled: ['RemovePodsViolatingInterPodAntiAffinity', 'PodLifeTime'],
               },
             },
           },
-          PodLifeTime: {
-            enabled: true,
-            params: {
-              podLifeTime: { maxPodLifeTimeSeconds: 86400 },
-              podStatusPhases: ['Running'],
-              labelSelector: {
-                matchLabels: { 'app.kubernetes.io/name': 'unifi' },
-              },
-            },
-          },
-        },
+        ],
       },
     }),
   },

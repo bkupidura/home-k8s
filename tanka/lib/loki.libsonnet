@@ -124,6 +124,30 @@
           },
         },
       },
+      memcachedExporter: {
+        resources: {
+          requests: {
+            cpu: '10m',
+            memory: '10Mi',
+          },
+          limits: {
+            cpu: '20m',
+            memory: '20Mi',
+          },
+        },
+      },
+      sidecar: {
+        resources: {
+          requests: {
+            cpu: '40m',
+            memory: '60Mi',
+          },
+          limits: {
+            cpu: '40m',
+            memory: '120Mi',
+          },
+        },
+      },
       chunksCache: {
         enabled: false,
       },

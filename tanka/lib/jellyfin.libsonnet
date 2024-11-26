@@ -50,7 +50,7 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          JELLYFIN_FFmpeg__probesize: '300M',
+                          JELLYFIN_FFmpeg__probesize: '200M',
                         })
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.resources.withRequests({ memory: '300Mi', cpu: '400m' })

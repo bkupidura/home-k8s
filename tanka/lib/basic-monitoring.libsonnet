@@ -135,7 +135,7 @@
           },
           {
             alert: 'K8sHighMemoryPodUsage',
-            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!~"(unifi|)"} / container_spec_memory_limit_bytes < Inf) > 0.95',
+            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!~"(unifi|)"} / container_spec_memory_limit_bytes < Inf) > 0.90',
             'for': '30m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -262,11 +262,11 @@
           },
           {
             alert: 'K8sPodsRestarts',
-            expr: 'delta(kube_pod_container_status_restarts_total[30m]) > 2',
+            expr: 'delta(kube_pod_container_status_restarts_total[2h]) > 2',
             'for': '1m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Pod {{ $labels.pod }} was restarted {{ humanize $value }} times in last 30m',
+              summary: 'Pod {{ $labels.pod }} was restarted {{ humanize $value }} times in last 2h',
             },
           },
           {
