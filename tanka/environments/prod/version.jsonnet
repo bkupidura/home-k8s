@@ -148,5 +148,8 @@
     jellyfin: {
       image: 'jellyfin/jellyfin:10.10.3',
     },
+    prowlarr: {
+      image: 'linuxserver/prowlarr:1.27.0.4852-ls93',
+    },
   },
 }

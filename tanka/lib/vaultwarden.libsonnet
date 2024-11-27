@@ -58,7 +58,7 @@
          + p.spec.resources.withRequests({ storage: '512Mi' }),
     cronjob_backup: $._custom.cronjob.new('vaultwarden-backup',
                                           'self-hosted',
-                                          '10 05,17 * * *',
+                                          '40 03,11,19 * * *',
                                           [
                                             c.new('backup', $._version.ubuntu.image)
                                             + c.withVolumeMounts([
