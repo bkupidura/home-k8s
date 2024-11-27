@@ -45,6 +45,7 @@
 (import 'bazarr.libsonnet') +
 (import 'nzbget.libsonnet') +
 (import 'jellyfin.libsonnet') +
+(import 'prowlarr.libsonnet') +
 {
   _config:: {
     restore: false,

@@ -27,7 +27,7 @@
         middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }],
       },
     ], null),
-    cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '00 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('unifi', 'home-infra', '10 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'unifi'),
