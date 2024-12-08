@@ -149,11 +149,29 @@
         rules: [
           {
             alert: 'K8sVolumeUsageHigh',
-            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / kubelet_volume_stats_capacity_bytes > 0.90',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (kubelet_volume_stats_capacity_bytes < 10*1024*1024*1024) > 0.90',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 90% os available storage',
+            },
+          },
+          {
+            alert: 'K8sVolumeUsageHigh',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (10*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes < 100*1024*1024*1024) > 0.95',
+            'for': '10m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 95% os available storage',
+            },
+          },
+          {
+            alert: 'K8sVolumeUsageHigh',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (100*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes) > 0.99',
+            'for': '10m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 99% os available storage',
             },
           },
           {

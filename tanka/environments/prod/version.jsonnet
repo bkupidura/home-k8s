@@ -93,11 +93,17 @@
     unifi: {
       image: 'jacobalberty/unifi:v8.6.9',
     },
-    prometheus: {
-      chart: '25.30.1',
-    },
     blackbox_exporter: {
       chart: '9.1.0',
+    },
+    alertmanager: {
+      chart: '1.13.1',
+    },
+    kube_state_metrics: {
+      chart: '5.27.0',
+    },
+    node_exporter: {
+      chart: '4.42.0',
     },
     victoria_metrics: {
       alert: {
