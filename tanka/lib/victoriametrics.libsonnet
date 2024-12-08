@@ -107,7 +107,7 @@
       {
         kind: 'Rule',
         match: std.format('Host(`alertmanager.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'prometheus-alertmanager', port: 9093, namespace: 'monitoring' }],
+        services: [{ name: 'alertmanager', port: 9093, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
@@ -116,7 +116,7 @@
         enabled: true,
         resources: {
           requests: { memory: '30Mi' },
-          limits: { memory: '50Mi' },
+          limits: { memory: '60Mi' },
         },
         extraArgs: {
           configCheckInterval: '5m',
@@ -136,7 +136,7 @@
         },
         notifier: {
           alertmanager: {
-            url: 'http://prometheus-alertmanager.monitoring:9093',
+            url: 'http://alertmanager.monitoring:9093',
           },
         },
         config: {
@@ -165,8 +165,8 @@
         },
         ingress: { enabled: false },
         resources: {
-          requests: { memory: '1536Mi' },
-          limits: { memory: '1536Mi' },
+          requests: { memory: '600M' },
+          limits: { memory: '1000M' },
         },
         podAnnotations: {
           'fluentbit.io/parser': 'json',
@@ -595,87 +595,77 @@
         },
       },
     }),
-    helm_prometheus: $._custom.helm.new('prometheus', 'prometheus', 'https://prometheus-community.github.io/helm-charts', $._version.prometheus.chart, 'monitoring', {
-      extraEnv: { TZ: $._config.tz },
-      alertmanager: {
-        resources: {
-          requests: { memory: '32Mi' },
-          limits: { memory: '64Mi' },
-        },
-        baseURL: std.format('https://alertmanager.%s', std.extVar('secrets').domain),
+    helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', {
+      resources: {
+        requests: { memory: '32Mi' },
+        limits: { memory: '64Mi' },
+      },
+      baseURL: std.format('https://alertmanager.%s', std.extVar('secrets').domain),
+      enabled: true,
+      persistence: {
         enabled: true,
-        persistence: {
-          enabled: true,
-          storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
-          size: '128Mi',
+        storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
+        size: '128Mi',
+      },
+      configmapReload: {
+        enabled: true,
+        resources: {
+          requests: { memory: '16Mi' },
+          limits: { memory: '32Mi' },
         },
-        configmapReload: {
-          enabled: true,
-          resources: {
-            requests: { memory: '16Mi' },
-            limits: { memory: '32Mi' },
-          },
-        },
-        podAnnotations: {
-          'fluentbit.io/parser': 'logfmt',
-        },
-        config: {
-          global: {},
-          receivers: [
-            {
-              name: 'default-receiver',
-              email_configs: [
-                {
-                  auth_password: std.extVar('secrets').smtp.password,
-                  auth_username: std.extVar('secrets').smtp.username,
-                  from: std.format('alertmanager@%s', std.extVar('secrets').domain),
-                  headers: {
-                    subject: |||
-                      [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]{{ range .Alerts }} {{ .Labels.alertname }}/{{ .Labels.severity | toUpper }}/{{ .Status }}{{ end }}'
-                    |||,
-                  },
-                  require_tls: true,
-                  send_resolved: true,
-                  smarthost: std.format('%s:%d', [std.extVar('secrets').smtp.server, std.extVar('secrets').smtp.port]),
-                  to: std.extVar('secrets').mail,
+      },
+      podAnnotations: {
+        'fluentbit.io/parser': 'logfmt',
+      },
+      config: {
+        global: {},
+        receivers: [
+          {
+            name: 'default-receiver',
+            email_configs: [
+              {
+                auth_password: std.extVar('secrets').smtp.password,
+                auth_username: std.extVar('secrets').smtp.username,
+                from: std.format('alertmanager@%s', std.extVar('secrets').domain),
+                headers: {
+                  subject: |||
+                    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]{{ range .Alerts }} {{ .Labels.alertname }}/{{ .Labels.severity | toUpper }}/{{ .Status }}{{ end }}'
+                  |||,
                 },
-              ],
-            },
-          ],
-          route: {
-            group_wait: '10s',
-            group_interval: '5m',
-            group_by: ['service'],
-            receiver: 'default-receiver',
-            repeat_interval: '24h',
+                require_tls: true,
+                send_resolved: true,
+                smarthost: std.format('%s:%d', [std.extVar('secrets').smtp.server, std.extVar('secrets').smtp.port]),
+                to: std.extVar('secrets').mail,
+              },
+            ],
           },
-          inhibit_rules: [
-            { equal: ['service'], source_matchers: ['severity = critical', 'service !~ system|k8s'], target_matchers: ['severity = warning'] },
-            { equal: ['service'], source_matchers: ['severity = warning', 'service !~ system|k8s'], target_matchers: ['severity = info'] },
-          ],
+        ],
+        route: {
+          group_wait: '10s',
+          group_interval: '5m',
+          group_by: ['service'],
+          receiver: 'default-receiver',
+          repeat_interval: '24h',
         },
+        inhibit_rules: [
+          { equal: ['service'], source_matchers: ['severity = critical', 'service !~ system|k8s'], target_matchers: ['severity = warning'] },
+          { equal: ['service'], source_matchers: ['severity = warning', 'service !~ system|k8s'], target_matchers: ['severity = info'] },
+        ],
       },
-      'prometheus-pushgateway': { enabled: false },
-      'kube-state-metrics': {
-        enabled: true,
-        resources: {
-          requests: { memory: '32Mi' },
-          limits: { memory: '64Mi' },
-        },
+    }),
+    helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
+      resources: {
+        requests: { memory: '32Mi' },
+        limits: { memory: '64Mi' },
       },
-      'prometheus-node-exporter': {
-        enabled: true,
-        resources: {
-          requests: { memory: '32Mi' },
-          limits: { memory: '64Mi' },
-        },
-        podAnnotations: {
-          'fluentbit.io/parser': 'logfmt',
-        },
+    }),
+    helm_node_exporter: $._custom.helm.new('prometheus-node-exporter', 'prometheus-node-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.node_exporter.chart, 'monitoring', {
+      resources: {
+        requests: { memory: '32Mi' },
+        limits: { memory: '64Mi' },
       },
-      server: {
-        replicaCount: 0,
-        persistentVolume: { enabled: false },
+      podAnnotations: {
+        'fluentbit.io/parser': 'logfmt',
       },
     }),
   },

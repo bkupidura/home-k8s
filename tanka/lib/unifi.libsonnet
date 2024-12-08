@@ -53,7 +53,9 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                           JVM_MAX_HEAP_SIZE: '384M',
+                          JVM_INIT_HEAP_SIZE: '256M',
                           JVM_MAX_THREAD_STACK_SIZE: '1M',
+                          LOTSOFDEVICES: 'true',
                           RUNAS_UID0: 'false',
                           UNIFI_GID: '999',
                           UNIFI_UID: '999',
