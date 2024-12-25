@@ -34,7 +34,7 @@
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
 (import 'vaultwarden.libsonnet') +
-(import 'redis.libsonnet') +
+(import 'valkey.libsonnet') +
 (import 'nextcloud.libsonnet') +
 (import 'freshrss.libsonnet') +
 (import 'registry.libsonnet') +
@@ -55,7 +55,7 @@
       ingress: '10.0.10.42',
       mqtt: '10.0.10.43',
       ntp: '10.0.10.45',
-      redis: '10.0.10.46',
+      valkey: '10.0.10.49',
       waf: '10.0.10.47',
       webrtc: '10.0.10.48',
     },

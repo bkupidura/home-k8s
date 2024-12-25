@@ -115,8 +115,8 @@
       server: {
         enabled: true,
         resources: {
-          requests: { memory: '30Mi' },
-          limits: { memory: '60Mi' },
+          requests: { memory: '50Mi' },
+          limits: { memory: '100Mi' },
         },
         extraArgs: {
           configCheckInterval: '5m',

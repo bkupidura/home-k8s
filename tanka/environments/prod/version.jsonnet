@@ -119,8 +119,8 @@
     nextcloud: {
       image: 'nextcloud:30.0.2-apache',
     },
-    redis: {
-      image: 'redis:7.4.1-alpine',
+    valkey: {
+      image: 'valkey/valkey:8.0.1',
       metrics: 'oliver006/redis_exporter:v1.66.0',
     },
     freshrss: {
