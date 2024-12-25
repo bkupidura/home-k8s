@@ -176,7 +176,7 @@
           },
           {
             alert: 'K8sVolumeUsageLow',
-            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes", persistentvolumeclaim!="redis"}[15m]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[2h] offset 1h)',
+            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes", persistentvolumeclaim!="valkey"}[15m]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[2h] offset 1h)',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using less than 50% of storage used in last 2h. Possible data loss.',

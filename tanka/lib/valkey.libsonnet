@@ -7,10 +7,10 @@
   monitoring+: {
     rules+:: [
       {
-        name: 'redis',
+        name: 'valkey',
         rules: [
           {
-            alert: 'RedisAOFEnabled',
+            alert: 'ValkeyAOFEnabled',
             expr: 'redis_aof_enabled != 1',
             labels: { service: 'redis', severity: 'critical' },
             annotations: {
@@ -18,7 +18,7 @@
             },
           },
           {
-            alert: 'RedisCommandFailed',
+            alert: 'ValkeyCommandFailed',
             expr: 'delta(redis_commands_failed_calls_total{cmd=~"^(get|set|del|incrby|publish|psubscribe|auth)$"}[5m]) > 0',
             labels: { service: 'redis', severity: 'warning' },
             annotations: {
@@ -26,7 +26,7 @@
             },
           },
           {
-            alert: 'RedisClientDisconnect',
+            alert: 'ValkeyClientDisconnect',
             expr: 'avg_over_time(redis_connected_clients[15m]) * 1.3 < avg_over_time(redis_connected_clients[15m] offset 30m)',
             labels: { service: 'redis', severity: 'warning' },
             annotations: {
@@ -34,7 +34,7 @@
             },
           },
           {
-            alert: 'RedisKeysDecrease',
+            alert: 'ValkeyKeysDecrease',
             expr: 'avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m])) < avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m] offset 15m)) * 0.7',
             labels: { service: 'redis', severity: 'warning' },
             annotations: {
@@ -45,34 +45,34 @@
       },
     ],
   },
-  redis: {
+  valkey: {
     restore:: $._config.restore,
-    pvc: p.new('redis')
+    pvc: p.new('valkey')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '512Mi' }),
-    cronjob_backup: $._custom.cronjob_backup.new('redis', 'home-infra', '20 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    cronjob_backup: $._custom.cronjob_backup.new('valkey', 'home-infra', '20 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'redis'),
-    cronjob_restore: $._custom.cronjob_restore.new('redis', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+    )], 'valkey'),
+    cronjob_restore: $._custom.cronjob_restore.new('valkey', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'redis'),
-    service: s.new('redis',
-                   { 'app.kubernetes.io/name': 'redis' },
+    )], 'valkey'),
+    service: s.new('valkey',
+                   { 'app.kubernetes.io/name': 'valkey' },
                    [
-                     v1.servicePort.withPort(6379) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('redis'),
+                     v1.servicePort.withPort(6379) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('valkey'),
                    ])
              + s.metadata.withNamespace('home-infra')
-             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'redis' })
-             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.redis })
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' })
+             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.valkey })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),
-    config: v1.configMap.new('redis-config', {
-              'redis.conf': |||
+    config: v1.configMap.new('valkey-config', {
+              'valkey.conf': |||
                 port 6379
                 loglevel verbose
                 protected-mode no
@@ -81,41 +81,41 @@
                 appendfsync everysec
                 appendonly yes
                 %(acls)s
-              ||| % { acls: std.join('\n', std.extVar('secrets').redis.acl) },
+              ||| % { acls: std.join('\n', std.extVar('secrets').valkey.acl) },
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
-    deployment: d.new('redis',
-                      if $.redis.restore then 0 else 1,
+    deployment: d.new('valkey',
+                      if $.valkey.restore then 0 else 1,
                       [
-                        c.new('redis', $._version.redis.image)
+                        c.new('valkey', $._version.valkey.image)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withCommand([
-                          'redis-server',
-                          '/config/redis.conf',
+                          'valkey-server',
+                          '/config/valkey.conf',
                         ])
                         + c.withPorts([
-                          v1.containerPort.newNamed(6379, 'redis'),
+                          v1.containerPort.newNamed(6379, 'valkey'),
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '16Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '64Mi', cpu: '100m' })
-                        + c.readinessProbe.tcpSocket.withPort('redis')
+                        + c.readinessProbe.tcpSocket.withPort('valkey')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.readinessProbe.withTimeoutSeconds(1)
-                        + c.livenessProbe.tcpSocket.withPort('redis')
+                        + c.livenessProbe.tcpSocket.withPort('valkey')
                         + c.livenessProbe.withInitialDelaySeconds(10)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(1),
-                        c.new('metrics', $._version.redis.metrics)
+                        c.new('metrics', $._version.valkey.metrics)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9121, 'metrics'))
                         + c.withEnvMap({
                           REDIS_ADDR: 'redis://localhost:6379',
                           REDIS_USER: 'exporter',
-                          REDIS_PASSWORD: std.extVar('secrets').redis.exporter.password,
+                          REDIS_PASSWORD: std.extVar('secrets').valkey.exporter.password,
                           REDIS_EXPORTER_LOG_FORMAT: 'json',
                           REDIS_EXPORTER_INCL_CONFIG_METRICS: 'false',
                           REDIS_EXPORTER_INCL_SYSTEM_METRICS: 'false',
@@ -136,10 +136,10 @@
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
-                      { 'app.kubernetes.io/name': 'redis' })
+                      { 'app.kubernetes.io/name': 'valkey' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.pvcVolumeMount('redis', '/data', false, {})
-                + d.configVolumeMount('redis-config', '/config/', {})
+                + d.pvcVolumeMount('valkey', '/data', false, {})
+                + d.configVolumeMount('valkey-config', '/config/', {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.metadata.withAnnotations({
