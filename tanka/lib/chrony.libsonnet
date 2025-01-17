@@ -11,7 +11,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'chrony' })
-             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.ntp })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.ntp })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),
@@ -36,6 +36,7 @@
                        + c.readinessProbe.exec.withCommand(['chronyc', 'tracking'])
                        + c.readinessProbe.withInitialDelaySeconds(30)
                        + c.readinessProbe.withPeriodSeconds(60)
+                       + c.readinessProbe.withTimeoutSeconds(5)
                        + c.livenessProbe.exec.withCommand(['chronyc', 'tracking'])
                        + c.livenessProbe.withInitialDelaySeconds(30)
                        + c.livenessProbe.withPeriodSeconds(60)

@@ -4,10 +4,10 @@
       image: 'coredns/coredns:1.12.0',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:16112024',
+      image: 'ghcr.io/bkupidura/chrony:28122024',
     },
     ubuntu: {
-      image: 'ubuntu:noble-20241015',
+      image: 'ubuntu:noble-20241118.1',
     },
     kubernetes_descheduler: {
       chart: '0.30.1',
@@ -16,18 +16,18 @@
       chart: '7.1.288',
     },
     metallb: {
-      chart: '0.14.8',
+      chart: '0.14.9',
       controller: {
         repo: 'quay.io/metallb/controller',
-        tag: 'v0.14.8',
+        tag: 'v0.14.9',
       },
       speaker: {
         repo: 'quay.io/metallb/speaker',
-        tag: 'v0.14.8',
+        tag: 'v0.14.9',
       },
     },
     nut: {
-      image: 'instantlinux/nut-upsd:2.8.2-r0',
+      image: 'instantlinux/nut-upsd:2.8.2-r2',
       metrics: 'ghcr.io/druggeri/nut_exporter:3.1.1',
     },
     longhorn: {
@@ -37,19 +37,19 @@
       image: 'restic/restic:0.17.3',
     },
     traefik: {
-      chart: '33.0.0',
+      chart: '33.2.1',
       registry: 'docker.io',
       repo: 'traefik',
-      tag: 'v3.2.1',
+      tag: 'v3.2.3',
     },
     blocky: {
       image: 'spx01/blocky:v0.24',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:16112024',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:28122024',
     },
     authelia: {
-      image: 'authelia/authelia:4.38.17',
+      image: 'authelia/authelia:4.38.18',
     },
     cert_manager: {
       chart: 'v1.16.2',
@@ -66,23 +66,23 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.41.0',
+      image: 'koenkk/zigbee2mqtt:1.42.0',
     },
     esphome: {
-      image: 'esphome/esphome:2024.11.1',
+      image: 'esphome/esphome:2024.12.2',
     },
     grafana: {
-      image: 'grafana/grafana:11.3.1',
+      image: 'grafana/grafana:11.4.0',
     },
     loki: {
-      server: '6.21.0',
-      fluentbit: '0.48.1',
+      server: '6.24.0',
+      fluentbit: '0.48.4',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2024.11.3',
+      image: 'homeassistant/home-assistant:2024.12.5',
     },
     node_red: {
-      image: 'nodered/node-red:4.0.5-22',
+      image: 'nodered/node-red:4.0.8-22',
     },
     recorder: {
       image: 'ghcr.io/bkupidura/recorder:2.0.7',
@@ -100,31 +100,31 @@
       chart: '1.13.1',
     },
     kube_state_metrics: {
-      chart: '5.27.0',
+      chart: '5.28.0',
     },
     node_exporter: {
-      chart: '4.42.0',
+      chart: '4.43.1',
     },
     victoria_metrics: {
       alert: {
-        chart: '0.12.6',
+        chart: '0.13.4',
       },
       server: {
-        chart: '0.12.7',
+        chart: '0.13.3',
       },
     },
     vaultwarden: {
-      image: 'vaultwarden/server:1.32.5-alpine',
+      image: 'vaultwarden/server:1.32.7-alpine',
     },
     nextcloud: {
-      image: 'nextcloud:30.0.2-apache',
+      image: 'nextcloud:30.0.4-apache',
     },
     valkey: {
       image: 'valkey/valkey:8.0.1',
-      metrics: 'oliver006/redis_exporter:v1.66.0',
+      metrics: 'oliver006/redis_exporter:v1.67.0',
     },
     freshrss: {
-      image: 'freshrss/freshrss:1.24.3',
+      image: 'freshrss/freshrss:1.25.0',
     },
     registry: {
       image: 'registry:2',
@@ -140,22 +140,22 @@
       image: 'democraticcsi/democratic-csi:v1.9.3',
     },
     bazarr: {
-      image: 'linuxserver/bazarr:v1.4.5-ls278',
+      image: 'linuxserver/bazarr:v1.5.1-ls286',
     },
     radarr: {
-      image: 'linuxserver/radarr:5.15.1.9463-ls246',
+      image: 'linuxserver/radarr:5.16.3.9541-ls252',
     },
     sonarr: {
-      image: 'linuxserver/sonarr:4.0.10.2544-ls259',
+      image: 'linuxserver/sonarr:4.0.11.2680-ls263',
     },
     nzbget: {
-      image: 'nzbgetcom/nzbget:v24.4',
+      image: 'nzbgetcom/nzbget:v24.5',
     },
     jellyfin: {
       image: 'jellyfin/jellyfin:10.10.3',
     },
     prowlarr: {
-      image: 'linuxserver/prowlarr:1.27.0.4852-ls93',
+      image: 'linuxserver/prowlarr:1.28.2.4885-ls98',
     },
   },
 }

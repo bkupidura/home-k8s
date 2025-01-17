@@ -20,7 +20,7 @@ k3s:
       custom-cni-dhcp:
         wants: network-online.target
         after: network.service
-        exec_start: /var/lib/rancher/k3s/data/current/bin/dhcp daemon
+        exec_start: /var/lib/rancher/k3s/data/cni/dhcp daemon
         wanted_by: default.target
   args:
     - "--disable"
