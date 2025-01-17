@@ -42,7 +42,7 @@
           },
           {
             alert: 'WAF4XXErrors',
-            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 60',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4..", parsed_code!="404", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 30',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
               summary: '4XX error codes observed on WAF for {{ $labels.parsed_host }}',
@@ -107,7 +107,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'waf' })
-             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.waf })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.waf })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

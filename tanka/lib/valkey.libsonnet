@@ -26,14 +26,6 @@
             },
           },
           {
-            alert: 'ValkeyClientDisconnect',
-            expr: 'avg_over_time(redis_connected_clients[15m]) * 1.3 < avg_over_time(redis_connected_clients[15m] offset 30m)',
-            labels: { service: 'redis', severity: 'warning' },
-            annotations: {
-              summary: 'Observed client disconects on {{ $labels.pod }}',
-            },
-          },
-          {
             alert: 'ValkeyKeysDecrease',
             expr: 'avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m])) < avg by (app_kubernetes_io_name, db) (avg_over_time(redis_db_keys[10m] offset 15m)) * 0.7',
             labels: { service: 'redis', severity: 'warning' },
@@ -67,7 +59,7 @@
                    ])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' })
-             + s.metadata.withAnnotations({ 'metallb.universe.tf/loadBalancerIPs': $._config.vip.valkey })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.valkey })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

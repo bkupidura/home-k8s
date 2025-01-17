@@ -33,15 +33,9 @@
     ingress_route_ssl: $._custom.ingress_route.new('home-assistant', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',
-        match: std.format('Host(`ha.%s`) && (Path(`/api/websocket`) || Path(`/auth/token`) || Path(`/api/ios/config`) || PathPrefix(`/api/webhook/`) || PathPrefix(`/local/tmp/`))', std.extVar('secrets').domain),
-        services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
-        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
-      },
-      {
-        kind: 'Rule',
         match: std.format('Host(`ha.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
-        middlewares: [{ name: 'languest-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     ingress_route: $._custom.ingress_route.new('home-assistant-http', 'smart-home', ['web'], [
