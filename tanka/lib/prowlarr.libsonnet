@@ -21,7 +21,7 @@
           domain: [
             std.format('prowlarr.%s', std.extVar('secrets').domain),
           ],
-          subject: 'group:media',
+          subject: 'group:media-download',
           policy: 'one_factor',
         },
       },

@@ -157,5 +157,8 @@
     prowlarr: {
       image: 'linuxserver/prowlarr:1.28.2.4885-ls98',
     },
+    homer: {
+      image: 'b4bz/homer:v24.12.1',
+    },
   },
 }
