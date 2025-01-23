@@ -134,7 +134,7 @@
     }),
     middleware_auth_authelia: $._custom.traefik_middleware.new('auth-authelia', {
       forwardAuth: {
-        address: 'http://authelia.home-infra:9091/api/verify?rd=https://auth.' + std.extVar('secrets').domain,
+        address: 'http://authelia.home-infra:9091/api/authz/forward-auth',
         trustForwardHeader: true,
         authResponseHeaders: [
           'Remote-User',

@@ -34,7 +34,7 @@
         rules: [
           {
             alert: 'WAF5XXErrors',
-            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"5..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 5',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"5..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) > 0.05',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
               summary: '5XX error codes observed on WAF for {{ $labels.parsed_host }}',
@@ -42,7 +42,7 @@
           },
           {
             alert: 'WAF4XXErrors',
-            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4..", parsed_code!="404", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) * 100 > 30',
+            expr: 'sum by (parsed_host) (waf:status_code:5m{parsed_code=~"4..", parsed_host=~".*[a-z]+?"}) / sum by (parsed_host) (waf:status_code:5m) > 0.1 and sum by (parsed_host) (waf:status_code:5m) > 50',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
               summary: '4XX error codes observed on WAF for {{ $labels.parsed_host }}',
@@ -126,7 +126,7 @@
                           PARANOIA: '4',
                           ANOMALY_INBOUND: '5',
                           ANOMALY_OUTBOUND: '4',
-                          ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
+                          ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE REPORT PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
                         + c.withVolumeMountsMixin([
                           v1.volumeMount.new(cert.secret, cert.dir)

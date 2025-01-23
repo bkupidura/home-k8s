@@ -4,6 +4,28 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  authelia+: {
+    access_control+:: [
+      {
+        order: 0,
+        rule: {
+          domain: std.format('node-red.%s', std.extVar('secrets').domain),
+          networks: [$._config.kubernetes_internal_cidr],
+          policy: 'bypass',
+        },
+      },
+      {
+        order: 1,
+        rule: {
+          domain: [
+            std.format('node-red.%s', std.extVar('secrets').domain),
+          ],
+          subject: 'group:smart-home-infra',
+          policy: 'two_factor',
+        },
+      },
+    ],
+  },
   node_red: {
     restore:: $._config.restore,
     pvc: p.new('node-red')
@@ -16,7 +38,7 @@
         kind: 'Rule',
         match: std.format('Host(`node-red.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'node-red', port: 1880, namespace: 'smart-home' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('node-red', 'smart-home', '55 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
