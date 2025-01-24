@@ -13,7 +13,7 @@
             std.format('esphome.%s', std.extVar('secrets').domain),
           ],
           subject: 'group:smart-home-infra',
-          policy: 'two_factor',
+          policy: 'one_factor',
         },
       },
     ],

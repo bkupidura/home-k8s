@@ -8,15 +8,6 @@
   authelia+: {
     access_control+:: [
       {
-        order: 0,
-        rule: {
-          domain: std.format('sonarr.%s', std.extVar('secrets').domain),
-          resources: ['^/api/.*$'],
-          networks: [$._config.kubernetes_internal_cidr],
-          policy: 'bypass',
-        },
-      },
-      {
         order: 1,
         rule: {
           domain: [
@@ -48,7 +39,7 @@
         kind: 'Rule',
         match: std.format('Host(`sonarr.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'sonarr', port: 8989 }],
-        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }, { name: 'lanhypervisor-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     service: s.new('sonarr',

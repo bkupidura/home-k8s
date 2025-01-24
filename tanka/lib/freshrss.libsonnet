@@ -32,7 +32,7 @@
         kind: 'Rule',
         match: std.format('Host(`rss.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'freshrss', port: 80 }],
-        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     pvc: p.new('freshrss')
@@ -59,7 +59,7 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                           CRON_MIN: '*/20',
-                          TRUSTED_PROXY: $._config.kubernetes_internal_cidr,
+                          TRUSTED_PROXY: $._config.network.kubernetes,
                         })
                         + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '130m' })

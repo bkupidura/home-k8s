@@ -39,7 +39,7 @@
         kind: 'Rule',
         match: std.format('Host(`bazarr.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'bazarr', port: 6767 }],
-        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }, { name: 'lanhypervisor-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     service: s.new('bazarr',
