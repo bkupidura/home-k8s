@@ -7,14 +7,6 @@
   authelia+: {
     access_control+:: [
       {
-        order: 0,
-        rule: {
-          domain: std.format('node-red.%s', std.extVar('secrets').domain),
-          networks: [$._config.kubernetes_internal_cidr],
-          policy: 'bypass',
-        },
-      },
-      {
         order: 1,
         rule: {
           domain: [

@@ -60,13 +60,21 @@
       waf: '10.0.10.47',
       webrtc: '10.0.10.48',
     },
+    network: {
+      kubernetes: '10.42.0.0/16',
+      mgmt: '10.0.100.0/24',
+      lan: '10.0.120.0/24',
+      iot: '10.0.150.0/24',
+      guest: '10.0.160.0/24',
+      vpn: '10.0.20.0/24',
+    },
     kubernetes_internal_cidr: '10.42.0.0/16',
     tz: 'Europe/Warsaw',
     chrony: {
       allow: [
-        '10.0.120.0/24',
-        '10.0.150.0/24',
-        '10.0.100.0/24',
+        $._config.network.lan,
+        $._config.network.iot,
+        $._config.network.mgmt,
       ],
       pool: '0.pl.pool.ntp.org',
     },
@@ -109,25 +117,10 @@
     },
     traefik: {
       whitelist: {
-        lan: [
-          '10.0.120.0/24',
-          '10.0.20.0/24',
-        ],
-        languest: [
-          '10.0.120.0/24',
-          '10.0.20.0/24',
-          '10.0.160.0/24',
-        ],
-        lanmgmt: [
-          '10.0.120.0/24',
-          '10.0.20.0/24',
-          '10.0.100.0/24',
-        ],
-        lanhypervisor: [
-          '10.0.120.0/24',
-          '10.0.20.0/24',
-          $._config.kubernetes_internal_cidr,
-        ],
+        lan: [$._config.network.lan, $._config.network.vpn],
+        languest: [$._config.network.lan, $._config.network.vpn, $._config.network.guest],
+        lanmgmt: [$._config.network.lan, $._config.network.vpn, $._config.network.mgmt],
+        lanhypervisor: [$._config.network.lan, $._config.network.vpn, $._config.network.kubernetes],
       },
     },
   },

@@ -8,15 +8,6 @@
   authelia+: {
     access_control+:: [
       {
-        order: 0,
-        rule: {
-          domain: std.format('nzbget.%s', std.extVar('secrets').domain),
-          resources: ['/jsonrpc'],
-          networks: [$._config.kubernetes_internal_cidr],
-          policy: 'bypass',
-        },
-      },
-      {
         order: 1,
         rule: {
           domain: [
@@ -48,7 +39,7 @@
         kind: 'Rule',
         match: std.format('Host(`nzbget.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'nzbget', port: 6789 }],
-        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }, { name: 'lanhypervisor-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     service: s.new('nzbget',
