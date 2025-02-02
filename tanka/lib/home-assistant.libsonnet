@@ -38,14 +38,6 @@
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
-    ingress_route: $._custom.ingress_route.new('home-assistant-http', 'smart-home', ['web'], [
-      {
-        kind: 'Rule',
-        match: std.format('Host(`ha.%s`)', std.extVar('secrets').domain),
-        services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
-        middlewares: [{ name: 'languest-whitelist', namespace: 'traefik-system' }],
-      },
-    ], null),
     cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]

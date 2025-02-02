@@ -64,7 +64,7 @@
             std.format('alertmanager.%s', std.extVar('secrets').domain),
           ],
           subject: 'group:admin',
-          policy: 'two_factor',
+          policy: 'one_factor',
         },
       },
     ],

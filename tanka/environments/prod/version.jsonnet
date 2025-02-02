@@ -46,7 +46,7 @@
       image: 'spx01/blocky:v0.24',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:28122024',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:29012025',
     },
     authelia: {
       image: 'authelia/authelia:4.38.18',
@@ -114,7 +114,7 @@
       },
     },
     vaultwarden: {
-      image: 'vaultwarden/server:1.32.7-alpine',
+      image: 'vaultwarden/server:1.33.0-alpine',
     },
     nextcloud: {
       image: 'nextcloud:30.0.4-apache',
