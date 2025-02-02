@@ -7,8 +7,8 @@
                                                     '/bin/sh',
                                                     '-ec',
                                                     std.join('\n', [
-                                                      std.format('restic --repo "%s" forget --keep-within 7d --keep-daily 14 --keep-weekly 24 --prune', std.extVar('secrets').restic.repo[repo_name].connection),
-                                                      std.format('restic --repo "%s" check --read-data-subset 5%%', std.extVar('secrets').restic.repo[repo_name].connection),
+                                                      std.format('restic --repo "%s" forget --keep-within 7d --keep-daily 30 --keep-weekly 24 --keep-monthly 12 --prune', std.extVar('secrets').restic.repo[repo_name].connection),
+                                                      std.format('restic --repo "%s" check --read-data-subset 10%%', std.extVar('secrets').restic.repo[repo_name].connection),
                                                     ]),
                                                   ])
                                                   + if std.get(std.extVar('secrets').restic.repo[repo_name], 'ssh_key', false) != false then $.k.core.v1.container.withVolumeMounts([

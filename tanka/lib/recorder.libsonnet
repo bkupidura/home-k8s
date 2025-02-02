@@ -63,15 +63,9 @@
     ingress_route: $._custom.ingress_route.new('recorder', 'smart-home', ['websecure'], [
       {
         kind: 'Rule',
-        match: std.format('Host(`recorder.%s`) && (Path(`/`) || PathPrefix(`/recordings`))', std.extVar('secrets').domain),
-        services: [{ name: 'recorder', port: 8080 }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
-      },
-      {
-        kind: 'Rule',
         match: std.format('Host(`recorder.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'recorder', port: 8080 }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_cleanup: $._custom.cronjob.new('recorder-cleanup', 'smart-home', '15 6,18 * * *', [
