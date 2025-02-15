@@ -47,6 +47,7 @@
 (import 'jellyfin.libsonnet') +
 (import 'prowlarr.libsonnet') +
 (import 'homer.libsonnet') +
+(import 'immich.libsonnet') +
 {
   _config:: {
     restore: false,
@@ -58,7 +59,6 @@
       ntp: '10.0.10.45',
       valkey: '10.0.10.49',
       waf: '10.0.10.47',
-      webrtc: '10.0.10.48',
     },
     network: {
       kubernetes: '10.42.0.0/16',
@@ -68,7 +68,6 @@
       guest: '10.0.160.0/24',
       vpn: '10.0.20.0/24',
     },
-    kubernetes_internal_cidr: '10.42.0.0/16',
     tz: 'Europe/Warsaw',
     chrony: {
       allow: [

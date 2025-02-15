@@ -30,6 +30,14 @@
               summary: 'Node {{ $labels.node }} is unhealthy ({{ $labels.condition }})',
             },
           },
+          {
+            alert: 'LonghornWrongDiskStatus',
+            expr: 'longhorn_disk_status != 1',
+            labels: { service: 'longhorn', severity: 'warning' },
+            annotations: {
+              summary: 'Disk {{ $labels.disk }} on {{ $labels.node }} is {{ $labels.condition }} ({{ $labels.condition_reason }})',
+            },
+          },
         ],
       },
     ],

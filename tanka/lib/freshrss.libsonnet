@@ -38,7 +38,7 @@
     pvc: p.new('freshrss')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
+         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '128Mi' }),
     cronjob_backup: $._custom.cronjob_backup.new('freshrss', 'self-hosted', '05 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',

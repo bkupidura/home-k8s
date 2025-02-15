@@ -46,7 +46,7 @@
       image: 'spx01/blocky:v0.24',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:29012025',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:08022025',
     },
     authelia: {
       image: 'authelia/authelia:4.38.18',
@@ -79,7 +79,7 @@
       fluentbit: '0.48.4',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2024.12.5',
+      image: 'homeassistant/home-assistant:2025.2.3',
     },
     node_red: {
       image: 'nodered/node-red:4.0.8-22',
@@ -159,6 +159,10 @@
     },
     homer: {
       image: 'b4bz/homer:v24.12.1',
+    },
+    immich: {
+      image: 'ghcr.io/immich-app/immich-server:v1.126.1',
+      postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
     },
   },
 }

@@ -85,7 +85,7 @@
     pvc_server: p.new('victoria-metrics')
                 + p.metadata.withNamespace('monitoring')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
-                + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
+                + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
                 + p.spec.resources.withRequests({ storage: '20Gi' }),
     ingress_route_alert: $._custom.ingress_route.new('victoria-metrics-alert', 'monitoring', ['websecure'], [
       {
@@ -604,7 +604,7 @@
       enabled: true,
       persistence: {
         enabled: true,
-        storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
+        storageClass: std.get($.storage.class_with_encryption.metadata, 'name'),
         size: '128Mi',
       },
       configmapReload: {

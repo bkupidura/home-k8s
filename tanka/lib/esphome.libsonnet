@@ -22,7 +22,7 @@
     pvc: p.new('esphome')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_without_snapshot.metadata, 'name'))
+         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '3Gi' }),
     service: s.new(
                'esphome',

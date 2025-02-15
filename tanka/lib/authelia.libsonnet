@@ -73,6 +73,7 @@
                   oidc: {
                     enable_client_debug_messages: false,
                     lifespans: { refresh_token: '90m', authorize_code: '1m', id_token: '1h', access_token: '1h' },
+                    authorization_policies: std.extVar('secrets').authelia.oidc.authorization_policies,
                     clients: $.authelia.oidc_clients,
                   },
                 },
