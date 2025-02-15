@@ -461,6 +461,15 @@ class Validator(ValidatorBase):
                             ignore_extra_keys=True,
                         ),
                     },
+                    {
+                        "name": "replicas_greater_zero",
+                        "schema": Schema(
+                            {
+                                "spec": {"replicas": And(int, lambda x: x > 0)},
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
                 ],
             },
         ]

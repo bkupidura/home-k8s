@@ -155,7 +155,7 @@
         replicas: 1,
         persistence: {
           enabled: true,
-          storageClass: std.get($.storage.class_without_snapshot.metadata, 'name'),
+          storageClass: std.get($.storage.class_with_encryption.metadata, 'name'),
           size: '15Gi',
         },
         podAnnotations: {

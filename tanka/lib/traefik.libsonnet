@@ -95,8 +95,18 @@
       ],
       ports: {
         traefik: { expose: { default: false } },
-        web: { expose: { default: true } },
-        websecure: { expose: { default: true } },
+        web: {
+          expose: { default: true },
+          transport: {
+            respondingTimeouts: { readTimeout: 240, writeTimeout: 0, idleTimeout: 180 },
+          },
+        },
+        websecure: {
+          expose: { default: true },
+          transport: {
+            respondingTimeouts: { readTimeout: 240, writeTimeout: 0, idleTimeout: 180 },
+          },
+        },
       },
       providers: {
         kubernetesCRD: {

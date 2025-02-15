@@ -4,20 +4,6 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
-  authelia+: {
-    access_control+:: [
-      {
-        order: 1,
-        rule: {
-          domain: [
-            std.format('grafana.%s', std.extVar('secrets').domain),
-          ],
-          subject: 'group:admin',
-          policy: 'one_factor',
-        },
-      },
-    ],
-  },
   grafana: {
     service: s.new(
                'grafana',
@@ -31,7 +17,7 @@
         kind: 'Rule',
         match: std.format('Host(`grafana.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'grafana', port: 3000, namespace: 'monitoring' }],
-        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
+        middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     config: v1.configMap.new('grafana-config', {

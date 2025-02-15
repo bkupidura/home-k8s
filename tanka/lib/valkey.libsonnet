@@ -91,8 +91,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '16Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '64Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '30M', cpu: '75m' })
+                        + c.resources.withLimits({ memory: '100M', cpu: '150m' })
                         + c.readinessProbe.tcpSocket.withPort('valkey')
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(10)
