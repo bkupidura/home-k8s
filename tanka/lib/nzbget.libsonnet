@@ -62,8 +62,8 @@
                           PUID: '911',
                           PGID: '911',
                         })
-                        + c.resources.withRequests({ memory: '200Mi', cpu: '150m' })
-                        + c.resources.withLimits({ memory: '300Mi', cpu: '300m' })
+                        + c.resources.withRequests({ cpu: '150m' })
+                        + c.resources.withLimits({ cpu: '300m' })
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.readinessProbe.httpGet.withPath('/')
                         + c.readinessProbe.httpGet.withPort('http')

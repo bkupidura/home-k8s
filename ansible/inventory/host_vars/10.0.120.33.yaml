@@ -1,24 +1,17 @@
 os:
   primary_interface: net0
-  primary_mac: 68:5b:35:94:95:84
+  primary_mac: C8:F7:50:FC:F4:A5
   vlans:
     - 200
   hostname: k3s-delta
   additional_mounts:
     - path: /var/lib/longhorn
       opts: defaults,noatime
-      src: /dev/sda3
+      src: /dev/nvme0n1p3
       fstype: ext4
 watchdog:
-  module: softdog
+  module: iTCO_wdt
 k3s:
   labels:
     video_processing: "true"
     ups_controller: "true"
-service:
-  create:
-    custom-setpci:
-      wants: network-online.target
-      after: network.service
-      exec_start: setpci -s 00:1f.0 0xa4.b=0
-      wanted_by: default.target

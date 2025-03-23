@@ -2,13 +2,9 @@ service:
   enable:
     - cpufrequtils
   disable:
-    - atd
     - multipathd
-    - ondemand
     - systemd-timesyncd
-    - accounts-daemon
     - networkd-dispatcher
-    - udisks2
     - unattended-upgrades
 package:
   install:
@@ -27,6 +23,9 @@ package:
     - sg3-utils
     - multipath-tools
     - scsitools
+    - vim
+    - dmidecode
+    - less
   remove:
     - snapd
 os:
