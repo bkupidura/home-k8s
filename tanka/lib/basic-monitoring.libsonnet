@@ -79,6 +79,23 @@
               summary: 'Physical CPU throtling on {{ $labels.node }}',
             },
           },
+          {
+            alert: 'HighTemperatureConstant',
+            expr: 'node_hwmon_temp_celsius / node_hwmon_temp_crit_celsius > 0.95',
+            'for': '15m',
+            labels: { service: 'system', severity: 'warning' },
+            annotations: {
+              summary: 'High temperature observed on {{ $labels.node }} for {{ $labels.chip }}/{{ $labels.sensor }}',
+            },
+          },
+          {
+            alert: 'HighTemperatureMultipleTimes',
+            expr: 'sum by (node, chip, sensor) (sum_over_time((node_hwmon_temp_celsius / node_hwmon_temp_crit_celsius > 0.95)[1h])) > 5',
+            labels: { service: 'system', severity: 'warning' },
+            annotations: {
+              summary: 'High temperature observed multiple times in last 1h on {{ $labels.node }} for {{ $labels.chip }}/{{ $labels.sensor }}',
+            },
+          },
         ],
       },
       {
@@ -108,7 +125,7 @@
         rules: [
           {
             alert: 'K8sHighCPUHVLimit',
-            expr: 'sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1',
+            expr: 'sum by (kubernetes_io_hostname) (container_spec_cpu_quota{container!=""} / 100) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="cpu"} * 1000, "kubernetes_io_hostname", "$1", "node", "(.+)") > 1.3',
             'for': '30m',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {
@@ -117,7 +134,7 @@
           },
           {
             alert: 'K8sHighMemoryHVUsage',
-            expr: 'sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 0.8',
+            expr: 'sum by (kubernetes_io_hostname) (container_memory_working_set_bytes{container!=""}) / on (kubernetes_io_hostname) label_replace(kube_node_status_allocatable{resource="memory"}, "kubernetes_io_hostname", "$1", "node", "(.+)") > 0.9',
             'for': '30m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {

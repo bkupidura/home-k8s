@@ -88,7 +88,7 @@
         dst: /etc/ssh/sshd_config
         src: "../templates/sshd_config"
         permission: "0644"
-        notify: sshd
+        notify: ssh
   include_tasks: custom_files.yaml
 
 - name: Set sysctl
@@ -109,12 +109,16 @@
         notify: avahi-daemon
   include_tasks: tasks/custom_files.yaml
 
-- name: Enforce performance cpu governor
+- name: Enforce cpu governor
   copy:
     dest: /etc/default/cpufrequtils
-    content: |
-      GOVERNOR="performance"
+    content: "GOVERNOR={{ cpu_governor }}"
   become: true
+
+- name: Enforce cpu governor (running)
+  shell: "cpupower frequency-set -g {{ cpu_governor }}"
+  become: true
+
 
 - block:
   - name: Set GRUB_CMDLINE_LINUX_DEFAULT
@@ -122,7 +126,7 @@
       state: present
       dest: /etc/default/grub
       regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-      line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance ignore_loglevel"
+      line: "GRUB_CMDLINE_LINUX_DEFAULT=\"cpufreq.default_governor={{ cpu_governor }} ignore_loglevel\""
     become: true
     register: grub_config
   - name: Set ignore_loglevel
@@ -138,7 +142,7 @@
       state: present
       dest: /etc/default/grub
       regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
-      line: GRUB_CMDLINE_LINUX_DEFAULT="cpufreq.default_governor=performance"
+      line: "GRUB_CMDLINE_LINUX_DEFAULT=\"cpufreq.default_governor={{ cpu_governor }}\""
     become: true
     register: grub_config
   - name: Unset ignore_loglevel

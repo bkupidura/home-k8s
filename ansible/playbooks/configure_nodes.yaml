@@ -51,6 +51,7 @@
         hostname: "{{ os.hostname }}"
         swap_file: "{{ os.swap_file }}"
         ssh_keys: "{{ os.ssh_keys + [ ansible_global_ssh_key ] }}"
+        cpu_governor: "{{ os.cpu_governor }}"
       include_tasks: tasks/base_config.yaml
 
     - name: Mount additional disks

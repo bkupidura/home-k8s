@@ -149,7 +149,7 @@
       image: 'linuxserver/sonarr:4.0.11.2680-ls263',
     },
     nzbget: {
-      image: 'nzbgetcom/nzbget:v24.5',
+      image: 'nzbgetcom/nzbget:v24.6',
     },
     jellyfin: {
       image: 'jellyfin/jellyfin:10.10.3',
