@@ -51,6 +51,7 @@
         userinfo_signed_response_alg: 'none',
         token_endpoint_auth_method: std.extVar('secrets').authelia.oidc.client[client_name].token_endpoint_auth_method,
         client_secret: std.extVar('secrets').authelia.oidc.client[client_name].client_secret,
+        [if std.get(std.extVar('secrets').authelia.oidc.client[client_name], 'claims_policy') != null then 'claims_policy']: std.extVar('secrets').authelia.oidc.client[client_name].claims_policy,
       }
       for client_name in std.objectFields(std.extVar('secrets').authelia.oidc.client)
     ],
@@ -72,6 +73,11 @@
                 identity_providers: {
                   oidc: {
                     enable_client_debug_messages: false,
+                    claims_policies: {
+                      default: {
+                        id_token: ['groups', 'email', 'email_verified', 'alt_emails', 'preferred_username', 'name'],
+                      },
+                    },
                     lifespans: { refresh_token: '90m', authorize_code: '1m', id_token: '1h', access_token: '1h' },
                     authorization_policies: std.extVar('secrets').authelia.oidc.authorization_policies,
                     clients: $.authelia.oidc_clients,

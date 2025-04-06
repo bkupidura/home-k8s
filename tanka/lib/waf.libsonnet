@@ -132,8 +132,8 @@
                           v1.volumeMount.new(cert.secret, cert.dir)
                           for cert in $.waf.certs_sorted
                         ])
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '100m' })
+                        + c.resources.withRequests({ memory: '256Mi', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '256Mi', cpu: '100m' })
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: 'localhost' }])

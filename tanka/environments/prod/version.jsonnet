@@ -4,16 +4,16 @@
       image: 'coredns/coredns:1.12.0',
     },
     chrony: {
-      image: 'ghcr.io/bkupidura/chrony:28122024',
+      image: 'ghcr.io/bkupidura/chrony:22032025',
     },
     ubuntu: {
-      image: 'ubuntu:noble-20241118.1',
+      image: 'ubuntu:noble-20250127',
     },
     kubernetes_descheduler: {
       chart: '0.30.1',
     },
     kubernetes_reflector: {
-      chart: '7.1.288',
+      chart: '9.0.322',
     },
     metallb: {
       chart: '0.14.9',
@@ -28,7 +28,7 @@
     },
     nut: {
       image: 'instantlinux/nut-upsd:2.8.2-r2',
-      metrics: 'ghcr.io/druggeri/nut_exporter:3.1.1',
+      metrics: 'ghcr.io/druggeri/nut_exporter:3.1.3',
     },
     longhorn: {
       chart: '1.7.2',
@@ -37,28 +37,28 @@
       image: 'restic/restic:0.17.3',
     },
     traefik: {
-      chart: '33.2.1',
+      chart: '34.4.1',
       registry: 'docker.io',
       repo: 'traefik',
-      tag: 'v3.2.3',
+      tag: 'v3.3.4',
     },
     blocky: {
-      image: 'spx01/blocky:v0.24',
+      image: 'spx01/blocky:v0.25',
     },
     waf: {
-      image: 'ghcr.io/bkupidura/waf-modsecurity:08022025',
+      image: 'ghcr.io/bkupidura/waf-modsecurity:22032025',
     },
     authelia: {
-      image: 'authelia/authelia:4.38.18',
+      image: 'authelia/authelia:4.39.1',
     },
     cert_manager: {
-      chart: 'v1.16.2',
+      chart: 'v1.17.1',
       repo: 'quay.io/jetstack/cert-manager-controller',
-      tag: 'v1.16.2',
+      tag: 'v1.17.1',
     },
     mariadb: {
-      image: 'mariadb:11.5.2',
-      metrics: 'prom/mysqld-exporter:v0.16.0',
+      image: 'mariadb:11.7.2',
+      metrics: 'prom/mysqld-exporter:v0.17.2',
     },
     broker_ha: {
       image: 'ghcr.io/bkupidura/broker-ha:0.1.19',
@@ -66,23 +66,23 @@
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
       firmware: 'deCONZ_ConBeeII_0x26780700.bin.GCF',
-      image: 'koenkk/zigbee2mqtt:1.42.0',
+      image: 'koenkk/zigbee2mqtt:2.1.3',
     },
     esphome: {
-      image: 'esphome/esphome:2024.12.2',
+      image: 'esphome/esphome:2025.3.1',
     },
     grafana: {
-      image: 'grafana/grafana:11.4.0',
+      image: 'grafana/grafana:11.5.2',
     },
     loki: {
-      server: '6.24.0',
-      fluentbit: '0.48.4',
+      server: '6.28.0',
+      fluentbit: '0.48.9',
     },
     home_assistant: {
-      image: 'homeassistant/home-assistant:2025.2.3',
+      image: 'homeassistant/home-assistant:2025.3.4',
     },
     node_red: {
-      image: 'nodered/node-red:4.0.8-22',
+      image: 'nodered/node-red:4.0.9-22',
     },
     recorder: {
       image: 'ghcr.io/bkupidura/recorder:2.0.7',
@@ -91,77 +91,77 @@
       image: 'pajikos/sms-gammu-gateway:1.3.0',
     },
     unifi: {
-      image: 'jacobalberty/unifi:v8.6.9',
+      image: 'jacobalberty/unifi:v9.0.114',
     },
     blackbox_exporter: {
-      chart: '9.1.0',
+      chart: '9.4.0',
     },
     alertmanager: {
-      chart: '1.13.1',
+      chart: '1.16.0',
     },
     kube_state_metrics: {
-      chart: '5.28.0',
+      chart: '5.31.0',
     },
     node_exporter: {
-      chart: '4.43.1',
+      chart: '4.45.0',
     },
     victoria_metrics: {
       alert: {
-        chart: '0.13.4',
+        chart: '0.15.0',
       },
       server: {
-        chart: '0.13.3',
+        chart: '0.15.1',
       },
     },
     vaultwarden: {
-      image: 'vaultwarden/server:1.33.0-alpine',
+      image: 'vaultwarden/server:1.33.2-alpine',
     },
     nextcloud: {
-      image: 'nextcloud:30.0.4-apache',
+      image: 'nextcloud:31.0.2-apache',
     },
     valkey: {
-      image: 'valkey/valkey:8.0.1',
-      metrics: 'oliver006/redis_exporter:v1.67.0',
+      image: 'valkey/valkey:8.0.2',
+      metrics: 'oliver006/redis_exporter:v1.69.0',
     },
     freshrss: {
-      image: 'freshrss/freshrss:1.25.0',
+      image: 'freshrss/freshrss:1.26.1',
     },
     registry: {
       image: 'registry:2',
     },
     paperless: {
-      image: 'ghcr.io/paperless-ngx/paperless-ngx:2.13.5',
+      image: 'ghcr.io/paperless-ngx/paperless-ngx:2.14.7',
     },
     reloader: {
-      chart: '1.2.0',
+      chart: '1.3.0',
     },
     democratic_csi: {
       chart: '0.14.7',
       image: 'democraticcsi/democratic-csi:v1.9.3',
     },
     bazarr: {
-      image: 'linuxserver/bazarr:v1.5.1-ls286',
+      image: 'linuxserver/bazarr:v1.5.1-ls296',
     },
     radarr: {
-      image: 'linuxserver/radarr:5.16.3.9541-ls252',
+      image: 'linuxserver/radarr:5.19.3.9730-ls262',
     },
     sonarr: {
-      image: 'linuxserver/sonarr:4.0.11.2680-ls263',
+      image: 'linuxserver/sonarr:4.0.14.2939-ls275',
     },
     nzbget: {
       image: 'nzbgetcom/nzbget:v24.6',
     },
     jellyfin: {
-      image: 'jellyfin/jellyfin:10.10.3',
+      image: 'jellyfin/jellyfin:10.10.6',
     },
     prowlarr: {
-      image: 'linuxserver/prowlarr:1.28.2.4885-ls98',
+      image: 'linuxserver/prowlarr:1.32.2.4987-ls109',
     },
     homer: {
-      image: 'b4bz/homer:v24.12.1',
+      image: 'b4bz/homer:v25.03.3',
     },
     immich: {
-      image: 'ghcr.io/immich-app/immich-server:v1.126.1',
+      image: 'ghcr.io/immich-app/immich-server:v1.129.0',
       postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
     },
   },
