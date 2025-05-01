@@ -1,6 +1,9 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  local s = v1.service,
+  local c = v1.container,
+  local d = $.k.apps.v1.deployment,
   monitoring+: {
     extra_scrape+:: {
       [std.format('blackbox_icmp_%s', group_name)]: {
@@ -49,6 +52,19 @@
               summary: 'Victoria-metrics {{ $labels.instance }} is not able to write new scrapes',
             },
           },
+          {
+            alert: 'Watchdog',
+            expr: 'scalar(1)',
+            labels: { service: 'dmh-watchdog', severity: 'info' },
+          },
+          {
+            alert: 'DMHVMActionDefined',
+            expr: 'dmh_actions{name="dmh-victoria-metrics", processed="0"} <= 0',
+            labels: { service: 'dmh', severity: 'critical' },
+            annotations: {
+              summary: 'There is no defined actions for dead-man-hand for Victoria Metrics',
+            },
+          },
         ],
       },
     ],
@@ -70,6 +86,7 @@
     ],
   },
   victoria_metrics: {
+    restore:: $._config.restore,
     [if $.monitoring.extra_scrape != null then 'extra_scrape_rendered']:: [
       $.monitoring.extra_scrape[extra_scrape]
       for extra_scrape in std.objectFields($.monitoring.extra_scrape)
@@ -166,7 +183,7 @@
         ingress: { enabled: false },
         resources: {
           requests: { memory: '600M' },
-          limits: { memory: '1000M' },
+          limits: { memory: '1200M' },
         },
         podAnnotations: {
           'fluentbit.io/parser': 'json',
@@ -639,6 +656,16 @@
               },
             ],
           },
+          {
+            name: 'dmh',
+            webhook_configs: [
+              {
+                send_resolved: false,
+                url: 'http://dmh-victoria-metrics.monitoring:8080/api/alive',
+                timeout: '3s',
+              },
+            ],
+          },
         ],
         route: {
           group_wait: '10s',
@@ -646,6 +673,17 @@
           group_by: ['service'],
           receiver: 'default-receiver',
           repeat_interval: '24h',
+          routes: [
+            {
+              receiver: 'dmh',
+              matchers: [
+                'service="dmh-watchdog"',
+              ],
+              group_wait: '10s',
+              group_interval: '1m',
+              repeat_interval: '5m',
+            },
+          ],
         },
         inhibit_rules: [
           { equal: ['service'], source_matchers: ['severity = critical', 'service !~ system|k8s'], target_matchers: ['severity = warning'] },
@@ -668,5 +706,81 @@
         'fluentbit.io/parser': 'logfmt',
       },
     }),
+    pvc_dmh: p.new('dmh-victoria-metrics')
+             + p.metadata.withNamespace('monitoring')
+             + p.spec.withAccessModes(['ReadWriteOnce'])
+             + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
+             + p.spec.resources.withRequests({ storage: '50Mi' }),
+    cronjob_backup: $._custom.cronjob_backup.new('dmh-victoria-metrics', 'monitoring', '10 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+      '\n',
+      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+    )], 'dmh-victoria-metrics'),
+    cronjob_restore: $._custom.cronjob_restore.new('dmh-victoria-metrics', 'monitoring', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
+      '\n',
+      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+    )], 'dmh-victoria-metrics'),
+    service: s.new('dmh-victoria-metrics', { 'app.kubernetes.io/name': 'dmh-victoria-metrics' }, [v1.servicePort.withPort(8080) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
+             + s.metadata.withNamespace('monitoring')
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'dmh-victoria-metrics' }),
+    config: v1.configMap.new('dmh-victoria-metrics-config', {
+              'config.yaml': std.manifestYamlDoc({
+                components: ['dmh', 'vault'],
+                state: { file: '/data/state.json' },
+                vault: { file: '/data/vault.json', key: std.extVar('secrets').dmh.vault.key },
+                action: { process_unit: 'minute' },
+                remote_vault: {
+                  client_uuid: 'dmh-victoria-metrics',
+                  url: 'http://127.0.0.1:8080',
+                },
+                execute: {
+                  plugin: {
+                    bulksms: { routing_group: 'premium', token: { id: std.extVar('secrets').dmh.execute.plugin.bulksms.token.id, secret: std.extVar('secrets').dmh.execute.plugin.bulksms.token.secret } },
+                    mail: {
+                      username: std.extVar('secrets').smtp.username,
+                      password: std.extVar('secrets').smtp.password,
+                      server: std.extVar('secrets').smtp.server,
+                      from: std.format('dmh-victoria-metrics@%s', std.extVar('secrets').domain),
+                      tls_policy: 'tls_mandatory',
+                    },
+                  },
+                },
+              }),
+            })
+            + v1.configMap.metadata.withNamespace('monitoring'),
+    deployment: d.new('dmh-victoria-metrics',
+                      if $.victoria_metrics.restore then 0 else 1,
+                      [
+                        c.new('dmh', $._version.dmh.image)
+                        + c.withImagePullPolicy('IfNotPresent')
+                        + c.withPorts([
+                          v1.containerPort.newNamed(8080, 'http'),
+                        ])
+                        + c.withEnvMap({
+                          TZ: $._config.tz,
+                          DMH_CONFIG_FILE: '/config/config.yaml',
+                        })
+                        + c.resources.withRequests({ memory: '16Mi', cpu: '20m' })
+                        + c.resources.withLimits({ memory: '32Mi', cpu: '40m' })
+                        + c.readinessProbe.httpGet.withPath('/ready')
+                        + c.readinessProbe.httpGet.withPort(8080)
+                        + c.readinessProbe.withInitialDelaySeconds(5)
+                        + c.readinessProbe.withPeriodSeconds(5)
+                        + c.readinessProbe.withTimeoutSeconds(1)
+                        + c.livenessProbe.httpGet.withPath('/healthz')
+                        + c.livenessProbe.httpGet.withPort(8080)
+                        + c.livenessProbe.withInitialDelaySeconds(5)
+                        + c.livenessProbe.withPeriodSeconds(5),
+                      ],
+                      { 'app.kubernetes.io/name': 'dmh-victoria-metrics' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
+                + d.configVolumeMount('dmh-victoria-metrics-config', '/config/', {})
+                + d.pvcVolumeMount('dmh-victoria-metrics', '/data', false, {})
+                + d.spec.strategy.withType('Recreate')
+                + d.metadata.withNamespace('monitoring')
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
+                + d.spec.template.metadata.withAnnotations({
+                  'prometheus.io/scrape': 'true',
+                  'prometheus.io/port': '8080',
+                }),
   },
 }

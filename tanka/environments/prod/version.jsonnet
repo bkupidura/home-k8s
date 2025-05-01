@@ -72,7 +72,7 @@
       image: 'esphome/esphome:2025.3.1',
     },
     grafana: {
-      image: 'grafana/grafana:11.5.2',
+      image: 'grafana/grafana:11.6.0',
     },
     loki: {
       server: '6.28.0',
@@ -85,7 +85,7 @@
       image: 'nodered/node-red:4.0.9-22',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0.7',
+      image: 'ghcr.io/bkupidura/recorder:2.0.8',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.3.0',
@@ -163,6 +163,9 @@
     immich: {
       image: 'ghcr.io/immich-app/immich-server:v1.129.0',
       postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
+    },
+    dmh: {
+      image: 'ghcr.io/bkupidura/dead-man-hand:0.3.2',
     },
   },
 }
