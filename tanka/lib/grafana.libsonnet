@@ -27,6 +27,7 @@
                   security: { allow_embedding: true },
                   database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana', password: std.extVar('secrets').grafana.db.password },
                   auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
+                  log: { level: 'info' },
                   'auth.generic_oauth': {
                     allow_sign_up: true,
                     api_url: 'http://authelia.home-infra:9091/api/oidc/userinfo',
@@ -38,6 +39,9 @@
                     name: 'Authelia',
                     role_attribute_path: "contains(groups[*], 'admin') && 'Admin' || 'Viewer'",
                     scopes: 'openid profile email groups',
+                    login_attribute_path: 'preferred_username',
+                    groups_attribute_path: 'groups',
+                    name_attribute_path: 'name',
                   },
                 },
               }),

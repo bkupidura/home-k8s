@@ -48,6 +48,7 @@
 (import 'prowlarr.libsonnet') +
 (import 'homer.libsonnet') +
 (import 'immich.libsonnet') +
+(import 'dmh.libsonnet') +
 {
   _config:: {
     restore: false,

@@ -156,14 +156,14 @@
         persistence: {
           enabled: true,
           storageClass: std.get($.storage.class_with_encryption.metadata, 'name'),
-          size: '15Gi',
+          size: '20Gi',
         },
         podAnnotations: {
           'prometheus.io/port': '3100',
         },
         resources: {
-          requests: { memory: '250Mi' },
-          limits: { memory: '500Mi' },
+          requests: { memory: '300Mi' },
+          limits: { memory: '750Mi' },
         },
         extraVolumes: [
           {
