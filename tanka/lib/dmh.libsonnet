@@ -4,6 +4,23 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'dmh',
+        rules: [
+          {
+            alert: 'DMHActionExecuted',
+            expr: 'delta(dmh_actions{name="dmh", processed="0"}[15m]) < 0',
+            labels: { service: 'dmh', severity: 'warning' },
+            annotations: {
+              summary: 'Some dead-man-hand actions were executed or deleted on {{ $labels.pod }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   dmh: {
     restore:: $._config.restore,
     pvc: p.new('dmh')
