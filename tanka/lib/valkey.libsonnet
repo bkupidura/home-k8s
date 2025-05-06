@@ -10,11 +10,27 @@
         name: 'valkey',
         rules: [
           {
+            alert: 'ValkeyDown',
+            expr: 'redis_up == 0',
+            labels: { service: 'redis', severity: 'critical' },
+            annotations: {
+              summary: 'Redis down for {{ $labels.pod }}',
+            },
+          },
+          {
             alert: 'ValkeyAOFEnabled',
             expr: 'redis_aof_enabled != 1',
             labels: { service: 'redis', severity: 'critical' },
             annotations: {
               summary: 'Redis AOF is disabled on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'ValkeyRDBMissing',
+            expr: 'time() - redis_rdb_last_save_timestamp_seconds > 60 * 10',
+            labels: { service: 'redis', severity: 'critical' },
+            annotations: {
+              summary: 'Redis RDB not executed in last 10 minutes for {{ $labels.pod }}',
             },
           },
           {
@@ -44,10 +60,48 @@
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
          + p.spec.resources.withRequests({ storage: '512Mi' }),
-    cronjob_backup: $._custom.cronjob_backup.new('valkey', 'home-infra', '20 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'valkey'),
+    cronjob_backup: $._custom.cronjob.new('valkey-backup',
+                                          'home-infra',
+                                          '20 03,11,19 * * *',
+                                          [
+                                            c.new('backup', $._version.valkey.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                              v1.volumeMount.new('valkey-data', '/data', false),
+                                            ])
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
+                                            + c.withCommand([
+                                              '/bin/bash',
+                                              '-ec',
+                                              std.join('\n', [
+                                                'set -eo pipefail',
+                                                'apt update || true',
+                                                'apt install -y restic openssh-client',
+                                                'cd /data',
+                                                std.format('export REDISCLI_AUTH="%s"', std.extVar('secrets').valkey.backup.password),
+                                                'export now=$(date +%d-%m-%YT%H:%M:%S)',
+                                                'mkdir -p backups/backup-${now}',
+                                                'echo dumping all keys',
+                                                'valkey-cli -h valkey.home-infra --scan | while read key; do',
+                                                'export encoded_key=$(echo ${key}|base64 -w0)',
+                                                'valkey-cli -h valkey.home-infra --raw dump "${key}" |head -c -1 > backups/backup-${now}/${encoded_key}',
+                                                'echo "$key:$encoded_key" >> backups/backup-${now}/key_index; done',
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                'find backups/ -mindepth 1 -type d -mtime +7 -iname backup-\\* -exec rm -rf {} \\;',
+                                              ]),
+                                            ]),
+                                          ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('valkey')
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                      v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
+                      v1.volume.fromPersistentVolumeClaim('valkey-data', 'valkey'),
+                    ])
+                    + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
+                      v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                      + v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                        { key: 'app.kubernetes.io/name', operator: 'In', values: ['valkey'] }
+                      )
+                    ),
     cronjob_restore: $._custom.cronjob_restore.new('valkey', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
@@ -58,11 +112,7 @@
                      v1.servicePort.withPort(6379) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('valkey'),
                    ])
              + s.metadata.withNamespace('home-infra')
-             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' })
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.valkey })
-             + s.spec.withType('LoadBalancer')
-             + s.spec.withExternalTrafficPolicy('Local')
-             + s.spec.withPublishNotReadyAddresses(false),
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' }),
     config: v1.configMap.new('valkey-config', {
               'valkey.conf': |||
                 port 6379
