@@ -5,6 +5,37 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  logging+: {
+    rules+:: [
+      {
+        name: 'radarr',
+        interval: '1m',
+        rules: [
+          {
+            record: 'radarr:api_request_limit:5m',
+            expr: 'count_over_time({kubernetes_container_name="radarr"} |~ "(?i)api request limit reached for"[5m])',
+          },
+        ],
+      },
+    ],
+  },
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'radarr',
+        rules: [
+          {
+            alert: 'RadarrApiRequestLimit',
+            expr: 'radarr:api_request_limit:5m > 1',
+            labels: { service: 'radarr', severity: 'info' },
+            annotations: {
+              summary: 'Radarr api request limit reached on {{ $labels.kubernetes_pod_name }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   authelia+: {
     access_control+:: [
       {

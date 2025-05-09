@@ -31,7 +31,7 @@
       metrics: 'ghcr.io/druggeri/nut_exporter:3.1.3',
     },
     longhorn: {
-      chart: '1.7.2',
+      chart: '1.8.1',
     },
     restic: {
       image: 'restic/restic:0.17.3',
@@ -153,9 +153,6 @@
     },
     jellyfin: {
       image: 'jellyfin/jellyfin:10.10.6',
-    },
-    prowlarr: {
-      image: 'linuxserver/prowlarr:1.32.2.4987-ls109',
     },
     homer: {
       image: 'b4bz/homer:v25.03.3',

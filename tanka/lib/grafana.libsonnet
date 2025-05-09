@@ -65,8 +65,8 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
                         ])
-                        + c.resources.withRequests({ memory: '64Mi' })
-                        + c.resources.withLimits({ memory: '128Mi' })
+                        + c.resources.withRequests({ memory: '128Mi' })
+                        + c.resources.withLimits({ memory: '196Mi' })
                         + c.readinessProbe.httpGet.withPath('/api/health')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(20)

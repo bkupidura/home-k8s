@@ -5,6 +5,37 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  logging+: {
+    rules+:: [
+      {
+        name: 'sonarr',
+        interval: '1m',
+        rules: [
+          {
+            record: 'sonarr:api_request_limit:5m',
+            expr: 'count_over_time({kubernetes_container_name="sonarr"} |~ "(?i)api request limit reached for"[5m])',
+          },
+        ],
+      },
+    ],
+  },
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'sonarr',
+        rules: [
+          {
+            alert: 'SonarrApiRequestLimit',
+            expr: 'sonarr:api_request_limit:5m > 1',
+            labels: { service: 'sonarr', severity: 'info' },
+            annotations: {
+              summary: 'Sonarr api request limit reached on {{ $labels.kubernetes_pod_name }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   authelia+: {
     access_control+:: [
       {
