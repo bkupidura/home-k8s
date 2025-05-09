@@ -45,7 +45,6 @@
 (import 'bazarr.libsonnet') +
 (import 'nzbget.libsonnet') +
 (import 'jellyfin.libsonnet') +
-(import 'prowlarr.libsonnet') +
 (import 'homer.libsonnet') +
 (import 'immich.libsonnet') +
 (import 'dmh.libsonnet') +
