@@ -8,7 +8,7 @@
 (import 'authelia.libsonnet') +
 (import 'victoriametrics.libsonnet') +
 (import 'truenas.libsonnet') +
-(import 'loki.libsonnet') +
+(import 'victorialogs.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'reloader.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +

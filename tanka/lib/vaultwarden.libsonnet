@@ -11,24 +11,11 @@
         interval: '1m',
         rules: [
           {
-            record: 'vaultwarden:failed_login:5m',
-            expr: 'count_over_time({kubernetes_container_name="vaultwarden"} |~ "(?i)username or password is incorrect"[5m])',
-          },
-        ],
-      },
-    ],
-  },
-  monitoring+: {
-    rules+:: [
-      {
-        name: 'vaultwarden',
-        rules: [
-          {
             alert: 'VaultwardenFailedLogin',
-            expr: 'vaultwarden:failed_login:5m > 1',
+            expr: '_time:5m kubernetes.container_name: "vaultwarden" and i("username or password is incorrect") | stats by (kubernetes.pod_name) count() as log_count | filter log_count :> 0',
             labels: { service: 'vaultwarden', severity: 'info' },
             annotations: {
-              summary: 'Failed login attempts on {{ $labels.kubernetes_pod_name }}',
+              summary: 'Failed login attempts on {{ index $labels "kubernetes.pod_name" }}',
             },
           },
         ],

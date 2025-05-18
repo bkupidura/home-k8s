@@ -12,24 +12,11 @@
         interval: '1m',
         rules: [
           {
-            record: 'sonarr:api_request_limit:5m',
-            expr: 'count_over_time({kubernetes_container_name="sonarr"} |~ "(?i)api request limit reached for"[5m])',
-          },
-        ],
-      },
-    ],
-  },
-  monitoring+: {
-    rules+:: [
-      {
-        name: 'sonarr',
-        rules: [
-          {
             alert: 'SonarrApiRequestLimit',
-            expr: 'sonarr:api_request_limit:5m > 1',
+            expr: '_time:5m kubernetes.container_name: "sonarr" and i("api request limit reached for") | stats by (kubernetes.pod_name) count() as log_count | filter log_count :> 0',
             labels: { service: 'sonarr', severity: 'info' },
             annotations: {
-              summary: 'Sonarr api request limit reached on {{ $labels.kubernetes_pod_name }}',
+              summary: 'Sonarr api request limit reached on {{ index $labels "kubernetes.pod_name" }}',
             },
           },
         ],

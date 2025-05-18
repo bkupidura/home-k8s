@@ -12,24 +12,11 @@
         interval: '1m',
         rules: [
           {
-            record: 'radarr:api_request_limit:5m',
-            expr: 'count_over_time({kubernetes_container_name="radarr"} |~ "(?i)api request limit reached for"[5m])',
-          },
-        ],
-      },
-    ],
-  },
-  monitoring+: {
-    rules+:: [
-      {
-        name: 'radarr',
-        rules: [
-          {
             alert: 'RadarrApiRequestLimit',
-            expr: 'radarr:api_request_limit:5m > 1',
+            expr: '_time:5m kubernetes.container_name: "radarr" and i("api request limit reached for") | stats by (kubernetes.pod_name) count() as log_count| filter log_count :> 0',
             labels: { service: 'radarr', severity: 'info' },
             annotations: {
-              summary: 'Radarr api request limit reached on {{ $labels.kubernetes_pod_name }}',
+              summary: 'Radarr api request limit reached on {{ index $labels "kubernetes.pod_name" }}',
             },
           },
         ],

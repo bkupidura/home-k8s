@@ -53,8 +53,8 @@
                           JELLYFIN_FFmpeg__probesize: '200M',
                         })
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '300Mi', cpu: '400m' })
-                        + c.resources.withLimits({ memory: '600Mi', cpu: '800m' })
+                        + c.resources.withRequests({ memory: '400Mi', cpu: '400m' })
+                        + c.resources.withLimits({ memory: '800Mi', cpu: '800m' })
                         + c.readinessProbe.httpGet.withPath('/health')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
