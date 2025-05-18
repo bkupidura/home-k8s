@@ -2,7 +2,22 @@
   logging: {
     parsers:: {
     },
-    rules:: [],
+    rules:: [
+      {
+        name: 'backup',
+        interval: '1m',
+        rules: [
+          {
+            alert: 'BackupError',
+            expr: '_time:5m kubernetes.container_name: "backup" and i("error") | stats by (kubernetes.pod_name) count() as log_count | filter log_count :> 0',
+            labels: { service: 'backup', severity: 'warning' },
+            annotations: {
+              summary: 'Errors observed on backup job {{ index $labels "kubernetes.pod_name" }}',
+            },
+          },
+        ],
+      },
+    ],
   },
   monitoring: {
     rules:: [

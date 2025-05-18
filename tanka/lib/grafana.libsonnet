@@ -61,6 +61,7 @@
                           GF_PATHS_PROVISIONING: '/etc/grafana/provisioning',
                           GF_SECURITY_ADMIN_USER: 'admin',
                           GF_SECURITY_ADMIN_PASSWORD: std.extVar('secrets').grafana.password,
+                          GF_INSTALL_PLUGINS: 'victoriametrics-logs-datasource',
                         })
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),

@@ -61,7 +61,7 @@
       metrics: 'prom/mysqld-exporter:v0.17.2',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.19',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.20',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
@@ -73,10 +73,6 @@
     },
     grafana: {
       image: 'grafana/grafana:11.6.0',
-    },
-    loki: {
-      server: '6.28.0',
-      fluentbit: '0.48.9',
     },
     home_assistant: {
       image: 'homeassistant/home-assistant:2025.3.4',
@@ -105,12 +101,18 @@
     node_exporter: {
       chart: '4.45.0',
     },
+    fluentbit: {
+      chart: '0.48.9',
+    },
     victoria_metrics: {
       alert: {
         chart: '0.15.0',
       },
       server: {
         chart: '0.15.1',
+      },
+      logs: {
+        chart: '0.9.8',
       },
     },
     vaultwarden: {
