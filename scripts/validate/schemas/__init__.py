@@ -13,7 +13,7 @@ class ValidatorBase(object):
 
             try:
                 validator["filter"].validate(manifest)
-            except SchemaError:
+            except SchemaError as e:
                 continue
 
             resource_full_name = f"{manifest['metadata'].get('namespace')}/{manifest['metadata'].get('name')}"

@@ -21,7 +21,7 @@
                   podLabels={ 'app.kubernetes.io/name': 'debugpod' },
                 )
                 + d.metadata.withNamespace('home-infra')
-                + d.spec.strategy.withType('Recreate')
+                + d.spec.strategy.withType('RollingUpdate')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                 + d.spec.template.spec.withDnsPolicy('ClusterFirstWithHostNet')
                 + d.spec.template.spec.withVolumes([
