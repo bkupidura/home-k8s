@@ -29,6 +29,17 @@ class Validator(ValidatorBase):
                             ignore_extra_keys=True,
                         ),
                     },
+                    {
+                        "name": "node_port_not_allowed",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "type": And(str, lambda x: x != "NodePort"),
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
                 ],
             },
             {

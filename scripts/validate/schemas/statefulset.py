@@ -48,20 +48,7 @@ class Validator(ValidatorBase):
                         "spec": {
                             "template": {
                                 "spec": {
-                                    "volumes": [
-                                        Schema(
-                                            {
-                                                "persistentVolumeClaim": dict,
-                                            },
-                                            ignore_extra_keys=True,
-                                        ),
-                                        Schema(
-                                            {
-                                                "hostPath": dict,
-                                            },
-                                            ignore_extra_keys=True,
-                                        ),
-                                    ],
+                                    "volumes": And(list, self.has_pvc_or_hostpath),
                                 },
                             },
                         },
@@ -473,3 +460,10 @@ class Validator(ValidatorBase):
                 ],
             },
         ]
+
+    def has_pvc_or_hostpath(self, volumes):
+        return any(
+            isinstance(volume, dict)
+            and ("persistentVolumeClaim" in volume or "hostPath" in volume)
+            for volume in volumes
+        )

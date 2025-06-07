@@ -21,21 +21,21 @@ with open(args.config_file, "r") as f:
     config = yaml.safe_load(f)
 
 validator_mapping = {
-    "deployment": schema_deployment.Validator(
+    "Deployment": schema_deployment.Validator(
         config["validators"].get("deployment", dict())
     ),
-    "ingress_route": schema_ingress_route.Validator(
+    "IngressRoute": schema_ingress_route.Validator(
         config["validators"].get("ingress_route", dict())
     ),
-    "daemonset": schema_daemonset.Validator(
+    "DaemonSet": schema_daemonset.Validator(
         config["validators"].get("daemonset", dict())
     ),
-    "service": schema_service.Validator(config["validators"].get("service", dict())),
-    "cron_job": schema_cron_job.Validator(config["validators"].get("cron_job", dict())),
-    "statefulset": schema_statefulset.Validator(
+    "Service": schema_service.Validator(config["validators"].get("service", dict())),
+    "CronJob": schema_cron_job.Validator(config["validators"].get("cron_job", dict())),
+    "StatefulSet": schema_statefulset.Validator(
         config["validators"].get("statefulset", dict())
     ),
-    "pod": schema_pod.Validator(config["validators"].get("pod", dict())),
+    "Pod": schema_pod.Validator(config["validators"].get("pod", dict())),
 }
 
 k8s_definitions = yaml.safe_load_all(sys.stdin)
@@ -45,6 +45,8 @@ broken_manifests = list()
 for manifests in k8s_definitions:
     for manifest in manifests["items"]:
         for validator_kind, validator in validator_mapping.items():
+            if manifest["kind"] != validator_kind:
+                continue
             errors = validator.run_checks(manifest)
             if len(errors) > 0:
                 broken_manifests.append(

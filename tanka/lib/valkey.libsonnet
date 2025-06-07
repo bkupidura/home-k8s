@@ -87,7 +87,7 @@
                                                 'valkey-cli -h valkey.home-infra --raw dump "${key}" |head -c -1 > backups/backup-${now}/${encoded_key}',
                                                 'echo "$key:$encoded_key" >> backups/backup-${now}/key_index; done',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
-                                                'find backups/ -mindepth 1 -type d -mtime +7 -iname backup-\\* -exec rm -rf {} \\;',
+                                                'find backups/ -mindepth 1 -ignore_readdir_race -type d -mtime +7 -iname backup-\\* -exec rm -rf {} +',
                                               ]),
                                             ]),
                                           ])
