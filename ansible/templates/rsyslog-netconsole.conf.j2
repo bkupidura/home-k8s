@@ -3,11 +3,13 @@ $RuleSet remote
 
 {% set local_ip = hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address %}
 {% for host in hostvars %}
+{% if host != 'localhost' %}
 {%- set remote_ip = hostvars[host]['ansible_' + hostvars[host].os.primary_interface].ipv4.address %}
 {%- set remote_hostname = hostvars[host]['ansible_hostname'] %}
 {%- if remote_ip != local_ip %}
 if $fromhost-ip=='{{ remote_ip }}' then /var/log/{{ remote_hostname }}-console.log
 & stop
+{% endif %}
 {% endif %}
 {% endfor %}
 

@@ -4,10 +4,12 @@
 {%- set local_interface = os.primary_interface %}
 {%- set remote_destinations = [] %}
 {%- for host in hostvars %}
+    {%- if host != 'localhost' -%}
     {%- set remote_ip = hostvars[host]['ansible_' + hostvars[host].os.primary_interface].ipv4.address -%}
     {%- set remote_mac = hostvars[host]['ansible_' + hostvars[host].os.primary_interface].macaddress -%}
     {%- if remote_ip != local_ip -%}
         {{ remote_destinations.append(local_port + "@" + local_ip + "/" + local_interface + "," + remote_port + "@" + remote_ip + "/" + remote_mac) }}
+    {%- endif -%}
     {%- endif -%}
 {%- endfor %}
 options netconsole netconsole="{{ remote_destinations | join(';') }}"

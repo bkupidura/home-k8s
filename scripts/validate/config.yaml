@@ -173,7 +173,9 @@ validators:
         loadbalancer: null
     cron_job:
         generic: null
-        backup: null
+        backup:
+            restic_image:
+                skip: ENC[AES256_GCM,data:jcZYxNY/yfj7FaWYCzKA9QFgBNNaq5IsKQ==,iv:qb8P+/pxbSVGle/wGY0BIS52Pa98hjiMeYFyzeFfukQ=,tag:oCeRuoUCfYZRl3+ahBsGTQ==,type:str]
         restore: null
     statefulset:
         generic:
@@ -209,8 +211,8 @@ sops:
             T0xIaU1VUjA4dXNZcm83Tk8vK043QlUKQreA5skPV0Ut9LzVYNleSMSk8sJRqk6I
             sOIQqvTdrwluaXCXOqZI+8GhCIfb1mK+h97aBywXRumtEyP3OPuO2g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-06-01T12:41:10Z"
-    mac: ENC[AES256_GCM,data:IUSJte1VjbBrpWN6mfIOZK+0YQRBEUMQWXFki1bzZeoxW8foDvrkPHz5PxNNWB2Pkzi9S+Gzwjk7AysM1TOGQsrUs+h1d5Z8bUJC+P6J+gpUMh4ORo/2Z7sBo0uJngVpGHDE74Os6sOmFs4A+PJd8QkUfm4NkgsZdqQArjwODHc=,iv:o0wcq+zejsmvr0SXLv1L5yc3ihCOCbOdoUPJHsrT234=,tag:rv/1uXVyPHQWDrAQ2Sy/hA==,type:str]
+    lastmodified: "2025-06-10T20:05:40Z"
+    mac: ENC[AES256_GCM,data:durmZuVdliIqq5p/ID/2ewg+9c5HUhRNvvzoPY8G81LXKydJneh/VkM/g+8/JrB2GYpYxRf2OCRUVzoNOH1m6qvfAbj49FdIHsFaaWPbAvu+e6RTzRrlGmCE6eoy9oj8zgndYs26H2NSkKOTX32iTj7wyQq1V1RrjBtnFlb52Cc=,iv:31ULvCMvODpebT5tNNt6kp4/elNM2x5KcdhzC/EEc9Y=,tag:kEXYUflDP9ZJ3ydCKWaWJA==,type:str]
     pgp: []
     unencrypted_suffix: _unencrypted
     version: 3.9.1
