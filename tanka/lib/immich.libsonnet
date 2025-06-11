@@ -23,8 +23,8 @@
     pvc_immich: p.new('immich-data')
                 + p.metadata.withNamespace('self-hosted')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
-                + p.spec.withStorageClassName(std.get($.storage.class_truenas_iscsi.metadata, 'name'))
-                + p.spec.resources.withRequests({ storage: '90Gi' }),
+                + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
+                + p.spec.resources.withRequests({ storage: '40Gi' }),
     pvc_postgres: p.new('immich-postgres')
                   + p.metadata.withNamespace('self-hosted')
                   + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -64,7 +64,7 @@
                                                    'self-hosted',
                                                    '55 04,20 * * *',
                                                    [
-                                                     c.new('backup', $._version.immich.postgres)
+                                                     c.new('backup', $._version.restic.image)
                                                      + c.withVolumeMounts([
                                                        v1.volumeMount.new('ssh', '/root/.ssh', false),
                                                      ])
@@ -73,8 +73,7 @@
                                                        '/bin/sh',
                                                        '-ec',
                                                        std.join('\n', [
-                                                         'apt update || true',
-                                                         'apt install -y restic openssh-client',
+                                                         std.format('apk add %s', $._version.immich.postgres_backup),
                                                          'mkdir /data',
                                                          'cd /data',
                                                          std.format('PGPASSWORD="%s" pg_dumpall -U postgres -h immich-postgres.self-hosted -f db-backup-$(date +%%d-%%m-%%YT%%H:%%M:%%S).sql', std.extVar('secrets').immich.postgres.password),
@@ -90,7 +89,7 @@
                                                     'self-hosted',
                                                     '0 0 * * *',
                                                     [
-                                                      c.new('restore', $._version.immich.postgres)
+                                                      c.new('restore', $._version.restic.image)
                                                       + c.withVolumeMounts([
                                                         v1.volumeMount.new('ssh', '/root/.ssh', false),
                                                       ])
@@ -102,8 +101,7 @@
                                                         '/bin/sh',
                                                         '-ec',
                                                         std.join('\n', [
-                                                          'apt update || true',
-                                                          'apt install -y restic openssh-client',
+                                                          std.format('apk add %s', $._version.immich.postgres_backup),
                                                           'mkdir /data',
                                                           'cd /data',
                                                           std.format('restic --repo "%s" --verbose restore latest -H immich-postgres --target .', std.extVar('secrets').restic.repo.default.connection),

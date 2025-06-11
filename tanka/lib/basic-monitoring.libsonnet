@@ -167,7 +167,7 @@
           },
           {
             alert: 'K8sHighMemoryPodUsage',
-            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!~"(unifi|)"} / container_spec_memory_limit_bytes < Inf) > 0.90',
+            expr: 'max by (pod, namespace) (container_memory_working_set_bytes{container!~"(unifi|)"} / container_spec_memory_limit_bytes < Inf) > 0.95',
             'for': '30m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {

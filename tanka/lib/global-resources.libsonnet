@@ -1,6 +1,6 @@
 {
   restic_check: {
-    [std.format('restic_check_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-check-%s', repo_name), 'home-infra', '15 18 * * *', [
+    [std.format('restic_check_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-check-%s', repo_name), 'home-infra', '15 17 * * *', [
                                                   $.k.core.v1.container.new('check', $._version.restic.image)
                                                   + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(std.format('restic-secrets-%s', repo_name)))
                                                   + $.k.core.v1.container.withCommand([

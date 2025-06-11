@@ -47,7 +47,7 @@
                                           'self-hosted',
                                           '40 03,11,19 * * *',
                                           [
-                                            c.new('backup', $._version.ubuntu.image)
+                                            c.new('backup', $._version.restic.image)
                                             + c.withVolumeMounts([
                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
                                               v1.volumeMount.new('vaultwarden-data', '/data', false),
@@ -57,12 +57,11 @@
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
-                                                'apt update || true',
-                                                'apt install -y restic sqlite3 openssh-client',
+                                                'apk add sqlite',
                                                 'cd /data',
                                                 'sqlite3 db.sqlite3 ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
-                                                'find /data -type f -name db-backup-\\*.dump -mtime +60 -delete',
+                                                'find /data -type f -name db-backup-\\*.dump -mtime +30 -delete',
                                               ]),
                                             ]),
                                           ])

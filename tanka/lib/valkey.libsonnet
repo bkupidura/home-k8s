@@ -64,19 +64,18 @@
                                           'home-infra',
                                           '20 03,11,19 * * *',
                                           [
-                                            c.new('backup', $._version.valkey.image)
+                                            c.new('backup', $._version.restic.image)
                                             + c.withVolumeMounts([
                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
                                               v1.volumeMount.new('valkey-data', '/data', false),
                                             ])
                                             + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                             + c.withCommand([
-                                              '/bin/bash',
+                                              '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
                                                 'set -eo pipefail',
-                                                'apt update || true',
-                                                'apt install -y restic openssh-client',
+                                                'apk add valkey-cli',
                                                 'cd /data',
                                                 std.format('export REDISCLI_AUTH="%s"', std.extVar('secrets').valkey.backup.password),
                                                 'export now=$(date +%d-%m-%YT%H:%M:%S)',
@@ -86,8 +85,9 @@
                                                 'export encoded_key=$(echo ${key}|base64 -w0)',
                                                 'valkey-cli -h valkey.home-infra --raw dump "${key}" |head -c -1 > backups/backup-${now}/${encoded_key}',
                                                 'echo "$key:$encoded_key" >> backups/backup-${now}/key_index; done',
+                                                'ls backups/backup-${now}',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
-                                                'find backups/ -mindepth 1 -ignore_readdir_race -type d -mtime +7 -iname backup-\\* -exec rm -rf {} +',
+                                                'find backups/ -mindepth 1 -type d -mtime +6 -iname backup-\\* -exec rm -fr {} +',
                                               ]),
                                             ]),
                                           ])

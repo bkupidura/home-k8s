@@ -78,8 +78,8 @@
         enabled: true,
         retentionPeriod: '4w',
         resources: {
-          requests: { memory: '300M' },
-          limits: { memory: '600M' },
+          requests: { memory: '350M' },
+          limits: { memory: '700M' },
         },
         persistentVolume: {
           enabled: true,

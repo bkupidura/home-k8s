@@ -18,20 +18,6 @@
     ],
   },
   homer: {
-    restore:: $._config.restore,
-    pvc: p.new('homer')
-         + p.metadata.withNamespace('self-hosted')
-         + p.spec.withAccessModes(['ReadWriteOnce'])
-         + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '100Mi' }),
-    cronjob_backup: $._custom.cronjob_backup.new('homer', 'self-hosted', '50 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'homer'),
-    cronjob_restore: $._custom.cronjob_restore.new('homer', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
-      '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
-    )], 'homer'),
     service: s.new(
                'homer',
                { 'app.kubernetes.io/name': 'homer' },
@@ -47,8 +33,112 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    config: v1.configMap.new('homer-config', {
+              'config.yml': std.manifestYamlDoc({
+                title: 'Catalog',
+                subtitle: 'Homer',
+                logo: 'logo.png',
+                header: true,
+                footer: false,
+                theme: 'default',
+                colors: {
+                  light: {
+                    'highlight-primary': '#3367d6',
+                    'highlight-secondary': '#4285f4',
+                    'highlight-hover': '#5a95f5',
+                    background: '#f5f5f5',
+                    'card-background': '#ffffff',
+                    text: '#363636',
+                    'text-header': '#ffffff',
+                    'text-title': '#303030',
+                    'text-subtitle': '#424242',
+                    'card-shadow': 'rgba(0, 0, 0, 0.1)',
+                    link: '#3273dc',
+                    'link-hover': '#363636',
+                  },
+                  dark: {
+                    'highlight-primary': '#3367d6',
+                    'highlight-secondary': '#4285f4',
+                    'highlight-hover': '#5a95f5',
+                    background: '#131313',
+                    'card-background': '#2b2b2b',
+                    text: '#eaeaea',
+                    'text-header': '#ffffff',
+                    'text-title': '#fafafa',
+                    'text-subtitle': '#f5f5f5',
+                    'card-shadow': 'rgba(0, 0, 0, 0.4)',
+                    link: '#3273dc',
+                    'link-hover': '#ffdd57',
+                  },
+                },
+                links: [],
+                services: [
+                  {
+                    name: 'Files',
+                    icon: 'fas fa-cloud',
+                    items: [
+                      {
+                        name: 'Nextcloud',
+                        icon: 'fa-solid fa-download',
+                        subtitle: 'File storage',
+                        url: std.format('https://files.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                      {
+                        name: 'Paperless',
+                        icon: 'fa-solid fa-paperclip',
+                        subtitle: 'Document storage',
+                        url: std.format('https://paperless.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                      {
+                        name: 'Immich',
+                        icon: 'fa-solid fa-camera',
+                        subtitle: 'Photo storage',
+                        url: std.format('https://photos.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                    ],
+                  },
+                  {
+                    name: 'Entertaiment',
+                    icon: 'fas fa-puzzle-piece',
+                    items: [
+                      {
+                        name: 'Radarr',
+                        icon: 'fa-solid fa-film',
+                        subtitle: 'Movie download',
+                        url: std.format('https://radarr.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                      {
+                        name: 'Sonarr',
+                        icon: 'fa-solid fa-television',
+                        subtitle: 'TV series download',
+                        url: std.format('https://sonarr.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                    ],
+                  },
+                  {
+                    name: 'Tools',
+                    icon: 'fas fa-wrench',
+                    items: [
+                      {
+                        name: 'Vaultwarden',
+                        icon: 'fa-solid fa-lock',
+                        subtitle: 'Password manager',
+                        url: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                    ],
+                  },
+                ],
+              }),
+            })
+            + v1.configMap.metadata.withNamespace('self-hosted'),
     deployment: d.new('homer',
-                      if $.homer.restore then 0 else 1,
+                      1,
                       [
                         c.new('homer', $._version.homer.image)
                         + c.withImagePullPolicy('IfNotPresent')
@@ -57,6 +147,9 @@
                           TZ: $._config.tz,
                           INIT_ASSETS: '0',
                         })
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('homer-config', '/www/assets/config.yml', false) + v1.volumeMount.withSubPath('config.yml'),
+                        ])
                         + c.resources.withRequests({ memory: '10Mi', cpu: '10m' })
                         + c.resources.withLimits({ memory: '20Mi', cpu: '20m' })
                         + c.readinessProbe.httpGet.withPath('/')
@@ -71,8 +164,9 @@
                         + c.livenessProbe.withTimeoutSeconds(3),
                       ],
                       { 'app.kubernetes.io/name': 'homer' })
-                + d.pvcVolumeMount('homer', '/www/assets', false, {})
-                + d.spec.strategy.withType('Recreate')
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
+                + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('homer-config', 'homer-config'))
+                + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('self-hosted')
                 + d.spec.template.spec.securityContext.withFsGroup(1000)
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
