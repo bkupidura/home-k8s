@@ -11,7 +11,7 @@
         rules: [
           {
             record: 'waf:status_code:1m',
-            expr: '_time:1m kubernetes.container_name: "waf" | unpack_json | stats by (parsed.code, parsed.host, parsed.method) count() as log_count',
+            expr: '_time:1m kubernetes__container_name: "waf" | stats by (parsed__code, parsed__host, parsed__method) count() as log_count',
           },
         ],
       },
@@ -34,18 +34,18 @@
         rules: [
           {
             alert: 'WAF5XXErrors',
-            expr: 'sum by (parsed.host) (waf:status_code:1m{parsed.code=~"5..", parsed.host=~".*[a-z]+?"}) / sum by (parsed.host) (waf:status_code:1m) > 0.05',
+            expr: 'sum by (parsed__host) (waf:status_code:1m{parsed__code=~"5..", parsed__host=~".*[a-z]+?"}) / sum by (parsed__host) (waf:status_code:1m) > 0.05',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
-              summary: '5XX error codes observed on WAF for {{ index $labels "parsed.host" }}',
+              summary: '5XX error codes observed on WAF for {{ index $labels "parsed__host" }}',
             },
           },
           {
             alert: 'WAF4XXErrors',
-            expr: 'sum by (parsed.host) (waf:status_code:1m{parsed.code=~"4..", parsed.host=~".*[a-z]+?"}) / sum by (parsed.host) (waf:status_code:1m) > 0.1 and sum by (parsed.host) (waf:status_code:1m) > 50',
+            expr: 'sum by (parsed__host) (waf:status_code:1m{parsed__code=~"4(0[0-3]|0[5-9]|[1-9][0-9])", parsed__host=~".*[a-z]+?"}) / sum by (parsed__host) (waf:status_code:1m) > 0.1 and sum by (parsed__host) (waf:status_code:1m) > 50',
             labels: { service: 'waf', severity: 'info' },
             annotations: {
-              summary: '4XX error codes observed on WAF for {{ index $labels "parsed.host" }}',
+              summary: '4XX error codes observed on WAF for {{ index $labels "parsed__host" }}',
             },
           },
         ],

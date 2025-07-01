@@ -58,10 +58,10 @@
         externalProvisioner: {
           resources: {
             requests: {
-              memory: '20Mi',
+              memory: '30Mi',
             },
             limits: {
-              memory: '40Mi',
+              memory: '60Mi',
             },
           },
         },
@@ -197,10 +197,10 @@
         externalProvisioner: {
           resources: {
             requests: {
-              memory: '20Mi',
+              memory: '30Mi',
             },
             limits: {
-              memory: '40Mi',
+              memory: '60Mi',
             },
           },
         },

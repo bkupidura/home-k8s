@@ -82,7 +82,7 @@
                                                 'mkdir -p backups/backup-${now}',
                                                 'echo dumping all keys',
                                                 'valkey-cli -h valkey.home-infra --scan | while read key; do',
-                                                'export encoded_key=$(echo ${key}|base64 -w0)',
+                                                'export encoded_key=$(echo -n ${key} | sha1sum | cut -f1 -d" ")',
                                                 'valkey-cli -h valkey.home-infra --raw dump "${key}" |head -c -1 > backups/backup-${now}/${encoded_key}',
                                                 'echo "$key:$encoded_key" >> backups/backup-${now}/key_index; done',
                                                 'ls backups/backup-${now}',

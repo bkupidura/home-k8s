@@ -25,7 +25,7 @@
               {
                 name: 'PodLifeTime',
                 args: {
-                  maxPodLifeTimeSeconds: 86400,
+                  maxPodLifeTimeSeconds: 43200,
                   states: ['Running'],
                   labelSelector: {
                     matchLabels: { 'app.kubernetes.io/name': 'unifi' },
