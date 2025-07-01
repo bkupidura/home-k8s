@@ -31,7 +31,7 @@ pip3 install ansible mitogen
 ## Deploy k8s workload
 
 ```
-jb install github.com/jsonnet-libs/k8s-libsonnet/1.28@main
+jb install github.com/jsonnet-libs/k8s-libsonnet/1.32@main
 ./scripts/tanka apply tanka/environments/prod/
 ```
 

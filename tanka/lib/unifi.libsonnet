@@ -10,7 +10,7 @@
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '3Gi' }),
+         + p.spec.resources.withRequests({ storage: '4Gi' }),
     ingress_route_https: $._custom.ingress_route.new('unifi', 'home-infra', ['websecure'], [
       {
         kind: 'Rule',

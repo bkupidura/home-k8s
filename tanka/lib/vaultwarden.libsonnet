@@ -12,10 +12,10 @@
         rules: [
           {
             alert: 'VaultwardenFailedLogin',
-            expr: '_time:5m kubernetes.container_name: "vaultwarden" and i("username or password is incorrect") | stats by (kubernetes.pod_name) count() as log_count | filter log_count :> 0',
+            expr: '_time:5m kubernetes__container_name: "vaultwarden" and i("username or password is incorrect") | stats by (kubernetes__pod_name) count() as log_count | filter log_count :> 0',
             labels: { service: 'vaultwarden', severity: 'info' },
             annotations: {
-              summary: 'Failed login attempts on {{ index $labels "kubernetes.pod_name" }}',
+              summary: 'Failed login attempts on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
         ],

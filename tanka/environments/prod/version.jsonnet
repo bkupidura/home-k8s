@@ -10,7 +10,7 @@
       image: 'ubuntu:noble-20250127',
     },
     kubernetes_descheduler: {
-      chart: '0.30.1',
+      chart: '0.33.0',
     },
     kubernetes_reflector: {
       chart: '9.0.322',

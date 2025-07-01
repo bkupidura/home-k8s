@@ -1,36 +1,46 @@
-- name: Create destination directory for custom files
+- name: create destination directory for custom files
   file:
-    path: "{{ item.value.dst | dirname }}"
+    path: "{{ custom_file.value.dst | dirname }}"
     state: directory
     mode: 0755
   with_dict: "{{ create }}"
+  loop_control:
+    loop_var: custom_file
   when: create is defined
   become: true
 
-- name: Create custom files
+- name: create custom files
+  vars:
+    data: "{{ custom_file.value.data | default(omit) }}"
   template:
-    src: "{{ item.value.src }}"
-    dest: "{{ item.value.dst }}"
-    mode: "{{ item.value.permission }}"
+    src: "{{ custom_file.value.src }}"
+    dest: "{{ custom_file.value.dst }}"
+    mode: "{{ custom_file.value.permission }}"
   with_dict: "{{ create }}"
+  loop_control:
+    loop_var: custom_file
   when: create is defined
   become: true
   register: custom_file_created
 
-- name: Restart service
+- name: restart service
   service:
-    name: "{{ item.item.value.notify }}"
+    name: "{{ custom_file.custom_file.value.notify }}"
     state: restarted
   with_list: "{{ custom_file_created.results }}"
+  loop_control:
+    loop_var: custom_file
   when:
-    - item.changed
-    - item.item.value.notify is defined
+    - custom_file.changed
+    - custom_file.custom_file.value.notify is defined
   become: true
 
-- name: Run command
-  command: "{{ item.item.value.execute }}"
+- name: run command
+  command: "{{ custom_file.custom_file.value.execute }}"
   with_list: "{{ custom_file_created.results }}"
+  loop_control:
+    loop_var: custom_file
   when:
-    - item.changed
-    - item.item.value.execute is defined
+    - custom_file.changed
+    - custom_file.custom_file.value.execute is defined
   become: true

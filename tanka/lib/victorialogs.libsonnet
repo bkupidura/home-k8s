@@ -9,10 +9,10 @@
         rules: [
           {
             alert: 'FluentbitUnknownParser',
-            expr: '_time:5m kubernetes.container_name: "fluent-bit" and contains_all("annotation parser", "not found") | stats count() as log_count | filter log_count :> 0',
+            expr: '_time:5m kubernetes__container_name: "fluent-bit" and contains_all("annotation parser", "not found") | stats count() as log_count | filter log_count :> 0',
             labels: { service: 'fluentbit', severity: 'warning' },
             annotations: {
-              summary: 'Unknown fluentbit parsed configured',
+              summary: 'Unknown fluentbit parser configured',
             },
           },
         ],
@@ -36,6 +36,29 @@
               annotations off
               k8s-logging.parser on
               k8s-logging.exclude on
+          [FILTER]
+              name nest
+              match *
+              operation lift
+              nested_under parsed
+              add_prefix parsed__
+          [FILTER]
+              name nest
+              match kube.*
+              operation lift
+              nested_under kubernetes
+              add_prefix kubernetes__
+          [FILTER]
+              name nest
+              match kube.*
+              operation lift
+              nested_under kubernetes__labels
+              add_prefix kubernetes__labels__
+          [FILTER]
+              name modify
+              match kube.*
+              rename kubernetes__labels__app.kubernetes.io/name kubernetes__labels__app__kubernetes__io__name
+              rename kubernetes__labels__app.kubernetes.io/instance kubernetes__labels__app__kubernetes__io__instace
         |||,
         outputs: |||
           [OUTPUT]
@@ -46,6 +69,7 @@
               uri /insert/jsonline?_stream_fields=stream&_msg_field=log&_time_field=date&debug=0
               format json_lines
               json_date_format iso8601
+              log_level warn
         |||,
         [if std.length($.fluentbit.parsers) > 0 then 'customParsers']: std.join('\n', $.fluentbit.parsers),
       },

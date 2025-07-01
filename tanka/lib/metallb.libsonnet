@@ -31,7 +31,7 @@
         },
         speaker: {
           resources: {
-            limits: { cpu: '75m', memory: '64Mi' },
+            limits: { cpu: '75m', memory: '90M' },
           },
           image: {
             repository: $._version.metallb.speaker.repo,

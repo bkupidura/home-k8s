@@ -4,15 +4,33 @@
     },
     rules:: [
       {
+        name: 'k8s',
+        interval: '5m',
+        rules: [
+          {
+            record: 'k8s:error_logs:5m',
+            expr: '_time:5m i("error") | stats by (kubernetes__pod_name, kubernetes__namespace_name, kubernetes__labels__app__kubernetes__io__name) count() as log_count',
+          },
+          {
+            record: 'k8s:warning_logs:5m',
+            expr: '_time:5m i("warning") | stats by (kubernetes__pod_name, kubernetes__namespace_name, kubernetes__labels__app__kubernetes__io__name) count() as log_count',
+          },
+          {
+            record: 'k8s:all_logs:5m',
+            expr: '_time:5m | stats by (kubernetes__pod_name, kubernetes__namespace_name, kubernetes__labels__app__kubernetes__io__name) count() as log_count',
+          },
+        ],
+      },
+      {
         name: 'backup',
         interval: '1m',
         rules: [
           {
             alert: 'BackupError',
-            expr: '_time:5m kubernetes.container_name: "backup" and i("error") | stats by (kubernetes.pod_name) count() as log_count | filter log_count :> 0',
+            expr: '_time:5m kubernetes__container_name: "backup" and i("error") | stats by (kubernetes__pod_name) count() as log_count | filter log_count :> 0',
             labels: { service: 'backup', severity: 'warning' },
             annotations: {
-              summary: 'Errors observed on backup job {{ index $labels "kubernetes.pod_name" }}',
+              summary: 'Errors observed on backup job {{ index $labels "kubernetes__pod_name" }}',
             },
           },
         ],
@@ -180,12 +198,39 @@
         name: 'k8s',
         rules: [
           {
+            alert: 'K8sPodErrorsIncreasing',
+            expr: 'k8s:error_logs:5m / avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 1.5 and avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 5',
+            'for': '5m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Observing error logs increase for POD {{ index $labels "kubernetes__namespace_name" }}/{{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
+          {
+            alert: 'K8sPodErrorsHigh',
+            expr: 'k8s:error_logs:5m > 50',
+            'for': '10m',
+            labels: { service: 'k8s', severity: 'warning' },
+            annotations: {
+              summary: 'Observing high number of error logs for POD {{ index $labels "kubernetes__namespace_name" }}/{{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
+          {
+            alert: 'K8sPodLogsIncreasing',
+            expr: 'k8s:all_logs:5m / avg_over_time(k8s:all_logs:5m[2h] offset 60m) > 2 and avg_over_time(k8s:all_logs:5m[2h] offset 60m) > 30',
+            'for': '30m',
+            labels: { service: 'k8s', severity: 'info' },
+            annotations: {
+              summary: 'Observing logs increase for POD {{ index $labels "kubernetes__namespace_name" }}/{{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
+          {
             alert: 'K8sVolumeUsageHigh',
             expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (kubelet_volume_stats_capacity_bytes < 10*1024*1024*1024) > 0.90',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 90% os available storage',
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 90% of available storage',
             },
           },
           {
@@ -194,7 +239,7 @@
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 95% os available storage',
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 95% of available storage',
             },
           },
           {
@@ -203,7 +248,7 @@
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 99% os available storage',
+              summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using more than 99% of available storage',
             },
           },
           {
