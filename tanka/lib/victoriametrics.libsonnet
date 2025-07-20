@@ -693,8 +693,8 @@
     }),
     helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
       resources: {
-        requests: { memory: '32Mi' },
-        limits: { memory: '64Mi' },
+        requests: { memory: '64Mi' },
+        limits: { memory: '128Mi' },
       },
     }),
     helm_node_exporter: $._custom.helm.new('prometheus-node-exporter', 'prometheus-node-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.node_exporter.chart, 'monitoring', {
