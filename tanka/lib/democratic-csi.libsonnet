@@ -34,8 +34,11 @@
     helm_nfs: $._custom.helm.new('democratic-csi-nfs', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {
       controller: {
         driver: {
-          image: $._version.democratic_csi.image,
-          imagePullPolicy: 'IfNotPresent',
+          image: {
+            registry: 'docker.io/democraticcsi/democratic-csi',
+            tag: $._version.democratic_csi.tag,
+            pullPolicy: 'IfNotPresent'
+          },
           resources: {
             requests: {
               memory: '60Mi',
@@ -98,8 +101,11 @@
       },
       node: {
         driver: {
-          image: $._version.democratic_csi.image,
-          imagePullPolicy: 'IfNotPresent',
+          image: {
+            registry: 'docker.io/democraticcsi/democratic-csi',
+            tag: $._version.democratic_csi.tag,
+            pullPolicy: 'IfNotPresent'
+          },
           resources: {
             requests: {
               memory: '60Mi',
@@ -173,8 +179,11 @@
     helm_iscsi: $._custom.helm.new('democratic-csi-iscsi', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {
       controller: {
         driver: {
-          image: $._version.democratic_csi.image,
-          imagePullPolicy: 'IfNotPresent',
+          image: {
+            registry: 'docker.io/democraticcsi/democratic-csi',
+            tag: $._version.democratic_csi.tag,
+            pullPolicy: 'IfNotPresent'
+          },
           resources: {
             requests: {
               memory: '60Mi',
@@ -237,8 +246,11 @@
       },
       node: {
         driver: {
-          image: $._version.democratic_csi.image,
-          imagePullPolicy: 'IfNotPresent',
+          image: {
+            registry: 'docker.io/democraticcsi/democratic-csi',
+            tag: $._version.democratic_csi.tag,
+            pullPolicy: 'IfNotPresent'
+          },
           resources: {
             requests: {
               memory: '60Mi',
