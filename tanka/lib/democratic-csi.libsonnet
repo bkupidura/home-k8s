@@ -37,7 +37,7 @@
           image: {
             registry: 'docker.io/democraticcsi/democratic-csi',
             tag: $._version.democratic_csi.tag,
-            pullPolicy: 'IfNotPresent'
+            pullPolicy: 'IfNotPresent',
           },
           resources: {
             requests: {
@@ -104,7 +104,7 @@
           image: {
             registry: 'docker.io/democraticcsi/democratic-csi',
             tag: $._version.democratic_csi.tag,
-            pullPolicy: 'IfNotPresent'
+            pullPolicy: 'IfNotPresent',
           },
           resources: {
             requests: {
@@ -182,7 +182,7 @@
           image: {
             registry: 'docker.io/democraticcsi/democratic-csi',
             tag: $._version.democratic_csi.tag,
-            pullPolicy: 'IfNotPresent'
+            pullPolicy: 'IfNotPresent',
           },
           resources: {
             requests: {
@@ -249,7 +249,7 @@
           image: {
             registry: 'docker.io/democraticcsi/democratic-csi',
             tag: $._version.democratic_csi.tag,
-            pullPolicy: 'IfNotPresent'
+            pullPolicy: 'IfNotPresent',
           },
           resources: {
             requests: {

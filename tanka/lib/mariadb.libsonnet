@@ -82,27 +82,34 @@
                                           'home-infra',
                                           '30 03,11,19 * * *',
                                           [
-                                            c.new('backup', $._version.mariadb.image)
+                                            c.new('backup', $._version.restic.image)
                                             + c.withVolumeMounts([
                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
-                                              v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
-                                              v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                                              v1.volumeMount.new('workdir', '/data', false),
                                             ])
                                             + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                             + c.withCommand([
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
-                                                'apt update || true',
-                                                'apt install -y openssh-client bzip2 wget',
-                                                std.format('wget %s -O restic.bz2', $._version.restic.binary),
-                                                'bzip2 -d restic.bz2',
-                                                'chmod +x restic',
-                                                'mv restic /bin',
-                                                'mkdir /dump',
-                                                'cd /dump',
-                                                std.format('mariadb-backup --backup --target-dir=/dump --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
+                                                'cd /data',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                              ]),
+                                            ]),
+                                          ],
+                                          [
+                                            c.new('pre-backup', $._version.mariadb.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                                              v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
+                                              v1.volumeMount.new('workdir', '/data', false),
+                                            ])
+                                            + c.withCommand([
+                                              '/bin/sh',
+                                              '-ec',
+                                              std.join('\n', [
+                                                'cd /data',
+                                                std.format('mariadb-backup --backup --target-dir=/data --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
                                               ]),
                                             ]),
                                           ])
@@ -111,6 +118,7 @@
                       v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                       v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                       v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                      { name: 'workdir', emptyDir: {} },
                     ])
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
                       v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
@@ -124,9 +132,26 @@
                                            [
                                              c.new('restore', $._version.mariadb.image)
                                              + c.withVolumeMounts([
-                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
                                                v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                                                v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                                               v1.volumeMount.new('workdir', '/data', false),
+                                             ])
+                                             + c.withCommand([
+                                               '/bin/sh',
+                                               '-ec',
+                                               std.join('\n', [
+                                                 'cd /data',
+                                                 'mariadb-backup --prepare --target-dir=/data',
+                                                 'mariadb-backup --copy-back --target-dir=/data',
+                                                 'chown -R mysql:mysql /var/lib/mysql/data',
+                                               ]),
+                                             ]),
+                                           ],
+                                           [
+                                             c.new('pre-restore', $._version.restic.image)
+                                             + c.withVolumeMounts([
+                                               v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                               v1.volumeMount.new('workdir', '/data', false),
                                              ])
                                              + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                              + c.withEnvMap({
@@ -136,18 +161,8 @@
                                                '/bin/sh',
                                                '-ec',
                                                std.join('\n', [
-                                                 'apt update || true',
-                                                 'apt install -y openssh-client bzip2 wget',
-                                                 std.format('wget %s -O restic.bz2', $._version.restic.binary),
-                                                 'bzip2 -d restic.bz2',
-                                                 'chmod +x restic',
-                                                 'mv restic /bin',
-                                                 'mkdir /dump',
-                                                 'cd /dump',
+                                                 'cd /data',
                                                  std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection),
-                                                 'mariadb-backup --prepare --target-dir=/dump',
-                                                 'mariadb-backup --copy-back --target-dir=/dump',
-                                                 'chown -R mysql:mysql /var/lib/mysql/data',
                                                ]),
                                              ]),
                                            ])
@@ -157,6 +172,7 @@
                        v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                        v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                        v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                       { name: 'workdir', emptyDir: {} },
                      ]),
     init: v1.configMap.new('mariadb-init', {
             'init.sql': std.strReplace(|||

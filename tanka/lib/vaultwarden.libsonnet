@@ -57,11 +57,22 @@
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
-                                                'apk add sqlite',
                                                 'cd /data',
-                                                'sqlite3 db.sqlite3 ".backup db-backup-$(date +%d-%m-%YT%H:%M:%S).dump"',
                                                 std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
-                                                'find /data -type f -name db-backup-\\*.dump -mtime +30 -delete',
+                                              ]),
+                                            ]),
+                                          ],
+                                          [
+                                            c.new('pre-backup', $._version.vaultwarden.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('vaultwarden-data', '/data', false),
+                                            ])
+                                            + c.withCommand([
+                                              '/bin/sh',
+                                              '-ec',
+                                              std.join('\n', [
+                                                '/vaultwarden backup',
+                                                'find /data -type f -name db_\\*_\\*.sqlite3 -mtime +30 -delete',
                                               ]),
                                             ]),
                                           ])
