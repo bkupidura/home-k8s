@@ -74,8 +74,21 @@
                                               '/bin/sh',
                                               '-ec',
                                               std.join('\n', [
+                                                'cd /data',
+                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                              ]),
+                                            ]),
+                                          ],
+                                          [
+                                            c.new('pre-backup', $._version.valkey.image)
+                                            + c.withVolumeMounts([
+                                              v1.volumeMount.new('valkey-data', '/data', false),
+                                            ])
+                                            + c.withCommand([
+                                              '/bin/bash',
+                                              '-ec',
+                                              std.join('\n', [
                                                 'set -eo pipefail',
-                                                'apk add valkey-cli',
                                                 'cd /data',
                                                 std.format('export REDISCLI_AUTH="%s"', std.extVar('secrets').valkey.backup.password),
                                                 'export now=$(date +%d-%m-%YT%H:%M:%S)',
@@ -86,7 +99,6 @@
                                                 'valkey-cli -h valkey.home-infra --raw dump "${key}" |head -c -1 > backups/backup-${now}/${encoded_key}',
                                                 'echo "$key:$encoded_key" >> backups/backup-${now}/key_index; done',
                                                 'ls backups/backup-${now}',
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
                                                 'find backups/ -mindepth 1 -type d -mtime +6 -iname backup-\\* -exec rm -fr {} +',
                                               ]),
                                             ]),

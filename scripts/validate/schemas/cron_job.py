@@ -7,7 +7,14 @@ def var_restic_host_set(data):
     for container in data["spec"]["jobTemplate"]["spec"]["template"]["spec"][
         "containers"
     ]:
-        for env in container["env"]:
+        for env in container.get("env", []):
+            if env["name"] == "RESTIC_HOST":
+                variables.append(env["value"])
+
+    for container in data["spec"]["jobTemplate"]["spec"]["template"]["spec"].get(
+        "initContainers", []
+    ):
+        for env in container.get("env", []):
             if env["name"] == "RESTIC_HOST":
                 variables.append(env["value"])
 
@@ -198,46 +205,7 @@ class Validator(ValidatorBase):
                     {
                         "name": "env_restic_host_set",
                         "schema": Schema(
-                            And(
-                                Schema(
-                                    {
-                                        "metadata": {
-                                            "name": str,
-                                        },
-                                        "spec": {
-                                            "jobTemplate": {
-                                                "spec": {
-                                                    "template": {
-                                                        "spec": {
-                                                            "containers": [
-                                                                Schema(
-                                                                    {
-                                                                        "env": [
-                                                                            Schema(
-                                                                                {
-                                                                                    "name": And(
-                                                                                        str,
-                                                                                        lambda x: x
-                                                                                        == "RESTIC_HOST",
-                                                                                    ),
-                                                                                    "value": str,
-                                                                                }
-                                                                            ),
-                                                                        ],
-                                                                    },
-                                                                    ignore_extra_keys=True,
-                                                                ),
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                    },
-                                    ignore_extra_keys=True,
-                                ),
-                                var_restic_host_set,
-                            ),
+                            var_restic_host_set,
                             ignore_extra_keys=True,
                         ),
                     },

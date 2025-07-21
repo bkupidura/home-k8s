@@ -35,7 +35,6 @@
     },
     restic: {
       image: 'restic/restic:0.18.0',
-      binary: 'https://github.com/restic/restic/releases/download/v0.18.0/restic_0.18.0_linux_amd64.bz2'
     },
     traefik: {
       chart: '36.3.0',
@@ -163,7 +162,6 @@
     immich: {
       image: 'ghcr.io/immich-app/immich-server:v1.135.3',
       postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
-      postgres_backup: 'postgresql16-client',
     },
     dmh: {
       image: 'ghcr.io/bkupidura/dead-man-hand:0.3.2',

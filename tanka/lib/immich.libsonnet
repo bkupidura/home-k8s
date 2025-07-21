@@ -67,31 +67,61 @@
                                                      c.new('backup', $._version.restic.image)
                                                      + c.withVolumeMounts([
                                                        v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                                       v1.volumeMount.new('workdir', '/data', false),
                                                      ])
                                                      + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                                      + c.withCommand([
                                                        '/bin/sh',
                                                        '-ec',
                                                        std.join('\n', [
-                                                         std.format('apk add %s', $._version.immich.postgres_backup),
-                                                         'mkdir /data',
+                                                         'cd /data',
+                                                         std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                       ]),
+                                                     ]),
+                                                   ],
+                                                   [
+                                                     c.new('pre-backup', $._version.immich.postgres)
+                                                     + c.withVolumeMounts([
+                                                       v1.volumeMount.new('workdir', '/data', false),
+                                                     ])
+                                                     + c.withCommand([
+                                                       '/bin/sh',
+                                                       '-ec',
+                                                       std.join('\n', [
                                                          'cd /data',
                                                          std.format('PGPASSWORD="%s" pg_dumpall -U postgres -h immich-postgres.self-hosted -f db-backup-$(date +%%d-%%m-%%YT%%H:%%M:%%S).sql', std.extVar('secrets').immich.postgres.password),
-                                                         std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
                                                        ]),
                                                      ]),
                                                    ])
                              + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('immich-postgres')
                              + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
                                v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
+                               { name: 'workdir', emptyDir: {} },
                              ]),
     cronjob_restore_postgres: $._custom.cronjob.new('immich-postgres-restore',
                                                     'self-hosted',
                                                     '0 0 * * *',
                                                     [
-                                                      c.new('restore', $._version.restic.image)
+                                                      c.new('restore', $._version.immich.postgres)
+                                                      + c.withVolumeMounts([
+                                                        v1.volumeMount.new('workdir', '/data', false),
+                                                      ])
+                                                      + c.withCommand([
+                                                        '/bin/sh',
+                                                        '-ec',
+                                                        std.join('\n', [
+                                                          'cd /data',
+                                                          'LATEST=`find . -type f -printf "%T+ %p\n" | sort -r | head  -1 | cut -f2 -d" "`',
+                                                          'echo using $LATEST backup',
+                                                          std.format('PGPASSWORD="%s" psql -U postgres -h immich-postgres.self-hosted -f $LATEST', std.extVar('secrets').immich.postgres.password),
+                                                        ]),
+                                                      ]),
+                                                    ],
+                                                    [
+                                                      c.new('pre-restore', $._version.restic.image)
                                                       + c.withVolumeMounts([
                                                         v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                                        v1.volumeMount.new('workdir', '/data', false),
                                                       ])
                                                       + c.withEnvFrom(v1.envFromSource.secretRef.withName('restic-secrets-default'))
                                                       + c.withEnvMap({
@@ -101,13 +131,8 @@
                                                         '/bin/sh',
                                                         '-ec',
                                                         std.join('\n', [
-                                                          std.format('apk add %s', $._version.immich.postgres_backup),
-                                                          'mkdir /data',
                                                           'cd /data',
                                                           std.format('restic --repo "%s" --verbose restore latest -H immich-postgres --target .', std.extVar('secrets').restic.repo.default.connection),
-                                                          'LATEST=`find . -type f -printf "%T+ %p\n" | sort -r | head  -1 | cut -f2 -d" "`',
-                                                          'echo using $LATEST backup',
-                                                          std.format('PGPASSWORD="%s" psql -U postgres -h immich-postgres.self-hosted -f $LATEST', std.extVar('secrets').immich.postgres.password),
                                                         ]),
                                                       ]),
                                                     ])
@@ -115,6 +140,7 @@
                               + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withHostname('immich-postgres')
                               + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
                                 v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
+                                { name: 'workdir', emptyDir: {} },
                               ]),
     cronjob_backup_immich: $._custom.cronjob_backup.new('immich', 'self-hosted', '00 05,21 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
