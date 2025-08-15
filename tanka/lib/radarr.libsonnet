@@ -19,6 +19,14 @@
               summary: 'Radarr api request limit reached on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
+          {
+            alert: 'RadarrDBError',
+            expr: '_time:5m kubernetes__container_name: "radarr" and i("database disk image is malformed") | stats by (kubernetes__pod_name) count() as log_count| filter log_count :> 0',
+            labels: { service: 'radarr', severity: 'warning' },
+            annotations: {
+              summary: 'Radarr database corrupted on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
         ],
       },
     ],

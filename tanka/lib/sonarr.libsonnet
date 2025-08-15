@@ -19,6 +19,14 @@
               summary: 'Sonarr api request limit reached on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
+          {
+            alert: 'SonarrDBError',
+            expr: '_time:5m kubernetes__container_name: "sonarr" and i("database disk image is malformed") | stats by (kubernetes__pod_name) count() as log_count| filter log_count :> 0',
+            labels: { service: 'sonarr', severity: 'warning' },
+            annotations: {
+              summary: 'Sonarr database corrupted on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
         ],
       },
     ],

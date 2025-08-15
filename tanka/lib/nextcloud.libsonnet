@@ -11,7 +11,7 @@
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '10Gi' }),
+         + p.spec.resources.withRequests({ storage: '30Gi' }),
     middleware_redirect: $._custom.traefik_middleware.new('nextcloud-redirect', {
       replacePathRegex: {
         regex: '^/.well-known/ca(l|rd)dav',
@@ -52,8 +52,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         }) + (if $.nextcloud.update == false then
-                                c.resources.withRequests({ memory: '256Mi', cpu: '500m' })
-                                + c.resources.withLimits({ memory: '512Mi', cpu: '700m' })
+                                c.resources.withRequests({ memory: '512Mi', cpu: '500m' })
+                                + c.resources.withLimits({ memory: '768Mi', cpu: '700m' })
                                 + c.readinessProbe.tcpSocket.withPort('http')
                                 + c.readinessProbe.withInitialDelaySeconds(10)
                                 + c.readinessProbe.withPeriodSeconds(10)
