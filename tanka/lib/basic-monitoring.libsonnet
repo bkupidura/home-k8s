@@ -208,8 +208,7 @@
           },
           {
             alert: 'K8sPodErrorsHigh',
-            expr: 'k8s:error_logs:5m > 50',
-            'for': '10m',
+            expr: 'avg_over_time(k8s:error_logs:5m[10m]) > 100',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Observing high number of error logs for POD {{ index $labels "kubernetes__namespace_name" }}/{{ index $labels "kubernetes__pod_name" }}',

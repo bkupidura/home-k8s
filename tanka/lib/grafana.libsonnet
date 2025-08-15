@@ -32,7 +32,7 @@
                     allow_sign_up: true,
                     api_url: 'http://authelia.home-infra:9091/api/oidc/userinfo',
                     token_url: 'http://authelia.home-infra:9091/api/oidc/token',
-                    auth_url: std.format('https://auth.%s/api/oidc/authorize', std.extVar('secrets').domain),
+                    auth_url: std.format('https://auth.%s/api/oidc/authorization', std.extVar('secrets').domain),
                     client_id: 'grafana',
                     client_secret: std.extVar('secrets').grafana.oidc.client_secret,
                     enabled: true,

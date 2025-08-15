@@ -26,7 +26,7 @@
           },
           {
             alert: 'NUTBatteryFailure',
-            expr: 'network_ups_tools_ups_status{flag="RB"} == 1',
+            expr: 'network_ups_tools_ups_status{flag="RB|HB"} == 1',
             labels: { service: 'nut', severity: 'critical' },
             annotations: {
               summary: 'Battery failure, replace UPS batteries in {{ $labels.param_ups }}',
