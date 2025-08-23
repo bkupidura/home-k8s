@@ -52,7 +52,7 @@
           },
           {
             alert: 'SystemOOMKill',
-            expr: 'delta(node_vmstat_oom_kill[30m]) > 0',
+            expr: 'delta(node_vmstat_oom_kill[30m]) > 1',
             'for': '1m',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
@@ -208,7 +208,7 @@
           },
           {
             alert: 'K8sPodErrorsHigh',
-            expr: 'avg_over_time(k8s:error_logs:5m[10m]) > 100',
+            expr: 'avg_over_time(k8s:error_logs:5m[10m]) > 300',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Observing high number of error logs for POD {{ index $labels "kubernetes__namespace_name" }}/{{ index $labels "kubernetes__pod_name" }}',

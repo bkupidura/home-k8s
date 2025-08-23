@@ -53,7 +53,8 @@
     restore: false,
     update: false,
     vip: {
-      dns: '10.0.10.40',
+      blocky_dns: '10.0.10.40',
+      core_dns: '10.0.10.41',
       ingress: '10.0.10.42',
       mqtt: '10.0.10.43',
       ntp: '10.0.10.45',

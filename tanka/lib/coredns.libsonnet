@@ -3,6 +3,47 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  monitoring+: {
+    rules+:: [
+      {
+        name: 'coredns',
+        rules: [
+          {
+            alert: 'CoreDNSReloadFailures',
+            expr: 'delta(coredns_reload_failed_total[10m]) > 0',
+            labels: { service: 'coredns', severity: 'warning' },
+            annotations: {
+              summary: 'Failed to reload config on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'CoreDNSPanic',
+            expr: 'delta(coredns_panics_total[10m]) > 0',
+            labels: { service: 'coredns', severity: 'warning' },
+            annotations: {
+              summary: 'Panics observed on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'CoreDNSKubernetesRequests',
+            expr: 'delta(coredns_kubernetes_rest_client_requests_total{code!="200"}[15m]) > 5',
+            labels: { service: 'coredns', severity: 'warning' },
+            annotations: {
+              summary: 'K8s requestes failing observed on {{ $labels.pod }}',
+            },
+          },
+          {
+            alert: 'CoreDNSEmptyCache',
+            expr: 'sum by(pod, type) (coredns_cache_entries) == 0',
+            labels: { service: 'coredns', severity: 'warning' },
+            annotations: {
+              summary: 'Empty cache on {{ $labels.pod }} for {{ $labels.type }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   coredns: {
     kubelet_cluster_dns:: '10.43.0.10',
     service_account: $.k.core.v1.serviceAccount.new('coredns')
@@ -40,28 +81,38 @@
                     errors
                     health
                     ready
+                    prometheus :9153
+                    loop
+                    reload
+                    loadbalance
                     kubernetes cluster.local in-addr.arpa ip6.arpa {
                         pods insecure
                         fallthrough in-addr.arpa ip6.arpa
                     }
-                    prometheus :9153
                     %(forwards)s
                     forward . 127.0.0.1:5301 127.0.0.1:5302
-                    loop
-                    reload
-                    loadbalance
                 }
                 .:5301 {
                     forward . tls://9.9.9.9 {
                         tls_servername dns.quad9.net
                     }
-                    cache 600
+                    cache 600 . {
+                        success 3000
+                        denial 500
+                        prefetch 10 300s
+                        servfail 10s
+                    }
                 }
                 .:5302 {
                     forward . tls://1.1.1.1 tls://1.0.0.1 {
                          tls_servername cloudflare-dns.com
                     }
-                    cache 600
+                    cache 600 . {
+                        success 3000
+                        denial 500
+                        prefetch 10 300s
+                        servfail 10s
+                    }
                 }
               ||| % { forwards: std.join('\n', $.coredns.forward_config) },
             })
@@ -69,11 +120,13 @@
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [
                v1.servicePort.withPort(53) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('dns-tcp'),
                v1.servicePort.withPort(53) + v1.servicePort.withProtocol('UDP') + v1.servicePort.withName('dns'),
-               v1.servicePort.withPort(9153) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('metrics'),
              ])
              + s.spec.withClusterIP($.coredns.kubelet_cluster_dns)
+             + s.spec.withType('LoadBalancer')
+             + s.spec.withExternalTrafficPolicy('Local')
+             + s.spec.withPublishNotReadyAddresses(false)
              + s.metadata.withNamespace('kube-system')
-             + s.metadata.withAnnotations({ 'prometheus.io/port': '9153', 'prometheus.io/scrape': 'true' })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.core_dns })
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'coredns' }),
     deployment: d.new('coredns',
                       2,
@@ -110,6 +163,10 @@
                 + d.spec.template.spec.withDnsPolicy('Default')
                 + d.spec.template.spec.withPriorityClassName('system-cluster-critical')
                 + d.spec.template.spec.withServiceAccountName('coredns')
+                + d.spec.template.metadata.withAnnotations({
+                  'prometheus.io/scrape': 'true',
+                  'prometheus.io/port': '9153',
+                })
                 + d.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
                   v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
                   + v1.podAffinityTerm.labelSelector.withMatchExpressions(
