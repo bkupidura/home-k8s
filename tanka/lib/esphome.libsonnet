@@ -23,7 +23,7 @@
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '3Gi' }),
+         + p.spec.resources.withRequests({ storage: '5Gi' }),
     service: s.new(
                'esphome',
                { 'app.kubernetes.io/name': 'esphome' },

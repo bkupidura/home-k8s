@@ -10,7 +10,7 @@
         rules: [
           {
             alert: 'BlockyFailedDownload',
-            expr: 'delta(blocky_failed_download_count[10]) > 0',
+            expr: 'delta(blocky_failed_download_count[10m]) > 0',
             labels: { service: 'blocky', severity: 'info' },
             annotations: {
               summary: 'Failed downloads increasing on {{ $labels.pod }}',
@@ -36,7 +36,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'blocky' })
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.dns })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.blocky_dns })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),
@@ -50,10 +50,7 @@
                   },
                 },
                 caching: {
-                  minTime: '1m',
-                  maxTime: '10m',
-                  maxItemsCount: 10240,
-                  cacheTimeNegative: '5m',
+                  maxTime: '-1',
                 },
                 queryLog: {
                   type: 'none',
