@@ -22,16 +22,7 @@
     ],
   },
   authelia: {
-    access_control:: [
-      {
-        order: 100,
-        rule: {
-          domain: std.format('*.%s', std.extVar('secrets').domain),
-          subject: 'group:admin',
-          policy: 'two_factor',
-        },
-      },
-    ],
+    access_control:: [],
     access_control_rendered:: [
       acl.rule
       for acl in std.sort($.authelia.access_control, function(x) x.order)

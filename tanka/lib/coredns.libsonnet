@@ -75,8 +75,24 @@
       $.coredns.forward_snippet % forward
       for forward in std.extVar('secrets').coredns.forward
     ],
+    zone: v1.configMap.new('coredns-zones', {
+            [std.format('%s.db', domain)]: std.extVar('secrets').coredns.zone[domain]
+            for domain in std.objectFields(std.extVar('secrets').coredns.zone)
+          })
+          + v1.configMap.metadata.withNamespace('kube-system'),
+    zone_config_snippet:: |||
+      %(domain)s:53 {
+          errors
+          file /etc/coredns/zones/%(domain)s.db
+      }
+    |||,
+    zone_config:: [
+      $.coredns.zone_config_snippet % { domain: domain }
+      for domain in std.objectFields(std.extVar('secrets').coredns.zone)
+    ],
     config: v1.configMap.new('coredns', {
               Corefile: |||
+                %(zone)s
                 .:53 {
                     errors
                     health
@@ -114,7 +130,7 @@
                         servfail 10s
                     }
                 }
-              ||| % { forwards: std.join('\n', $.coredns.forward_config) },
+              ||| % { forwards: std.join('\n', $.coredns.forward_config), zone: std.join('\n', $.coredns.zone_config) },
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [
@@ -159,6 +175,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'coredns' })
                 + d.configVolumeMount('coredns', '/etc/coredns/', {})
+                + d.configVolumeMount('coredns-zones', '/etc/coredns/zones/', {})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.spec.template.spec.withDnsPolicy('Default')
                 + d.spec.template.spec.withPriorityClassName('system-cluster-critical')

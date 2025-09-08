@@ -24,6 +24,14 @@
               summary: '{{ $value | humanizePercentage }} of queries failing on {{ $labels.pod }}',
             },
           },
+          {
+            alert: 'BlockyDenylistEmpty',
+            expr: 'sum by (pod, group) (blocky_denylist_cache_entries) == 0',
+            labels: { service: 'blocky', severity: 'info' },
+            annotations: {
+              summary: 'Blocky {{ $labels.group }} is empty on {{ $labels.pod }}',
+            },
+          },
         ],
       },
     ],
