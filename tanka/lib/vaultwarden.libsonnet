@@ -18,6 +18,14 @@
               summary: 'Failed login attempts on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
+          {
+            alert: 'VaultwardenDBError',
+            expr: '_time:5m kubernetes__container_name: "vaultwarden" and i("DatabaseError") | stats by (kubernetes__pod_name) count() as log_count | filter log_count :> 0',
+            labels: { service: 'vaultwarden', severity: 'critical' },
+            annotations: {
+              summary: 'Database issues reported on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
         ],
       },
     ],
@@ -30,7 +38,7 @@
           domain: [
             std.format('vaultwarden.%s', std.extVar('secrets').domain),
           ],
-          subject: 'group:admin',
+          subject: 'group:vaultwarden-admin',
           policy: 'two_factor',
         },
       },
