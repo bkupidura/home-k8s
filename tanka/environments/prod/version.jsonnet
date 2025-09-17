@@ -61,7 +61,7 @@
       metrics: 'prom/mysqld-exporter:v0.17.2',
     },
     broker_ha: {
-      image: 'ghcr.io/bkupidura/broker-ha:0.1.20',
+      image: 'ghcr.io/bkupidura/broker-ha:0.1.21',
     },
     zigbee2mqtt: {
       deconz: 'ghcr.io/deconz-community/deconz-docker:2.18.00',
@@ -81,7 +81,7 @@
       image: 'nodered/node-red:4.1.0-22',
     },
     recorder: {
-      image: 'ghcr.io/bkupidura/recorder:2.0.8',
+      image: 'ghcr.io/bkupidura/recorder:2.0.9',
     },
     sms_gammu: {
       image: 'pajikos/sms-gammu-gateway:1.3.0',
@@ -164,7 +164,7 @@
       postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
     },
     dmh: {
-      image: 'ghcr.io/bkupidura/dead-man-hand:0.3.2',
+      image: 'ghcr.io/bkupidura/dead-man-hand:0.3.2.1',
     },
   },
 }
