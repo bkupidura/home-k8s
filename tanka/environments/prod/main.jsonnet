@@ -48,6 +48,7 @@
 (import 'homer.libsonnet') +
 (import 'immich.libsonnet') +
 (import 'dmh.libsonnet') +
+(import 'main-dev.libsonnet') +
 {
   _config:: {
     restore: false,
