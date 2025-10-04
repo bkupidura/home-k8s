@@ -126,6 +126,8 @@
                           PARANOIA: '4',
                           ANOMALY_INBOUND: '5',
                           ANOMALY_OUTBOUND: '4',
+                          MODSEC_REQ_BODY_LIMIT: '20971520',
+                          MODSEC_REQ_BODY_LIMIT_ACTION: 'ProcessPartial',
                           ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE REPORT PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
                         })
                         + c.withVolumeMountsMixin([

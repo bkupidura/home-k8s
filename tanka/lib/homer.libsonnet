@@ -118,6 +118,13 @@
                         url: std.format('https://sonarr.%s', std.extVar('secrets').domain),
                         target: '_blank',
                       },
+                      {
+                        name: 'Jellyfin',
+                        icon: 'fa-solid fa-ticket',
+                        subtitle: 'Media player',
+                        url: std.format('https://jellyfin.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
                     ],
                   },
                   {
