@@ -17,6 +17,22 @@
               summary: 'Some dead-man-hand actions were executed or deleted on {{ $labels.pod }}',
             },
           },
+          {
+            alert: 'DMHActionError',
+            expr: 'delta(dmh_action_errors_total[15m]) > 0',
+            labels: { service: 'dmh', severity: 'warning' },
+            annotations: {
+              summary: 'Dead-man-hand actions errors ({{ $labels.error }}) observed on {{ $labels.pod }} for action {{ $labels.action }}',
+            },
+          },
+          {
+            alert: 'DMHMissingVaultKey',
+            expr: 'delta(dmh_missing_secrets_total[1h]) > 0',
+            labels: { service: 'dmh', severity: 'critical' },
+            annotations: {
+              summary: 'Dead-man-hand detected missing encryption key for {{ $labels.action }} on {{ $labels.pod }}',
+            },
+          },
         ],
       },
     ],

@@ -34,7 +34,7 @@
       chart: '1.8.1',
     },
     restic: {
-      image: 'restic/restic:0.18.0',
+      image: 'restic/restic:0.18.1',
     },
     traefik: {
       chart: '37.0.0',
@@ -164,7 +164,7 @@
       postgres: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.3.0',
     },
     dmh: {
-      image: 'ghcr.io/bkupidura/dead-man-hand:0.3.2.1',
+      image: 'ghcr.io/bkupidura/dead-man-hand:0.3.3',
     },
   },
 }
