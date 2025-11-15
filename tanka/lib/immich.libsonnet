@@ -24,7 +24,7 @@
                 + p.metadata.withNamespace('self-hosted')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
                 + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-                + p.spec.resources.withRequests({ storage: '40Gi' }),
+                + p.spec.resources.withRequests({ storage: '50Gi' }),
     pvc_postgres: p.new('immich-postgres')
                   + p.metadata.withNamespace('self-hosted')
                   + p.spec.withAccessModes(['ReadWriteOnce'])
