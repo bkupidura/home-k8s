@@ -199,7 +199,7 @@
         rules: [
           {
             alert: 'K8sPodErrorsIncreasing',
-            expr: 'k8s:error_logs:5m / avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 1.5 and avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 5',
+            expr: 'k8s:error_logs:5m / avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 2 and avg_over_time(k8s:error_logs:5m[2h] offset 30m) > 20',
             'for': '5m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {

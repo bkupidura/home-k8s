@@ -138,6 +138,13 @@
                         url: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         target: '_blank',
                       },
+                      {
+                        name: 'FreshRSS',
+                        icon: 'fa-solid fa-rss',
+                        subtitle: 'RSS reader',
+                        url: std.format('https://rss.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
                     ],
                   },
                 ],

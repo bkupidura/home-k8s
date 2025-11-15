@@ -6,12 +6,13 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   jellyfin: {
+    update:: $._config.update,
     restore:: $._config.restore,
     pvc: p.new('jellyfin-config')
          + p.metadata.withNamespace('arr')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '3Gi' }),
+         + p.spec.resources.withRequests({ storage: '5Gi' }),
     cronjob_backup: $._custom.cronjob_backup.new('jellyfin', 'arr', '40 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
@@ -53,18 +54,20 @@
                           JELLYFIN_FFmpeg__probesize: '200M',
                         })
                         + c.withImagePullPolicy('IfNotPresent')
-                        + c.resources.withRequests({ memory: '400Mi', cpu: '400m' })
-                        + c.resources.withLimits({ memory: '800Mi', cpu: '800m' })
-                        + c.readinessProbe.httpGet.withPath('/health')
-                        + c.readinessProbe.httpGet.withPort('http')
-                        + c.readinessProbe.withInitialDelaySeconds(10)
-                        + c.readinessProbe.withPeriodSeconds(15)
-                        + c.readinessProbe.withTimeoutSeconds(3)
-                        + c.livenessProbe.httpGet.withPath('/health')
-                        + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(30)
-                        + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(5),
+                        + (if $.jellyfin.update == false then
+                             c.resources.withRequests({ memory: '500Mi', cpu: '400m' })
+                             + c.resources.withLimits({ memory: '1000Mi', cpu: '800m' })
+                             + c.readinessProbe.httpGet.withPath('/health')
+                             + c.readinessProbe.httpGet.withPort('http')
+                             + c.readinessProbe.withInitialDelaySeconds(10)
+                             + c.readinessProbe.withPeriodSeconds(15)
+                             + c.readinessProbe.withTimeoutSeconds(3)
+                             + c.livenessProbe.httpGet.withPath('/health')
+                             + c.livenessProbe.httpGet.withPort('http')
+                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withPeriodSeconds(15)
+                             + c.livenessProbe.withTimeoutSeconds(5)
+                           else {}),
                       ],
                       { 'app.kubernetes.io/name': 'jellyfin' })
                 + d.spec.template.spec.withVolumes([

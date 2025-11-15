@@ -40,6 +40,26 @@
                                                      ]) else {}
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
   },
+  restic_unlock: {
+    [std.format('restic_unlock_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-unlock-%s', repo_name), 'home-infra', '10 */2 * * *', [
+                                                   $.k.core.v1.container.new('unlock', $._version.restic.image)
+                                                   + $.k.core.v1.container.withEnvFrom($.k.core.v1.envFromSource.secretRef.withName(std.format('restic-secrets-%s', repo_name)))
+                                                   + $.k.core.v1.container.withCommand([
+                                                     '/bin/sh',
+                                                     '-ec',
+                                                     std.join('\n', [
+                                                       std.format('restic --repo "%s" unlock', std.extVar('secrets').restic.repo[repo_name].connection),
+                                                     ]),
+                                                   ])
+                                                   + if std.get(std.extVar('secrets').restic.repo[repo_name], 'ssh_key', false) != false then $.k.core.v1.container.withVolumeMounts([
+                                                     $.k.core.v1.volumeMount.new('ssh', '/root/.ssh', false),
+                                                   ]) else {},
+                                                 ])
+                                                 + if std.get(std.extVar('secrets').restic.repo[repo_name], 'ssh_key', false) != false then $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                                                   $.k.core.v1.volume.fromSecret('ssh', std.format('restic-ssh-%s', repo_name)) + $.k.core.v1.volume.secret.withDefaultMode(256),
+                                                 ]) else {}
+    for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
+  },
   multus_dhcp_lan: {
     apiVersion: 'k8s.cni.cncf.io/v1',
     kind: 'NetworkAttachmentDefinition',

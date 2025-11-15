@@ -79,7 +79,7 @@
                           PAPERLESS_OCR_USER_ARGS: '{"invalidate_digital_signatures": true}',
                           PAPERLESS_TASK_WORKERS: '1',
                           PAPERLESS_THREADS_PER_WORKER: '1',
-                          PAPERLESS_EMAIL_TASK_CRON: 'disable',
+                          PAPERLESS_EMAIL_TASK_CRON: '*/10 * * * *',
                         })
                         + c.resources.withRequests({ memory: '1024Mi', cpu: '300m' })
                         + c.resources.withLimits({ memory: '1500Mi', cpu: '500m' })

@@ -26,10 +26,18 @@
           },
           {
             alert: 'NUTBatteryFailure',
-            expr: 'network_ups_tools_ups_status{flag="RB|HB"} == 1',
+            expr: 'network_ups_tools_ups_status{flag=~"RB|HB"} == 1',
             labels: { service: 'nut', severity: 'critical' },
             annotations: {
               summary: 'Battery failure, replace UPS batteries in {{ $labels.param_ups }}',
+            },
+          },
+          {
+            alert: 'NUTAlarm',
+            expr: 'network_ups_tools_ups_status{flag="ALARM"} == 1',
+            labels: { service: 'nut', severity: 'critical' },
+            annotations: {
+              summary: 'UPS reporting alarm {{ $labels.param_ups }}',
             },
           },
           {
@@ -113,7 +121,7 @@
                         + c.resources.withLimits({ memory: '16Mi' })
                         + c.securityContext.withPrivileged(true)
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-usb-hiddev0', '/dev/usb/hiddev0', false),
+                          v1.volumeMount.new('dev-bus-usb-001-004', '/dev/bus/usb/001/004', false),
                         ])
                         + c.readinessProbe.tcpSocket.withPort('nut')
                         + c.readinessProbe.withInitialDelaySeconds(30)
@@ -151,7 +159,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-usb-hiddev0', '/dev/usb/hiddev0') + v1.volume.hostPath.withType('CharDevice'))
+                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-bus-usb-001-004', '/dev/bus/usb/001/004') + v1.volume.hostPath.withType('CharDevice'))
                 + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ ups_controller: 'true' })

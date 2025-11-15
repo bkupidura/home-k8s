@@ -95,7 +95,7 @@
                         + c.readinessProbe.withTimeoutSeconds(1)
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')
-                        + c.livenessProbe.withInitialDelaySeconds(120)
+                        + c.livenessProbe.withInitialDelaySeconds(180)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(3),
                       ],
