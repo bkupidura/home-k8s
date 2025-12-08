@@ -174,6 +174,14 @@
                        v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
                        { name: 'workdir', emptyDir: {} },
                      ]),
+    cronjob_check: $._custom.cronjob.new('mariadb-check', 'home-infra', '45 * * * *', [
+                       $.k.core.v1.container.new('check', $._version.mariadb.image)
+                       + $.k.core.v1.container.withCommand([
+                         '/bin/sh',
+                         '-ec',
+                         std.format('mariadb-check --host=mariadb.home-infra --user=root --password="%s" --check --all-databases | grep -i "error" && RC=1 || RC=0; exit $RC', std.extVar('secrets').mariadb.password),
+                       ]),
+                     ]),
     init: v1.configMap.new('mariadb-init', {
             'init.sql': std.strReplace(|||
               CREATE DATABASE homeassistant CHARACTER SET utf8mb4;

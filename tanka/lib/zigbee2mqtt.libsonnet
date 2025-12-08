@@ -105,6 +105,6 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ zigbee_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(30),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(60),
   },
 }
