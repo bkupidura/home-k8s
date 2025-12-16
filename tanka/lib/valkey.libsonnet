@@ -124,7 +124,11 @@
                      v1.servicePort.withPort(6379) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('valkey'),
                    ])
              + s.metadata.withNamespace('home-infra')
-             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' }),
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'valkey' })
+             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.valkey })
+             + s.spec.withType('LoadBalancer')
+             + s.spec.withExternalTrafficPolicy('Local')
+             + s.spec.withPublishNotReadyAddresses(false),
     config: v1.configMap.new('valkey-config', {
               'valkey.conf': |||
                 port 6379
