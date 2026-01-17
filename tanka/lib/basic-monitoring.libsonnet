@@ -180,7 +180,7 @@
             'for': '30m',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {
-              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 90% of HV total memory',
+              summary: 'PODs running on {{ $labels.kubernetes_io_hostname }} have higher memory limits than 100% of HV total memory',
             },
           },
           {
