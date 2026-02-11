@@ -52,7 +52,7 @@
           },
           {
             alert: 'SystemOOMKill',
-            expr: 'delta(node_vmstat_oom_kill[30m]) > 1',
+            expr: 'changes(node_vmstat_oom_kill[30m]) > 2',
             'for': '1m',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
@@ -356,7 +356,7 @@
           },
           {
             alert: 'K8sPodsRestarts',
-            expr: 'delta(kube_pod_container_status_restarts_total[2h]) > 2',
+            expr: 'delta(kube_pod_container_status_restarts_total[2h]) > 3',
             'for': '1m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {

@@ -171,8 +171,8 @@
                                ])
                                + c.securityContext.withPrivileged(true)
                                + (if $.immich.update == false then
-                                    c.resources.withRequests({ cpu: '300m', memory: '500M' })
-                                    + c.resources.withLimits({ cpu: '500m', memory: '1G' })
+                                    c.resources.withRequests({ cpu: '250m', memory: '600M' })
+                                    + c.resources.withLimits({ cpu: '400m', memory: '1000M' })
                                     + c.livenessProbe.httpGet.withPath('/api/server/ping')
                                     + c.livenessProbe.httpGet.withPort('http')
                                     + c.livenessProbe.withInitialDelaySeconds(90)

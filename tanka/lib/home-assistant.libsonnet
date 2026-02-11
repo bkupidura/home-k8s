@@ -62,8 +62,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         }) + (if $.home_assistant.update == false then
-                                c.resources.withRequests({ memory: '640Mi', cpu: '300m' })
-                                + c.resources.withLimits({ memory: '640Mi', cpu: '300m' })
+                                c.resources.withRequests({ memory: '800Mi', cpu: '300m' })
+                                + c.resources.withLimits({ memory: '800Mi', cpu: '300m' })
                                 + c.readinessProbe.tcpSocket.withPort('http')
                                 + c.readinessProbe.withInitialDelaySeconds(30)
                                 + c.readinessProbe.withPeriodSeconds(15)

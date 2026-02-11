@@ -167,7 +167,7 @@
                         + c.livenessProbe.withInitialDelaySeconds(10)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(1),
-                        c.new('metrics', $._version.valkey.metrics)
+                        c.new('valkey-metrics', $._version.valkey.metrics)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9121, 'metrics'))
                         + c.withEnvMap({

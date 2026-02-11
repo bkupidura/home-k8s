@@ -136,7 +136,7 @@
                           '-ec',
                           std.join('\n', ['sleep 30', std.format('/usr/bin/upscmd -u admin -p "%s" apc@127.0.0.1 beeper.disable', std.extVar('secrets').nut.admin)]),
                         ]),
-                        c.new('exporter', $._version.nut.metrics)
+                        c.new('network-ups-tools-exporter', $._version.nut.metrics)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9199, 'metrics'))
                         + c.withEnvMap({

@@ -52,8 +52,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         }) + (if $.nextcloud.update == false then
-                                c.resources.withRequests({ memory: '512Mi', cpu: '500m' })
-                                + c.resources.withLimits({ memory: '768Mi', cpu: '700m' })
+                                c.resources.withRequests({ memory: '200M', cpu: '400m' })
+                                + c.resources.withLimits({ memory: '300M', cpu: '600m' })
                                 + c.readinessProbe.tcpSocket.withPort('http')
                                 + c.readinessProbe.withInitialDelaySeconds(10)
                                 + c.readinessProbe.withPeriodSeconds(10)
@@ -65,14 +65,14 @@
                                 + c.livenessProbe.withPeriodSeconds(10)
                                 + c.livenessProbe.withTimeoutSeconds(3)
                               else {}),
-                        c.new('cron', $._version.nextcloud.image)
+                        c.new('nextcloud-cron', $._version.nextcloud.image)
                         + c.withCommand([
                           '/cron.sh',
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
                         + (if $.nextcloud.update == false then
-                             c.resources.withRequests({ memory: '128Mi' })
-                             + c.resources.withLimits({ memory: '196Mi' })
+                             c.resources.withRequests({ memory: '150M' })
+                             + c.resources.withLimits({ memory: '300M' })
                              + c.livenessProbe.exec.withCommand([
                                '/bin/bash',
                                '-ec',
