@@ -300,7 +300,7 @@
                              + c.livenessProbe.withPeriodSeconds(15)
                              + c.livenessProbe.withTimeoutSeconds(2)
                            else {}),
-                        c.new('metrics', $._version.mariadb.metrics)
+                        c.new('mariadb-metrics', $._version.mariadb.metrics)
                         + c.withArgs([
                           '--config.my-cnf',
                           '/config/my.cnf',

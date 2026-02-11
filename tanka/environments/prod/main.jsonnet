@@ -5,25 +5,25 @@
 (import 'secret.libsonnet') +
 (import 'storage.libsonnet') +
 (import 'basic-monitoring.libsonnet') +
-(import 'authelia.libsonnet') +
-(import 'victoriametrics.libsonnet') +
-(import 'truenas.libsonnet') +
-(import 'victorialogs.libsonnet') +
 (import 'coredns.libsonnet') +
-(import 'reloader.libsonnet') +
-(import 'kubernetes-descheduler.libsonnet') +
 (import 'kubernetes-reflector.libsonnet') +
+(import 'kubernetes-descheduler.libsonnet') +
+(import 'reloader.libsonnet') +
 (import 'metallb.libsonnet') +
-(import 'chrony.libsonnet') +
+(import 'cert-manager.libsonnet') +
+(import 'authelia.libsonnet') +
 (import 'traefik.libsonnet') +
 (import 'longhorn.libsonnet') +
+(import 'registry.libsonnet') +
+(import 'chrony.libsonnet') +
 (import 'democratic-csi.libsonnet') +
-(import 'mariadb.libsonnet') +
-(import 'debugpod.libsonnet') +
-(import 'blocky.libsonnet') +
-(import 'cert-manager.libsonnet') +
+(import 'victoriametrics.libsonnet') +
+(import 'victorialogs.libsonnet') +
 (import 'nut.libsonnet') +
 (import 'waf.libsonnet') +
+(import 'mariadb.libsonnet') +
+(import 'valkey.libsonnet') +
+(import 'blocky.libsonnet') +
 (import 'broker-ha.libsonnet') +
 (import 'grafana.libsonnet') +
 (import 'unifi.libsonnet') +
@@ -34,10 +34,8 @@
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
 (import 'vaultwarden.libsonnet') +
-(import 'valkey.libsonnet') +
 (import 'nextcloud.libsonnet') +
 (import 'freshrss.libsonnet') +
-(import 'registry.libsonnet') +
 (import 'paperless.libsonnet') +
 (import 'arr.libsonnet') +
 (import 'radarr.libsonnet') +
@@ -48,6 +46,8 @@
 (import 'homer.libsonnet') +
 (import 'immich.libsonnet') +
 (import 'dmh.libsonnet') +
+(import 'debugpod.libsonnet') +
+(import 'truenas.libsonnet') +
 (import 'main-dev.libsonnet') +
 {
   _config:: {

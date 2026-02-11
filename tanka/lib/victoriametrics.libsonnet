@@ -244,12 +244,6 @@
                     target_label: '__address__',
                     replacement: 'kubernetes.default.svc:443',
                   },
-                  {
-                    source_labels: ['__meta_kubernetes_node_name'],
-                    regex: '(.+)',
-                    target_label: '__metrics_path__',
-                    replacement: '/api/v1/nodes/$1/proxy/metrics',
-                  },
                 ],
               },
               {
@@ -263,20 +257,15 @@
                 kubernetes_sd_configs: [
                   { role: 'node' },
                 ],
+                metrics_path: '/metrics/cadvisor',
                 relabel_configs: [
                   {
                     action: 'labelmap',
                     regex: '__meta_kubernetes_node_label_(.+)',
                   },
                   {
-                    target_label: '__address__',
-                    replacement: 'kubernetes.default.svc:443',
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_node_name'],
-                    regex: '(.+)',
-                    target_label: '__metrics_path__',
-                    replacement: '/api/v1/nodes/$1/proxy/metrics/cadvisor',
+                    source_labels: ['__metrics_path__'],
+                    target_label: 'metrics_path',
                   },
                 ],
               },
@@ -627,8 +616,8 @@
       configmapReload: {
         enabled: true,
         resources: {
-          requests: { memory: '16Mi' },
-          limits: { memory: '32Mi' },
+          requests: { memory: '30Mi' },
+          limits: { memory: '70Mi' },
         },
       },
       podAnnotations: {
