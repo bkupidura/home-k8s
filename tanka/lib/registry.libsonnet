@@ -10,7 +10,7 @@
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '10Gi' }),
+         + p.spec.resources.withRequests({ storage: '20Gi' }),
     service: s.new(
                'registry',
                { 'app.kubernetes.io/name': 'registry' },
@@ -34,6 +34,24 @@
       '\n',
       ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
     )], 'registry'),
+    cronjob_cleanup: $._custom.cronjob.new('registry-cleanup', 'home-infra', '10 20,12 * * *', [
+                       $.k.core.v1.container.new('cleanup', $._version.registry.image)
+                       + $.k.core.v1.container.withVolumeMounts([
+                         $.k.core.v1.volumeMount.new('registry', '/var/lib/registry', false),
+                       ])
+                       + $.k.core.v1.container.withCommand([
+                         '/bin/sh',
+                         '-ec',
+                         std.join('\n', ['registry garbage-collect /etc/distribution/config.yml --delete-untagged']),
+                       ]),
+                     ])
+                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('registry', 'registry')])
+                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
+                       $.k.core.v1.podAffinityTerm.withTopologyKey('kubernetes.io/hostname')
+                       + $.k.core.v1.podAffinityTerm.labelSelector.withMatchExpressions(
+                         { key: 'app.kubernetes.io/name', operator: 'In', values: ['registry'] }
+                       )
+                     ),
     deployment: d.new('registry',
                       if $.registry.restore then 0 else 1,
                       [

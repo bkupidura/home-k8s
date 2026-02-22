@@ -27,15 +27,6 @@ def var_restic_host_set(data):
     return True
 
 
-def restic_image_set(data):
-    for container in data["spec"]["jobTemplate"]["spec"]["template"]["spec"][
-        "containers"
-    ]:
-        if not container["image"].startswith("restic/restic:"):
-            raise SchemaError(f"wrong image {container['image']} used")
-    return True
-
-
 class Validator(ValidatorBase):
     def __init__(self, *args, **kwargs):
         super(Validator, self).__init__(*args, **kwargs)
@@ -144,7 +135,31 @@ class Validator(ValidatorBase):
                     },
                     {
                         "name": "restic_image",
-                        "schema": Schema(restic_image_set),
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "jobTemplate": {
+                                        "spec": {
+                                            "template": {
+                                                "spec": {
+                                                    "containers": [
+                                                        {
+                                                            "image": And(
+                                                                str,
+                                                                lambda x: x.startswith(
+                                                                    "restic/restic:"
+                                                                ),
+                                                            ),
+                                                        },
+                                                    ],
+                                                }
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
                     },
                 ],
             },

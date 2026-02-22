@@ -161,6 +161,32 @@ class Validator(ValidatorBase):
                         ),
                     },
                     {
+                        "name": "local_registry",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "containers": [
+                                                {
+                                                    "image": And(
+                                                        str,
+                                                        lambda x: x.startswith(
+                                                            self.global_conf[
+                                                                "registry_domain"
+                                                            ]
+                                                        ),
+                                                    ),
+                                                },
+                                            ],
+                                        },
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
                         "name": "selector_match_labels",
                         "schema": Schema(
                             And(

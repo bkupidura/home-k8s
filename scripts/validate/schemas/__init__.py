@@ -2,8 +2,9 @@ from schema import SchemaError
 
 
 class ValidatorBase(object):
-    def __init__(self, conf):
+    def __init__(self, conf, global_conf):
         self.conf = conf
+        self.global_conf = global_conf
 
     def run_checks(self, manifest):
         errors = list()

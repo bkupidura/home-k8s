@@ -22,20 +22,26 @@ with open(args.config_file, "r") as f:
 
 validator_mapping = {
     "Deployment": schema_deployment.Validator(
-        config["validators"].get("deployment", dict())
+        config["validators"].get("deployment", dict()), config["global"]
     ),
     "IngressRoute": schema_ingress_route.Validator(
-        config["validators"].get("ingress_route", dict())
+        config["validators"].get("ingress_route", dict()), config["global"]
     ),
     "DaemonSet": schema_daemonset.Validator(
-        config["validators"].get("daemonset", dict())
+        config["validators"].get("daemonset", dict()), config["global"]
     ),
-    "Service": schema_service.Validator(config["validators"].get("service", dict())),
-    "CronJob": schema_cron_job.Validator(config["validators"].get("cron_job", dict())),
+    "Service": schema_service.Validator(
+        config["validators"].get("service", dict()), config["global"]
+    ),
+    "CronJob": schema_cron_job.Validator(
+        config["validators"].get("cron_job", dict()), config["global"]
+    ),
     "StatefulSet": schema_statefulset.Validator(
-        config["validators"].get("statefulset", dict())
+        config["validators"].get("statefulset", dict()), config["global"]
     ),
-    "Pod": schema_pod.Validator(config["validators"].get("pod", dict())),
+    "Pod": schema_pod.Validator(
+        config["validators"].get("pod", dict()), config["global"]
+    ),
 }
 
 k8s_definitions = yaml.safe_load_all(sys.stdin)
