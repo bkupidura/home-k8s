@@ -25,8 +25,8 @@
             limits: { cpu: '75m', memory: '64Mi' },
           },
           image: {
-            repository: $._version.metallb.controller.repo,
-            tag: $._version.metallb.controller.tag,
+            repository: std.splitLimitR($._version.metallb.controller, ':', 1)[0],
+            tag: std.splitLimitR($._version.metallb.controller, ':', 1)[1],
           },
         },
         speaker: {
@@ -34,8 +34,8 @@
             limits: { cpu: '75m', memory: '90M' },
           },
           image: {
-            repository: $._version.metallb.speaker.repo,
-            tag: $._version.metallb.speaker.tag,
+            repository: std.splitLimitR($._version.metallb.speaker, ':', 1)[0],
+            tag: std.splitLimitR($._version.metallb.speaker, ':', 1)[1],
           },
           podAnnotations: {
             'prometheus.io/port': '7473',

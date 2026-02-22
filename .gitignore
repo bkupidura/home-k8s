@@ -3,6 +3,7 @@ pocs/*
 tanka/vendor/*
 tanka/environments/dev/*
 tanka/lib/*-dev.libsonnet
+scripts/manage-images/manage-images
 .DS_Store
 venv/*
 __pycache__

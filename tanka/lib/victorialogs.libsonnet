@@ -81,6 +81,10 @@
       resources: {
         limits: { memory: '64Mi', cpu: '50m' },
       },
+      image: {
+        repository: std.splitLimitR($._version.fluentbit.image, ':', 1)[0],
+        tag: std.splitLimitR($._version.fluentbit.image, ':', 1)[1],
+      },
     }),
   },
   victoria_logs: {
@@ -99,6 +103,11 @@
                 + p.spec.resources.withRequests({ storage: '10Gi' }),
     helm_server: $._custom.helm.new('victoria-logs-single', 'victoria-logs-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.logs.chart, 'monitoring', {
       server: {
+        image: {
+          registry: $._version.victoria_metrics.logs.registry,
+          repository: $._version.victoria_metrics.logs.repository,
+          tag: $._version.victoria_metrics.logs.tag,
+        },
         enabled: true,
         retentionPeriod: '4w',
         resources: {
@@ -114,6 +123,11 @@
     helm_alert: $._custom.helm.new('victoria-logs-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,
+        image: {
+          registry: $._version.victoria_metrics.alert.registry,
+          repository: $._version.victoria_metrics.alert.repository,
+          tag: $._version.victoria_metrics.alert.tag,
+        },
         resources: {
           requests: { memory: '25Mi' },
           limits: { memory: '50Mi' },

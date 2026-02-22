@@ -35,8 +35,8 @@
       controller: {
         driver: {
           image: {
-            registry: 'docker.io/democraticcsi/democratic-csi',
-            tag: $._version.democratic_csi.tag,
+            registry: std.splitLimitR($._version.democratic_csi.image, ':', 1)[0],
+            tag: std.splitLimitR($._version.democratic_csi.image, ':', 1)[1],
             pullPolicy: 'IfNotPresent',
           },
           resources: {
@@ -102,8 +102,8 @@
       node: {
         driver: {
           image: {
-            registry: 'docker.io/democraticcsi/democratic-csi',
-            tag: $._version.democratic_csi.tag,
+            registry: std.splitLimitR($._version.democratic_csi.image, ':', 1)[0],
+            tag: std.splitLimitR($._version.democratic_csi.image, ':', 1)[1],
             pullPolicy: 'IfNotPresent',
           },
           resources: {
@@ -180,8 +180,8 @@
       controller: {
         driver: {
           image: {
-            registry: 'docker.io/democraticcsi/democratic-csi',
-            tag: $._version.democratic_csi.tag,
+            registry: std.splitLimitR($._version.democratic_csi.image, ':', 1)[0],
+            tag: std.splitLimitR($._version.democratic_csi.image, ':', 1)[1],
             pullPolicy: 'IfNotPresent',
           },
           resources: {
@@ -247,8 +247,8 @@
       node: {
         driver: {
           image: {
-            registry: 'docker.io/democraticcsi/democratic-csi',
-            tag: $._version.democratic_csi.tag,
+            registry: std.splitLimitR($._version.democratic_csi.image, ':', 1)[0],
+            tag: std.splitLimitR($._version.democratic_csi.image, ':', 1)[1],
             pullPolicy: 'IfNotPresent',
           },
           resources: {

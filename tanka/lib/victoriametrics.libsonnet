@@ -131,6 +131,11 @@
     helm_alert: $._custom.helm.new('victoria-metrics-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,
+        image: {
+          registry: $._version.victoria_metrics.alert.registry,
+          repository: $._version.victoria_metrics.alert.repository,
+          tag: $._version.victoria_metrics.alert.tag,
+        },
         resources: {
           requests: { memory: '25Mi' },
           limits: { memory: '50Mi' },
@@ -169,6 +174,11 @@
     helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {
       server: {
         enabled: true,
+        image: {
+          registry: $._version.victoria_metrics.server.registry,
+          repository: $._version.victoria_metrics.server.repository,
+          tag: $._version.victoria_metrics.server.tag,
+        },
         extraArgs: {
           'promscrape.suppressDuplicateScrapeTargetErrors': true,
           'search.minStalenessInterval': '5m',
@@ -576,6 +586,11 @@
       },
     }),
     helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
+      image: {
+        registry: $._version.blackbox_exporter.registry,
+        repository: $._version.blackbox_exporter.repository,
+        tag: $._version.blackbox_exporter.tag,
+      },
       securityContext: {
         capabilities: {
           drop: ['ALL'],
@@ -602,6 +617,10 @@
       },
     }),
     helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', {
+      image: {
+        repository: std.splitLimitR($._version.alertmanager.image, ':', 1)[0],
+        tag: std.splitLimitR($._version.alertmanager.image, ':', 1)[1],
+      },
       resources: {
         requests: { memory: '32Mi' },
         limits: { memory: '64Mi' },
@@ -615,6 +634,10 @@
       },
       configmapReload: {
         enabled: true,
+        image: {
+          repository: std.splitLimitR($._version.alertmanager.reloader, ':', 1)[0],
+          tag: std.splitLimitR($._version.alertmanager.reloader, ':', 1)[1],
+        },
         resources: {
           requests: { memory: '30Mi' },
           limits: { memory: '70Mi' },
@@ -681,12 +704,22 @@
       },
     }),
     helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
+      image: {
+        registry: $._version.kube_state_metrics.registry,
+        repository: $._version.kube_state_metrics.repository,
+        tag: $._version.kube_state_metrics.tag,
+      },
       resources: {
         requests: { memory: '64Mi' },
         limits: { memory: '128Mi' },
       },
     }),
     helm_node_exporter: $._custom.helm.new('prometheus-node-exporter', 'prometheus-node-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.node_exporter.chart, 'monitoring', {
+      image: {
+        registry: $._version.node_exporter.registry,
+        repository: $._version.node_exporter.repository,
+        tag: $._version.node_exporter.tag,
+      },
       resources: {
         requests: { memory: '32Mi' },
         limits: { memory: '64Mi' },
