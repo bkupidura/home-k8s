@@ -162,7 +162,7 @@
                         + c.resources.withLimits({ memory: '128Mi' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
-                        + c.securityContext.capabilities.withAdd('NET_BIND_SERVICE')
+                        + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/ready')
                         + c.readinessProbe.httpGet.withPort(8181)

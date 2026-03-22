@@ -57,6 +57,9 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)

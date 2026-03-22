@@ -132,6 +132,7 @@
                   disable: false,
                 },
                 server: {
+                  disable_healthcheck: true,
                   buffers: {
                     read: 16384,
                     write: 16384,
@@ -155,6 +156,10 @@
                         })
                         + c.resources.withRequests({ memory: '196Mi', cpu: '80m' })
                         + c.resources.withLimits({ memory: '196Mi', cpu: '80m' })
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID'])
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.livenessProbe.httpGet.withPath('/healthz')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)

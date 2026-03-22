@@ -41,10 +41,8 @@
                       [
                         c.new('jellyfin', $._version.jellyfin.image)
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
                           v1.volumeMount.new('jellyfin-cache', '/cache', false),
                         ])
-                        + c.securityContext.withPrivileged(true)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts([
                           v1.containerPort.newNamed(8096, 'http'),
@@ -54,24 +52,29 @@
                           JELLYFIN_FFmpeg__probesize: '200M',
                         })
                         + c.withImagePullPolicy('IfNotPresent')
-                        + (if $.jellyfin.update == false then
-                             c.resources.withRequests({ memory: '500Mi', cpu: '400m' })
-                             + c.resources.withLimits({ memory: '1000Mi', cpu: '800m' })
-                             + c.readinessProbe.httpGet.withPath('/health')
-                             + c.readinessProbe.httpGet.withPort('http')
-                             + c.readinessProbe.withInitialDelaySeconds(10)
-                             + c.readinessProbe.withPeriodSeconds(15)
-                             + c.readinessProbe.withTimeoutSeconds(3)
-                             + c.livenessProbe.httpGet.withPath('/health')
-                             + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(30)
-                             + c.livenessProbe.withPeriodSeconds(15)
-                             + c.livenessProbe.withTimeoutSeconds(5)
-                           else {}),
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
+                        + (
+                          if $.jellyfin.update == false then
+                            c.resources.withRequests({ memory: '500Mi', cpu: '400m' })
+                            + c.resources.withLimits({ memory: '1000Mi', cpu: '800m', 'squat.ai/video-dri': 1 })
+                            + c.readinessProbe.httpGet.withPath('/health')
+                            + c.readinessProbe.httpGet.withPort('http')
+                            + c.readinessProbe.withInitialDelaySeconds(10)
+                            + c.readinessProbe.withPeriodSeconds(15)
+                            + c.readinessProbe.withTimeoutSeconds(3)
+                            + c.livenessProbe.httpGet.withPath('/health')
+                            + c.livenessProbe.httpGet.withPort('http')
+                            + c.livenessProbe.withInitialDelaySeconds(30)
+                            + c.livenessProbe.withPeriodSeconds(15)
+                            + c.livenessProbe.withTimeoutSeconds(5)
+                          else
+                            c.resources.withLimits({ 'squat.ai/video-dri': 1 })
+                        ),
                       ],
                       { 'app.kubernetes.io/name': 'jellyfin' })
                 + d.spec.template.spec.withVolumes([
-                  v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'),
                   v1.volume.fromEmptyDir('jellyfin-cache', emptyDir={ sizeLimit: '15Gi' }),
                 ])
                 + d.pvcVolumeMount('jellyfin-config', '/config', false, {})

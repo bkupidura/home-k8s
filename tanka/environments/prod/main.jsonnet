@@ -16,6 +16,7 @@
 (import 'longhorn.libsonnet') +
 (import 'registry.libsonnet') +
 (import 'chrony.libsonnet') +
+(import 'generic-device-plugin.libsonnet') +
 (import 'democratic-csi.libsonnet') +
 (import 'victoriametrics.libsonnet') +
 (import 'victorialogs.libsonnet') +

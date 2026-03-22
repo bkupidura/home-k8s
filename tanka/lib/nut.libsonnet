@@ -112,16 +112,19 @@
                         + c.withCommand([
                           '/bin/sh',
                           '-ec',
-                          std.join('\n', ['mkdir /var/run/nut', '/usr/sbin/upsdrvctl -u root start', '/usr/sbin/upsd -u nut -F']),
+                          std.join('\n', ['sleep 3', 'mkdir /var/run/nut || true', '/usr/sbin/upsdrvctl -u root start', '/usr/sbin/upsd -u nut -F']),
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '8Mi' })
-                        + c.resources.withLimits({ memory: '16Mi' })
-                        + c.securityContext.withPrivileged(true)
+                        + c.resources.withLimits({ memory: '16Mi', 'squat.ai/ups': 1 })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID', 'CHOWN'])
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-bus-usb-001-004', '/dev/bus/usb/001/004', false),
+                          v1.volumeMount.new('var-run', '/var/run', false),
                         ])
                         + c.readinessProbe.tcpSocket.withPort('nut')
                         + c.readinessProbe.withInitialDelaySeconds(30)
@@ -144,6 +147,9 @@
                           NUT_EXPORTER_PASSWORD: std.extVar('secrets').nut.admin,
                           NUT_EXPORTER_VARIABLES: 'battery.charge,battery.voltage,battery.voltage.nominal,input.voltage,input.voltage.nominal,ups.load,ups.status,battery.runtime',
                         })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.resources.withRequests({ memory: '8Mi' })
                         + c.resources.withLimits({ memory: '16Mi' })
                         + c.readinessProbe.httpGet.withPath('/metrics')
@@ -159,7 +165,9 @@
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-bus-usb-001-004', '/dev/bus/usb/001/004') + v1.volume.hostPath.withType('CharDevice'))
+                + d.spec.template.spec.withVolumes([
+                  v1.volume.fromEmptyDir('var-run', emptyDir={ sizeLimit: '1M' }),
+                ])
                 + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ ups_controller: 'true' })

@@ -30,7 +30,7 @@ class Validator(ValidatorBase):
                             {
                                 "spec": {
                                     "updateStrategy": {
-                                        "type": And(str, lambda x: x == "Recreate"),
+                                        "type": And(str, lambda x: x == "OnDelete"),
                                     },
                                 },
                             },
@@ -282,7 +282,36 @@ class Validator(ValidatorBase):
                         ),
                     },
                     {
-                        "name": "capabilities_add_missing",
+                        "name": "capabilities_drop_not_set",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "containers": [
+                                                Schema(
+                                                    {
+                                                        "securityContext": {
+                                                            "capabilities": {
+                                                                "drop": lambda x: any(
+                                                                    y.lower() == "all"
+                                                                    for y in x
+                                                                ),
+                                                            }
+                                                        }
+                                                    },
+                                                    ignore_extra_keys=True,
+                                                ),
+                                            ],
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "allow_privilege_escalation_false",
                         "schema": Schema(
                             {
                                 "spec": {
@@ -292,9 +321,39 @@ class Validator(ValidatorBase):
                                                 Schema(
                                                     {
                                                         Optional("securityContext"): {
-                                                            Optional("capabilities"): {
-                                                                Forbidden("add"): [str],
-                                                            }
+                                                            Optional(
+                                                                "allowPrivilegeEscalation"
+                                                            ): And(
+                                                                bool,
+                                                                lambda x: x is False,
+                                                            ),
+                                                        }
+                                                    },
+                                                    ignore_extra_keys=True,
+                                                ),
+                                            ],
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "read_only_root_true",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "containers": [
+                                                Schema(
+                                                    {
+                                                        "securityContext": {
+                                                            "readOnlyRootFilesystem": And(
+                                                                bool,
+                                                                lambda x: x is True,
+                                                            ),
                                                         }
                                                     },
                                                     ignore_extra_keys=True,

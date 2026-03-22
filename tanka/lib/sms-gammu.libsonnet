@@ -21,11 +21,10 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '25Mi' })
-                        + c.resources.withLimits({ memory: '50Mi' })
-                        + c.securityContext.withPrivileged(true)
-                        + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-ttyusb0', '/dev/mobile', false),
-                        ])
+                        + c.resources.withLimits({ memory: '50Mi', 'squat.ai/mobile': 1 })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.livenessProbe.httpGet.withPath('/signal')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
@@ -34,7 +33,6 @@
                       ],
                       { 'app.kubernetes.io/name': 'sms-gammu' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-ttyusb0', '/dev/ttyUSB0') + v1.volume.hostPath.withType('CharDevice'))
                 + d.secretVolumeMount('sms-gammu-secret', '/sms-gw/credentials.txt', 256, $.k.core.v1.volumeMount.withSubPath('credentials.txt'))
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ modem_controller: 'true' })

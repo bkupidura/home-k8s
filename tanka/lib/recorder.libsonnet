@@ -116,10 +116,12 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '128Mi' })
-                        + c.resources.withLimits({ memory: '512Mi' })
-                        + c.securityContext.withPrivileged(true)
+                        + c.resources.withLimits({ memory: '512Mi', 'squat.ai/video-dri': 1 })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
+                          v1.volumeMount.new('tmp', '/tmp', false),
                         ])
                         + c.readinessProbe.httpGet.withPath('/ready')
                         + c.readinessProbe.httpGet.withPort(8080)
@@ -134,7 +136,9 @@
                       ],
                       { 'app.kubernetes.io/name': 'recorder' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'))
+                + d.spec.template.spec.withVolumes([
+                  v1.volume.fromEmptyDir('tmp', emptyDir={ sizeLimit: '1G' }),
+                ])
                 + d.configVolumeMount('recorder-config', '/config/', {})
                 + d.secretVolumeMount('recorder-secret', '/secret/', 256, {})
                 + d.pvcVolumeMount('recorder', '/data', false, {})
