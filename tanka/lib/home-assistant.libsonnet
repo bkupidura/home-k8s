@@ -61,19 +61,22 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                        }) + (if $.home_assistant.update == false then
-                                c.resources.withRequests({ memory: '800Mi', cpu: '300m' })
-                                + c.resources.withLimits({ memory: '800Mi', cpu: '300m' })
-                                + c.readinessProbe.tcpSocket.withPort('http')
-                                + c.readinessProbe.withInitialDelaySeconds(30)
-                                + c.readinessProbe.withPeriodSeconds(15)
-                                + c.readinessProbe.withTimeoutSeconds(2)
-                                + c.livenessProbe.httpGet.withPath('/healthz')
-                                + c.livenessProbe.httpGet.withPort('http')
-                                + c.livenessProbe.withInitialDelaySeconds(120)
-                                + c.livenessProbe.withPeriodSeconds(15)
-                                + c.livenessProbe.withTimeoutSeconds(5)
-                              else {}),
+                        })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.capabilities.withDrop('all')
+                        + (if $.home_assistant.update == false then
+                             c.resources.withRequests({ memory: '800Mi', cpu: '300m' })
+                             + c.resources.withLimits({ memory: '800Mi', cpu: '300m' })
+                             + c.readinessProbe.tcpSocket.withPort('http')
+                             + c.readinessProbe.withInitialDelaySeconds(30)
+                             + c.readinessProbe.withPeriodSeconds(15)
+                             + c.readinessProbe.withTimeoutSeconds(2)
+                             + c.livenessProbe.httpGet.withPath('/healthz')
+                             + c.livenessProbe.httpGet.withPort('http')
+                             + c.livenessProbe.withInitialDelaySeconds(120)
+                             + c.livenessProbe.withPeriodSeconds(15)
+                             + c.livenessProbe.withTimeoutSeconds(5)
+                           else {}),
                       ],
                       { 'app.kubernetes.io/name': 'home-assistant' })
                 + d.pvcVolumeMount('home-assistant', '/config', false, {})

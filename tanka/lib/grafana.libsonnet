@@ -68,6 +68,8 @@
                         ])
                         + c.resources.withRequests({ memory: '128Mi' })
                         + c.resources.withLimits({ memory: '256Mi' })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/api/health')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(20)

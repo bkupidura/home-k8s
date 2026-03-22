@@ -279,7 +279,13 @@
                           v1.volumeMount.new('mariadb-init', '/docker-entrypoint-initdb.d/', true),
                           v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                           v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
+                          v1.volumeMount.new('tmp', '/tmp', false),
+                          v1.volumeMount.new('run-mysqld', '/run/mysqld', false),
                         ])
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['DAC_OVERRIDE', 'SETUID', 'SETGID', 'CHOWN'])
+                        + c.securityContext.capabilities.withDrop('all')
                         + (if $.mariadb.update == false then
                              c.resources.withRequests({ cpu: '300m', memory: '768Mi' })
                              + c.resources.withLimits({ cpu: '300m', memory: '768Mi' })
@@ -320,6 +326,9 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('mariadb-exporter-config', '/config/', true),
                         ])
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withDrop('all')
                         + (if $.mariadb.update == false then
                              c.resources.withRequests({ cpu: '150m', memory: '15Mi' })
                              + c.resources.withLimits({ cpu: '300m', memory: '30Mi' })
@@ -342,6 +351,8 @@
                   v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
                   v1.volume.fromConfigMap('mariadb-exporter-config', 'mariadb-exporter-config'),
                   v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
+                  v1.volume.fromEmptyDir('tmp', emptyDir={ sizeLimit: '1G' }),
+                  v1.volume.fromEmptyDir('run-mysqld', emptyDir={ sizeLimit: '1M' }),
                 ])
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')

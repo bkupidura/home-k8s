@@ -166,27 +166,28 @@
                                  IMMICH_TELEMETRY_INCLUDE: 'all',
                                  IMMICH_PORT: '2283',
                                })
-                               + c.withVolumeMounts([
-                                 v1.volumeMount.new('dev-dri-renderd128', '/dev/dri/renderD128', false),
-                               ])
-                               + c.securityContext.withPrivileged(true)
-                               + (if $.immich.update == false then
-                                    c.resources.withRequests({ cpu: '250m', memory: '600M' })
-                                    + c.resources.withLimits({ cpu: '400m', memory: '1000M' })
-                                    + c.livenessProbe.httpGet.withPath('/api/server/ping')
-                                    + c.livenessProbe.httpGet.withPort('http')
-                                    + c.livenessProbe.withInitialDelaySeconds(90)
-                                    + c.livenessProbe.withPeriodSeconds(10)
-                                    + c.livenessProbe.withTimeoutSeconds(2)
-                                    + c.readinessProbe.httpGet.withPath('/api/server/ping')
-                                    + c.readinessProbe.httpGet.withPort('http')
-                                    + c.readinessProbe.withInitialDelaySeconds(30)
-                                    + c.readinessProbe.withPeriodSeconds(10)
-                                    + c.readinessProbe.withTimeoutSeconds(2)
-                                  else {}),
+                               + c.securityContext.withAllowPrivilegeEscalation(false)
+                               + c.securityContext.withReadOnlyRootFilesystem(true)
+                               + c.securityContext.capabilities.withDrop('all')
+                               + (
+                                 if $.immich.update == false then
+                                   c.resources.withRequests({ cpu: '250m', memory: '600M' })
+                                   + c.resources.withLimits({ cpu: '400m', memory: '1000M', 'squat.ai/video-dri': 1 })
+                                   + c.livenessProbe.httpGet.withPath('/api/server/ping')
+                                   + c.livenessProbe.httpGet.withPort('http')
+                                   + c.livenessProbe.withInitialDelaySeconds(90)
+                                   + c.livenessProbe.withPeriodSeconds(10)
+                                   + c.livenessProbe.withTimeoutSeconds(2)
+                                   + c.readinessProbe.httpGet.withPath('/api/server/ping')
+                                   + c.readinessProbe.httpGet.withPort('http')
+                                   + c.readinessProbe.withInitialDelaySeconds(30)
+                                   + c.readinessProbe.withPeriodSeconds(10)
+                                   + c.readinessProbe.withTimeoutSeconds(2)
+                                 else
+                                   c.resources.withLimits({ 'squat.ai/video-dri': 1 })
+                               ),
                              ],
                              { 'app.kubernetes.io/name': 'immich' })
-                       + d.spec.template.spec.withVolumes(v1.volume.fromHostPath('dev-dri-renderd128', '/dev/dri/renderD128') + v1.volume.hostPath.withType('CharDevice'))
                        + d.spec.template.spec.withNodeSelector({ video_processing: 'true' })
                        + d.pvcVolumeMount('immich-data', '/usr/src/app/upload', false, {})
                        + d.spec.strategy.withType('Recreate')
@@ -214,7 +215,12 @@
                                  + c.withVolumeMounts([
                                    v1.volumeMount.new('immich-postgres-config', '/etc/postgresql', true),
                                    v1.volumeMount.new('immich-postgres', '/var/lib/postgresql/data', false),
+                                   v1.volumeMount.new('var-run', '/var/run', false),
                                  ])
+                                 + c.securityContext.withAllowPrivilegeEscalation(false)
+                                 + c.securityContext.withReadOnlyRootFilesystem(true)
+                                 + c.securityContext.capabilities.withAdd(['DAC_OVERRIDE', 'FOWNER', 'SETUID', 'SETGID', 'CHOWN'])
+                                 + c.securityContext.capabilities.withDrop('all')
                                  + (if $.immich.update == false then
                                       c.resources.withRequests({ cpu: '200m', memory: '200M' })
                                       + c.resources.withLimits({ cpu: '350m', memory: '300M' })
@@ -243,6 +249,7 @@
                          + d.spec.template.spec.withVolumes([
                            v1.volume.fromConfigMap('immich-postgres-config', 'immich-postgres-config'),
                            v1.volume.fromPersistentVolumeClaim('immich-postgres', 'immich-postgres'),
+                           v1.volume.fromEmptyDir('var-run', emptyDir={ sizeLimit: '1M' }),
                          ])
                          + d.spec.strategy.withType('Recreate')
                          + d.metadata.withNamespace('self-hosted')

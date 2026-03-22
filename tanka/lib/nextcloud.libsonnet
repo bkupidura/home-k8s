@@ -51,25 +51,42 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                        }) + (if $.nextcloud.update == false then
-                                c.resources.withRequests({ memory: '200M', cpu: '400m' })
-                                + c.resources.withLimits({ memory: '300M', cpu: '600m' })
-                                + c.readinessProbe.tcpSocket.withPort('http')
-                                + c.readinessProbe.withInitialDelaySeconds(10)
-                                + c.readinessProbe.withPeriodSeconds(10)
-                                + c.readinessProbe.withTimeoutSeconds(1)
-                                + c.livenessProbe.httpGet.withPath('/status.php')
-                                + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
-                                + c.livenessProbe.httpGet.withPort('http')
-                                + c.livenessProbe.withInitialDelaySeconds(30)
-                                + c.livenessProbe.withPeriodSeconds(10)
-                                + c.livenessProbe.withTimeoutSeconds(3)
-                              else {}),
+                        })
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('nextcloud', '/var/www/html', false),
+                          v1.volumeMount.new('tmp', '/tmp', false),
+                          v1.volumeMount.new('var-run', '/var/run', false),
+                        ])
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE', 'SETUID', 'SETGID'])
+                        + c.securityContext.capabilities.withDrop('all')
+                        + (if $.nextcloud.update == false then
+                             c.resources.withRequests({ memory: '200M', cpu: '400m' })
+                             + c.resources.withLimits({ memory: '300M', cpu: '600m' })
+                             + c.readinessProbe.tcpSocket.withPort('http')
+                             + c.readinessProbe.withInitialDelaySeconds(10)
+                             + c.readinessProbe.withPeriodSeconds(10)
+                             + c.readinessProbe.withTimeoutSeconds(1)
+                             + c.livenessProbe.httpGet.withPath('/status.php')
+                             + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
+                             + c.livenessProbe.httpGet.withPort('http')
+                             + c.livenessProbe.withInitialDelaySeconds(30)
+                             + c.livenessProbe.withPeriodSeconds(10)
+                             + c.livenessProbe.withTimeoutSeconds(3)
+                           else {}),
                         c.new('nextcloud-cron', $._version.nextcloud.image)
                         + c.withCommand([
                           '/cron.sh',
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
+                        + c.withVolumeMounts([
+                          v1.volumeMount.new('nextcloud', '/var/www/html', false),
+                        ])
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['SETUID', 'SETGID'])
+                        + c.securityContext.capabilities.withDrop('all')
                         + (if $.nextcloud.update == false then
                              c.resources.withRequests({ memory: '150M' })
                              + c.resources.withLimits({ memory: '300M' })
@@ -84,7 +101,11 @@
                            else {}),
                       ],
                       { 'app.kubernetes.io/name': 'nextcloud' })
-                + d.pvcVolumeMount('nextcloud', '/var/www/html/', false, {})
+                + d.spec.template.spec.withVolumes([
+                  v1.volume.fromPersistentVolumeClaim('nextcloud', 'nextcloud'),
+                  v1.volume.fromEmptyDir('var-run', emptyDir={ sizeLimit: '1M' }),
+                  v1.volume.fromEmptyDir('tmp', emptyDir={ sizeLimit: '10G' }),
+                ])
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
                 + d.metadata.withNamespace('self-hosted'),

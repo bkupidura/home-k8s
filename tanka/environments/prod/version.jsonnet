@@ -6,11 +6,11 @@
     chrony: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/chrony:31012026',
-          destination: std.format('registry.%s/chrony:31012026', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/chrony:17032026',
+          destination: std.format('registry.%s/chrony:17032026', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/chrony:31012026', std.extVar('secrets').domain),
+      image: std.format('registry.%s/chrony:17032026', std.extVar('secrets').domain),
     },
     ubuntu: {
       cache: [
@@ -427,6 +427,15 @@
         },
       ],
       image: std.format('registry.%s/dead-man-hand:0.3.4', std.extVar('secrets').domain),
+    },
+    generic_device_plugin: {
+      cache: [
+        {
+          source: 'squat/generic-device-plugin:29ddd00',
+          destination: std.format('registry.%s/generic-device-plugin:29ddd00', std.extVar('secrets').domain),
+        },
+      ],
+      image: std.format('registry.%s/generic-device-plugin:29ddd00', std.extVar('secrets').domain),
     },
   },
 }

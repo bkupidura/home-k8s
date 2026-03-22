@@ -81,8 +81,11 @@
                           PAPERLESS_THREADS_PER_WORKER: '1',
                           PAPERLESS_EMAIL_TASK_CRON: '*/10 * * * *',
                         })
-                        + c.resources.withRequests({ memory: '1024Mi', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '1500Mi', cpu: '500m' })
+                        + c.resources.withRequests({ memory: '700M', cpu: '300m' })
+                        + c.resources.withLimits({ memory: '1000M', cpu: '400m' })
+                        + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.capabilities.withAdd(['CHOWN', 'SETUID', 'SETGID', 'DAC_OVERRIDE'])
+                        + c.securityContext.capabilities.withDrop('all')
                         + (if $.paperless.update == false then
                              c.readinessProbe.tcpSocket.withPort('http')
                              + c.readinessProbe.withInitialDelaySeconds(10)
@@ -90,7 +93,7 @@
                              + c.readinessProbe.withTimeoutSeconds(1)
                              + c.livenessProbe.httpGet.withPath('/')
                              + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(120)
+                             + c.livenessProbe.withInitialDelaySeconds(180)
                              + c.livenessProbe.withPeriodSeconds(10)
                              + c.livenessProbe.withTimeoutSeconds(3)
                            else {}),
