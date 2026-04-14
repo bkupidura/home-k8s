@@ -185,6 +185,14 @@ func image_sync(v *Versions) error {
 		for _, cache := range version.Cache {
 			log.Printf("syncing image for service %s: %s -> %s", service, cache.Source, cache.Destination)
 
+			srcTagSlice := strings.Split(cache.Source, ":")
+			dstTagSlice := strings.Split(cache.Destination, ":")
+
+			if srcTagSlice[len(srcTagSlice)-1] != dstTagSlice[len(dstTagSlice)-1] {
+				log.Printf("error: source tag doesn't match destination tag")
+				continue
+			}
+
 			exists, err := image_exists(cache.Destination)
 			if err != nil {
 				log.Printf("error checking destination %s for service %s: %v", cache.Destination, service, err)

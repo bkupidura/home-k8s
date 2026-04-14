@@ -58,23 +58,26 @@
                           v1.volumeMount.new('var-run', '/var/run', false),
                         ])
                         + c.securityContext.withAllowPrivilegeEscalation(false)
-                        + c.securityContext.withReadOnlyRootFilesystem(true)
-                        + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE', 'SETUID', 'SETGID'])
+                        + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE', 'SETUID', 'SETGID', 'DAC_OVERRIDE', 'CHOWN'])
                         + c.securityContext.capabilities.withDrop('all')
-                        + (if $.nextcloud.update == false then
-                             c.resources.withRequests({ memory: '200M', cpu: '400m' })
-                             + c.resources.withLimits({ memory: '300M', cpu: '600m' })
-                             + c.readinessProbe.tcpSocket.withPort('http')
-                             + c.readinessProbe.withInitialDelaySeconds(10)
-                             + c.readinessProbe.withPeriodSeconds(10)
-                             + c.readinessProbe.withTimeoutSeconds(1)
-                             + c.livenessProbe.httpGet.withPath('/status.php')
-                             + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
-                             + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(30)
-                             + c.livenessProbe.withPeriodSeconds(10)
-                             + c.livenessProbe.withTimeoutSeconds(3)
-                           else {}),
+                        + (
+                          if $.nextcloud.update == false then
+                            c.resources.withRequests({ memory: '300M', cpu: '400m' })
+                            + c.resources.withLimits({ memory: '400M', cpu: '600m' })
+                            + c.readinessProbe.tcpSocket.withPort('http')
+                            + c.readinessProbe.withInitialDelaySeconds(10)
+                            + c.readinessProbe.withPeriodSeconds(10)
+                            + c.readinessProbe.withTimeoutSeconds(1)
+                            + c.livenessProbe.httpGet.withPath('/status.php')
+                            + c.livenessProbe.httpGet.withHttpHeaders(v1.httpHeader.withName('Host') + v1.httpHeader.withValue(std.format('files.%s', std.extVar('secrets').domain)))
+                            + c.livenessProbe.httpGet.withPort('http')
+                            + c.livenessProbe.withInitialDelaySeconds(30)
+                            + c.livenessProbe.withPeriodSeconds(10)
+                            + c.livenessProbe.withTimeoutSeconds(3)
+                            + c.securityContext.withReadOnlyRootFilesystem(true)
+                          else
+                            {}
+                        ),
                         c.new('nextcloud-cron', $._version.nextcloud.image)
                         + c.withCommand([
                           '/cron.sh',
