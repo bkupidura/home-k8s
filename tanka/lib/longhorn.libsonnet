@@ -109,11 +109,6 @@
         concurrentAutomaticEngineUpgradePerNodeLimit: 1,
         orphanAutoDeletion: true,
       },
-      image: {
-        longhorn: {
-          instanceManager: { tag: 'v1.11.0-hotfix-1' },
-        },
-      },
       annotations: {
         'prometheus.io/scrape': 'true',
         'prometheus.io/port': '9500',

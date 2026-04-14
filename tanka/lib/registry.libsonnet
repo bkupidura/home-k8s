@@ -60,8 +60,8 @@
                         + c.withEnvMap({
                           REGISTRY_STORAGE_DELETE_ENABLED: 'true',
                         })
-                        + c.resources.withRequests({ memory: '64Mi', cpu: '10m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '30m' })
+                        + c.resources.withRequests({ memory: '100M', cpu: '20m' })
+                        + c.resources.withLimits({ memory: '200M', cpu: '100m' })
                         + c.withPorts(v1.containerPort.newNamed(5000, 'http'))
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
@@ -69,8 +69,8 @@
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
-                        + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(2),
+                        + c.livenessProbe.withPeriodSeconds(30)
+                        + c.livenessProbe.withTimeoutSeconds(3),
                       ],
                       { 'app.kubernetes.io/name': 'registry' })
                 + d.pvcVolumeMount('registry', '/var/lib/registry', false, {})
