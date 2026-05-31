@@ -54,6 +54,7 @@
         kind: 'Rule',
         match: std.format('Host(`auth.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'authelia', port: 9091 }],
+        middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     config: v1.configMap.new('authelia-config', {

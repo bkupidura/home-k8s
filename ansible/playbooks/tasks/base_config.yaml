@@ -10,7 +10,7 @@
 
 - name: Get orchestrator time
   set_fact:
-    orch_date: "{{ ansible_date_time }}"
+    orch_date: "{{ ansible_facts['date_time'] }}"
   delegate_to: localhost
   delegate_facts: true
 
@@ -21,7 +21,7 @@
     masked: false
     state: started
   become: true
-  when: ((hostvars['localhost'].orch_date.epoch|int - ansible_date_time.epoch|int) | abs) > 5
+  when: ((hostvars['localhost'].orch_date.epoch|int - ansible_facts['date_time'].epoch|int) | abs) > 5
 
 - name: Update /etc/hosts
   lineinfile:

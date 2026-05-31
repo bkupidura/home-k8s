@@ -30,9 +30,10 @@
                   log: { level: 'info' },
                   'auth.generic_oauth': {
                     allow_sign_up: true,
-                    api_url: 'http://authelia.home-infra:9091/api/oidc/userinfo',
-                    token_url: 'http://authelia.home-infra:9091/api/oidc/token',
+                    api_url: std.format('https://auth.%s/api/oidc/userinfo', std.extVar('secrets').domain),
+                    token_url: std.format('https://auth.%s/api/oidc/token', std.extVar('secrets').domain),
                     auth_url: std.format('https://auth.%s/api/oidc/authorization', std.extVar('secrets').domain),
+                    auth_style: 'InHeader',
                     client_id: 'grafana',
                     client_secret: std.extVar('secrets').grafana.oidc.client_secret,
                     enabled: true,
@@ -66,8 +67,8 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
                         ])
-                        + c.resources.withRequests({ memory: '128Mi' })
-                        + c.resources.withLimits({ memory: '256Mi' })
+                        + c.resources.withRequests({ memory: '150M' })
+                        + c.resources.withLimits({ memory: '300M' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/api/health')

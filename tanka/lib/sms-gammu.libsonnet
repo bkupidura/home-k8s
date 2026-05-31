@@ -21,7 +21,7 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '25Mi' })
-                        + c.resources.withLimits({ memory: '50Mi', 'squat.ai/mobile': 1 })
+                        + c.resources.withLimits({ memory: '50Mi', 'devic.es/mobile': 1 })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withDrop('all')

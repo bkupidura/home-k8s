@@ -116,7 +116,7 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '128Mi' })
-                        + c.resources.withLimits({ memory: '512Mi', 'squat.ai/video-dri': 1 })
+                        + c.resources.withLimits({ memory: '512Mi', 'devic.es/video-dri': 1 })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withDrop('all')

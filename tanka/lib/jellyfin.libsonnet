@@ -58,7 +58,7 @@
                         + (
                           if $.jellyfin.update == false then
                             c.resources.withRequests({ memory: '500Mi', cpu: '400m' })
-                            + c.resources.withLimits({ memory: '1000Mi', cpu: '800m', 'squat.ai/video-dri': 1 })
+                            + c.resources.withLimits({ memory: '1000Mi', cpu: '800m', 'devic.es/video-dri': 1 })
                             + c.readinessProbe.httpGet.withPath('/health')
                             + c.readinessProbe.httpGet.withPort('http')
                             + c.readinessProbe.withInitialDelaySeconds(10)
@@ -70,7 +70,7 @@
                             + c.livenessProbe.withPeriodSeconds(15)
                             + c.livenessProbe.withTimeoutSeconds(5)
                           else
-                            c.resources.withLimits({ 'squat.ai/video-dri': 1 })
+                            c.resources.withLimits({ 'devic.es/video-dri': 1 })
                         ),
                       ],
                       { 'app.kubernetes.io/name': 'jellyfin' })

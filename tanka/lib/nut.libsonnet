@@ -118,7 +118,7 @@
                           TZ: $._config.tz,
                         })
                         + c.resources.withRequests({ memory: '8Mi' })
-                        + c.resources.withLimits({ memory: '16Mi', 'squat.ai/ups': 1 })
+                        + c.resources.withLimits({ memory: '16Mi', 'devic.es/ups': 1 })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID', 'CHOWN'])

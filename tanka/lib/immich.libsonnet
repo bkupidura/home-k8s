@@ -171,8 +171,8 @@
                                + c.securityContext.capabilities.withDrop('all')
                                + (
                                  if $.immich.update == false then
-                                   c.resources.withRequests({ cpu: '250m', memory: '600M' })
-                                   + c.resources.withLimits({ cpu: '400m', memory: '1000M', 'squat.ai/video-dri': 1 })
+                                   c.resources.withRequests({ cpu: '250m', memory: '700M' })
+                                   + c.resources.withLimits({ cpu: '400m', memory: '1400M', 'devic.es/video-dri': 1 })
                                    + c.livenessProbe.httpGet.withPath('/api/server/ping')
                                    + c.livenessProbe.httpGet.withPort('http')
                                    + c.livenessProbe.withInitialDelaySeconds(90)
@@ -184,7 +184,7 @@
                                    + c.readinessProbe.withPeriodSeconds(10)
                                    + c.readinessProbe.withTimeoutSeconds(2)
                                  else
-                                   c.resources.withLimits({ 'squat.ai/video-dri': 1 })
+                                   c.resources.withLimits({ 'devic.es/video-dri': 1 })
                                ),
                              ],
                              { 'app.kubernetes.io/name': 'immich' })

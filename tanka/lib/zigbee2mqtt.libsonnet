@@ -54,7 +54,7 @@
                                            std.format('/usr/bin/GCFFlasher_internal -f %s -d /dev/ttyACM0', $._version.zigbee2mqtt.firmware),
                                          ]),
                                        ])
-                                       + c.resources.withLimits({ 'squat.ai/zigbee': 1 }),
+                                       + c.resources.withLimits({ 'devic.es/zigbee': 1 }),
                                      ])
                                      + $.k.batch.v1.cronJob.spec.withSuspend(true)
                                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAntiAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
@@ -80,7 +80,7 @@
                           ZIGBEE2MQTT_DATA: '/app/data',
                         })
                         + c.resources.withRequests({ memory: '150Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '150Mi', cpu: '50m', 'squat.ai/zigbee': 1 })
+                        + c.resources.withLimits({ memory: '150Mi', cpu: '50m', 'devic.es/zigbee': 1 })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withDrop('all')

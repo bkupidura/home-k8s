@@ -35,7 +35,7 @@
                          std.manifestYamlDoc({
                            name: 'ups',
                            groups: [
-                             { paths: [{ path: '/dev/bus/usb/001/004', mountPath: '/dev/bus/usb/001/004' }] },
+                             { paths: [{ path: '/dev/bus/usb/001/002', mountPath: '/dev/bus/usb/001/002' }] },
                            ],
                          }),
                          '--device',
