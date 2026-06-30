@@ -23,7 +23,7 @@
     config: v1.configMap.new('grafana-config', {
               'grafana.ini': std.manifestIni({
                 sections: {
-                  server: { domain: std.format('grafana.%s', std.extVar('secrets').domain), root_url: 'https://%(domain)s/' },
+                  server: { domain: std.format('grafana.%s', std.extVar('secrets').domain), root_url: 'https://%(domain)s/', enable_gzip: false },
                   security: { allow_embedding: true },
                   database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana', password: std.extVar('secrets').grafana.db.password },
                   auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
@@ -67,8 +67,8 @@
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
                         ])
-                        + c.resources.withRequests({ memory: '150M' })
-                        + c.resources.withLimits({ memory: '300M' })
+                        + c.resources.withRequests({ memory: '100M' })
+                        + c.resources.withLimits({ memory: '250M' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/api/health')

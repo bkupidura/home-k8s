@@ -12,7 +12,7 @@
   },
   secret_restic_ssh: {
     [std.format('restic_ssh_%s', repo_name)]: $.k.core.v1.secret.new(std.format('restic-ssh-%s', repo_name), {
-                                                id_rsa: std.base64(std.extVar('secrets').restic.repo[repo_name].ssh_key),
+                                                id_ed25519: std.base64(std.extVar('secrets').restic.repo[repo_name].ssh_key),
                                                 config: std.base64(std.extVar('secrets').restic.repo[repo_name].ssh_config),
                                               })
                                               + $.k.core.v1.secret.metadata.withNamespace('kube-system')

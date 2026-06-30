@@ -120,8 +120,8 @@
                     }
                 }
                 .:5302 {
-                    forward . tls://1.1.1.1 tls://1.0.0.1 {
-                         tls_servername cloudflare-dns.com
+                    forward . tls://194.242.2.2 {
+                        tls_servername dns.mullvad.net
                     }
                     cache 600 . {
                         success 3000

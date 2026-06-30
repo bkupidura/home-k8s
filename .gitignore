@@ -6,4 +6,5 @@ tanka/lib/*-dev.libsonnet
 scripts/manage-images/manage-images
 .DS_Store
 venv/*
+ideas/*
 __pycache__

@@ -58,7 +58,7 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          CRON_MIN: '*/20',
+                          CRON_MIN: '*/30',
                           TRUSTED_PROXY: $._config.network.kubernetes,
                         })
                         + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })

@@ -225,7 +225,7 @@
           },
           {
             alert: 'K8sVolumeUsageHigh',
-            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (kubelet_volume_stats_capacity_bytes < 10*1024*1024*1024) > 0.90',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-apiservers"} / (kubelet_volume_stats_capacity_bytes < 10*1024*1024*1024) > 0.90',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -234,7 +234,7 @@
           },
           {
             alert: 'K8sVolumeUsageHigh',
-            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (10*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes < 100*1024*1024*1024) > 0.95',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-apiservers"} / (10*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes < 100*1024*1024*1024) > 0.95',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -243,7 +243,7 @@
           },
           {
             alert: 'K8sVolumeUsageHigh',
-            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-nodes"} / (100*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes) > 0.99',
+            expr: 'kubelet_volume_stats_used_bytes{job="kubernetes-apiservers"} / (100*1024*1024*1024 <= kubelet_volume_stats_capacity_bytes) > 0.99',
             'for': '10m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
@@ -252,7 +252,7 @@
           },
           {
             alert: 'K8sVolumeUsageLow',
-            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes", persistentvolumeclaim!="valkey"}[15m]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-nodes"}[2h] offset 1h)',
+            expr: 'avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-apiservers", persistentvolumeclaim!="valkey"}[15m]) * 2 < avg_over_time(kubelet_volume_stats_used_bytes{job="kubernetes-apiservers"}[2h] offset 1h)',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
               summary: 'Volume for PVC {{ $labels.persistentvolumeclaim }} is using less than 50% of storage used in last 2h. Possible data loss.',

@@ -88,7 +88,7 @@
                      ),
     config: v1.configMap.new('recorder-config', {
               'config.yml': std.manifestYamlDoc({
-                ssh: { user: std.extVar('secrets').recorder.user, key: '/secret/id_rsa', server: std.extVar('secrets').recorder.server },
+                ssh: { user: std.extVar('secrets').recorder.user, key: '/secret/id_ed25519', server: std.extVar('secrets').recorder.server },
                 upload: { workers: 4, timeout: 60, max_errors: 30 },
                 record: { workers: 4, input_args: { rtsp_transport: 'tcp' }, output_args: { 'c:a': 'aac', 'c:v': 'copy' } },
                 convert: {
@@ -100,7 +100,7 @@
             })
             + v1.configMap.metadata.withNamespace('smart-home'),
     secret: $.k.core.v1.secret.new('recorder-secret', {
-              id_rsa: std.base64(std.extVar('secrets').recorder.key),
+              id_ed25519: std.base64(std.extVar('secrets').recorder.key),
             })
             + $.k.core.v1.secret.metadata.withNamespace('smart-home'),
     service: s.new('recorder', { 'app.kubernetes.io/name': 'recorder' }, [v1.servicePort.withPort(8080) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('recorder')])

@@ -287,73 +287,10 @@
                 kubernetes_sd_configs: [
                   { role: 'endpoints' },
                 ],
+                bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
                 relabel_configs: [
                   {
                     source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_scrape'],
-                    action: 'keep',
-                    regex: true,
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_scrape_slow'],
-                    action: 'drop',
-                    regex: true,
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_scheme'],
-                    action: 'replace',
-                    target_label: '__scheme__',
-                    regex: '(https?)',
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_path'],
-                    action: 'replace',
-                    target_label: '__metrics_path__',
-                    regex: '(.+)',
-                  },
-                  {
-                    source_labels: ['__address__', '__meta_kubernetes_service_annotation_prometheus_io_port'],
-                    action: 'replace',
-                    target_label: '__address__',
-                    regex: '(.+?)(?::\\d+)?;(\\d+)',
-                    replacement: '${1}:${2}',
-                  },
-                  {
-                    action: 'labelmap',
-                    regex: '__meta_kubernetes_service_annotation_prometheus_io_param_(.+)',
-                    replacement: '__param_${1}',
-                  },
-                  {
-                    action: 'labelmap',
-                    regex: '__meta_kubernetes_service_label_(.+)',
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_namespace'],
-                    action: 'replace',
-                    target_label: 'namespace',
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_service_name'],
-                    action: 'replace',
-                    target_label: 'service',
-                  },
-                  {
-                    source_labels: ['__meta_kubernetes_pod_node_name'],
-                    action: 'replace',
-                    target_label: 'node',
-                  },
-                ],
-              },
-              {
-                job_name: 'kubernetes-service-endpoints-slow',
-                honor_labels: true,
-                scrape_interval: '5m',
-                scrape_timeout: '30s',
-                kubernetes_sd_configs: [
-                  { role: 'endpoints' },
-                ],
-                relabel_configs: [
-                  {
-                    source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_scrape_slow'],
                     action: 'keep',
                     regex: true,
                   },
@@ -412,6 +349,7 @@
                 kubernetes_sd_configs: [
                   { role: 'service' },
                 ],
+                bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
                 relabel_configs: [
                   {
                     source_labels: ['__meta_kubernetes_service_annotation_prometheus_io_probe'],
@@ -445,11 +383,16 @@
                 ],
               },
               {
-                job_name: 'kubernetes-pods',
+                job_name: 'kubernetes-pods-insecure',
                 honor_labels: true,
                 kubernetes_sd_configs: [
                   { role: 'pod' },
                 ],
+                scheme: 'https',
+                tls_config: {
+                  insecure_skip_verify: true,
+                },
+                bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
                 relabel_configs: [
                   {
                     source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scrape'],
@@ -457,8 +400,8 @@
                     regex: true,
                   },
                   {
-                    source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow'],
-                    action: 'drop',
+                    source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_insecure_skip_verify'],
+                    action: 'keep',
                     regex: true,
                   },
                   {
@@ -517,17 +460,21 @@
                 ],
               },
               {
-                job_name: 'kubernetes-pods-slow',
+                job_name: 'kubernetes-pods',
                 honor_labels: true,
-                scrape_interval: '5m',
-                scrape_timeout: '30s',
                 kubernetes_sd_configs: [
                   { role: 'pod' },
                 ],
+                bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token',
                 relabel_configs: [
                   {
-                    source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scrape_slow'],
+                    source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_scrape'],
                     action: 'keep',
+                    regex: true,
+                  },
+                  {
+                    source_labels: ['__meta_kubernetes_pod_annotation_prometheus_io_insecure_skip_verify'],
+                    action: 'drop',
                     regex: true,
                   },
                   {
@@ -558,6 +505,11 @@
                     action: 'labelmap',
                     regex: '__meta_kubernetes_pod_annotation_prometheus_io_param_(.+)',
                     replacement: '__param_${1}',
+                  },
+                  {
+                    action: 'labelmap',
+                    regex: '__param_(.+)',
+                    replacement: 'param_${1}',
                   },
                   {
                     action: 'labelmap',

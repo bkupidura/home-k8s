@@ -12,6 +12,14 @@
               summary: 'BGP sessions down on {{ $labels.instance }}',
             },
           },
+          {
+            alert: 'MetalLbLowNumberOfAvailableIP',
+            expr: 'metallb_allocator_ipv4_addresses_in_use_total / metallb_allocator_ipv4_addresses_total * 100 > 75',
+            labels: { service: 'metallb', severity: 'warning' },
+            annotations: {
+              summary: 'MetalLB is ussing more than 75% of all available IP addresses for pool {{ $labels.pool }}',
+            },
+          },
         ],
       },
     ],
@@ -28,6 +36,17 @@
             repository: std.splitLimitR($._version.metallb.controller, ':', 1)[0],
             tag: std.splitLimitR($._version.metallb.controller, ':', 1)[1],
           },
+          podAnnotations: {
+            'prometheus.io/insecure_skip_verify': 'true',
+          },
+        },
+        frrk8s: {
+          enabled: true,
+        },
+        'frr-k8s': {
+          prometheus: {
+            scrapeAnnotations: true,
+          },
         },
         speaker: {
           resources: {
@@ -38,9 +57,8 @@
             tag: std.splitLimitR($._version.metallb.speaker, ':', 1)[1],
           },
           podAnnotations: {
-            'prometheus.io/port': '7473',
+            'prometheus.io/insecure_skip_verify': 'true',
           },
-          frr: { enabled: true },
         },
         prometheus: { scrapeAnnotations: true },
       }
