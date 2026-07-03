@@ -171,7 +171,7 @@
         },
       },
     }),
-    helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {
+    helm_server_values_secret: $._custom.helm.valuesSecret('victoria-metrics-single-values', {
       server: {
         enabled: true,
         image: {
@@ -537,6 +537,7 @@
         },
       },
     }),
+    helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {}, 'victoria-metrics-single-values'),
     helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
       image: {
         registry: $._version.blackbox_exporter.registry,
@@ -568,7 +569,7 @@
         },
       },
     }),
-    helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', {
+    helm_alertmanager_values_secret: $._custom.helm.valuesSecret('alertmanager-values', {
       image: {
         repository: std.splitLimitR($._version.alertmanager.image, ':', 1)[0],
         tag: std.splitLimitR($._version.alertmanager.image, ':', 1)[1],
@@ -655,6 +656,7 @@
         ],
       },
     }),
+    helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', {}, 'alertmanager-values'),
     helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
       image: {
         registry: $._version.kube_state_metrics.registry,
@@ -687,17 +689,17 @@
              + p.spec.resources.withRequests({ storage: '50Mi' }),
     cronjob_backup: $._custom.cronjob_backup.new('dmh-victoria-metrics', 'monitoring', '10 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'dmh-victoria-metrics'),
     cronjob_restore: $._custom.cronjob_restore.new('dmh-victoria-metrics', 'monitoring', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'dmh-victoria-metrics'),
     service: s.new('dmh-victoria-metrics', { 'app.kubernetes.io/name': 'dmh-victoria-metrics' }, [v1.servicePort.withPort(8080) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('monitoring')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'dmh-victoria-metrics' }),
-    config: v1.configMap.new('dmh-victoria-metrics-config', {
-              'config.yaml': std.manifestYamlDoc({
+    config: v1.secret.new('dmh-victoria-metrics-config', {
+              'config.yaml': std.base64(std.manifestYamlDoc({
                 components: ['dmh', 'vault'],
                 state: { file: '/data/state.json' },
                 vault: { file: '/data/vault.json', key: std.extVar('secrets').dmh.vault.key },
@@ -718,9 +720,9 @@
                     },
                   },
                 },
-              }),
+              })),
             })
-            + v1.configMap.metadata.withNamespace('monitoring'),
+            + v1.secret.metadata.withNamespace('monitoring'),
     deployment: d.new('dmh-victoria-metrics',
                       if $.victoria_metrics.restore then 0 else 1,
                       [
@@ -750,7 +752,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'dmh-victoria-metrics' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.configVolumeMount('dmh-victoria-metrics-config', '/config/', {})
+                + d.secretVolumeMount('dmh-victoria-metrics-config', '/config/', volumeMountMixin={})
                 + d.pvcVolumeMount('dmh-victoria-metrics', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('monitoring')

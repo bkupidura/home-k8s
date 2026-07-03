@@ -35,11 +35,11 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('zigbee2mqtt', 'smart-home', '00 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'zigbee2mqtt'),
     cronjob_restore: $._custom.cronjob_restore.new('zigbee2mqtt', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'zigbee2mqtt'),
     cronjob_zigbee_firmware_upgrade: $._custom.cronjob.new('zigbee-firmware-upgrade', 'smart-home', '0 0 * * *', [
                                        c.new('upgrade', $._version.zigbee2mqtt.deconz)

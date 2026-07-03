@@ -25,7 +25,7 @@
                 sections: {
                   server: { domain: std.format('grafana.%s', std.extVar('secrets').domain), root_url: 'https://%(domain)s/', enable_gzip: false },
                   security: { allow_embedding: true },
-                  database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana', password: std.extVar('secrets').grafana.db.password },
+                  database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana' },
                   auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
                   log: { level: 'info' },
                   'auth.generic_oauth': {
@@ -35,7 +35,6 @@
                     auth_url: std.format('https://auth.%s/api/oidc/authorization', std.extVar('secrets').domain),
                     auth_style: 'InHeader',
                     client_id: 'grafana',
-                    client_secret: std.extVar('secrets').grafana.oidc.client_secret,
                     enabled: true,
                     name: 'Authelia',
                     role_attribute_path: "contains(groups[*], 'admin') && 'Admin' || 'Viewer'",
@@ -48,6 +47,11 @@
               }),
             })
             + v1.configMap.metadata.withNamespace('monitoring'),
+    secret: v1.secret.new('grafana-secrets', {
+      GF_DATABASE_PASSWORD: std.base64(std.extVar('secrets').grafana.db.password),
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: std.base64(std.extVar('secrets').grafana.oidc.client_secret),
+      GF_SECURITY_ADMIN_PASSWORD: std.base64(std.extVar('secrets').grafana.password),
+    }) + v1.secret.metadata.withNamespace('monitoring'),
     deployment: d.new('grafana',
                       1,
                       [
@@ -61,9 +65,9 @@
                           GF_PATHS_PLUGINS: '/var/lib/grafana/plugins',
                           GF_PATHS_PROVISIONING: '/etc/grafana/provisioning',
                           GF_SECURITY_ADMIN_USER: 'admin',
-                          GF_SECURITY_ADMIN_PASSWORD: std.extVar('secrets').grafana.password,
                           GF_INSTALL_PLUGINS: 'victoriametrics-logs-datasource',
                         })
+                        + c.withEnvFrom(v1.envFromSource.secretRef.withName('grafana-secrets'))
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
                         ])

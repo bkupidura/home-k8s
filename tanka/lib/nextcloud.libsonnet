@@ -35,11 +35,11 @@
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'nextcloud' }),
     cronjob_backup: $._custom.cronjob_backup.new('nextcloud', 'self-hosted', '00 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'nextcloud'),
     cronjob_restore: $._custom.cronjob_restore.new('nextcloud', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'nextcloud'),
     deployment: d.new('nextcloud',
                       if $.nextcloud.restore then 0 else 1,

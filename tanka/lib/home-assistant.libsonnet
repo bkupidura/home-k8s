@@ -40,11 +40,11 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'home-assistant'),
     cronjob_restore: $._custom.cronjob_restore.new('home-assistant', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'home-assistant'),
     service: s.new('home-assistant', { 'app.kubernetes.io/name': 'home-assistant' }, [v1.servicePort.withPort(8123) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')

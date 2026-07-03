@@ -75,7 +75,7 @@
                                               '-ec',
                                               std.join('\n', [
                                                 'cd /data',
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                'restic --verbose backup .',
                                               ]),
                                             ]),
                                           ],
@@ -84,13 +84,13 @@
                                             + c.withVolumeMounts([
                                               v1.volumeMount.new('valkey-data', '/data', false),
                                             ])
+                                            + c.withEnvFrom(v1.envFromSource.secretRef.withName('valkey-secrets'))
                                             + c.withCommand([
                                               '/bin/bash',
                                               '-ec',
                                               std.join('\n', [
                                                 'set -eo pipefail',
                                                 'cd /data',
-                                                std.format('export REDISCLI_AUTH="%s"', std.extVar('secrets').valkey.backup.password),
                                                 'export now=$(date +%d-%m-%YT%H:%M:%S)',
                                                 'mkdir -p backups/backup-${now}',
                                                 'echo dumping all keys',
@@ -116,7 +116,7 @@
                     ),
     cronjob_restore: $._custom.cronjob_restore.new('valkey', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'valkey'),
     service: s.new('valkey',
                    { 'app.kubernetes.io/name': 'valkey' },
@@ -138,10 +138,16 @@
                 save 360 1 60 10
                 appendfsync everysec
                 appendonly yes
-                %(acls)s
-              ||| % { acls: std.join('\n', std.extVar('secrets').valkey.acl) },
+                aclfile /secret/acl.conf
+              |||,
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
+    secret: v1.secret.new('valkey-secrets', {
+              'acl.conf': std.base64(std.join('\n', std.extVar('secrets').valkey.acl)),
+              REDIS_PASSWORD: std.base64(std.extVar('secrets').valkey.exporter.password),
+              REDISCLI_AUTH: std.base64(std.extVar('secrets').valkey.backup.password),
+            })
+            + v1.secret.metadata.withNamespace('home-infra'),
     deployment: d.new('valkey',
                       if $.valkey.restore then 0 else 1,
                       [
@@ -169,14 +175,14 @@
                         + c.livenessProbe.tcpSocket.withPort('valkey')
                         + c.livenessProbe.withInitialDelaySeconds(10)
                         + c.livenessProbe.withPeriodSeconds(10)
-                        + c.livenessProbe.withTimeoutSeconds(1),
+                        + c.livenessProbe.withTimeoutSeconds(1)
+                        + c.withVolumeMounts([v1.volumeMount.new('valkey-secrets', '/secret/acl.conf', true) + v1.volumeMount.withSubPath('acl.conf')]),
                         c.new('valkey-metrics', $._version.valkey.metrics)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9121, 'metrics'))
                         + c.withEnvMap({
                           REDIS_ADDR: 'redis://localhost:6379',
                           REDIS_USER: 'exporter',
-                          REDIS_PASSWORD: std.extVar('secrets').valkey.exporter.password,
                           REDIS_EXPORTER_LOG_FORMAT: 'json',
                           REDIS_EXPORTER_INCL_CONFIG_METRICS: 'false',
                           REDIS_EXPORTER_INCL_SYSTEM_METRICS: 'false',
@@ -184,6 +190,7 @@
                           REDIS_EXPORTER_EXCLUDE_LATENCY_HISTOGRAM_METRICS: 'true',
                           REDIS_EXPORTER_DEBUG: 'false',
                         })
+                        + c.withEnvFrom([v1.envFromSource.secretRef.withName('valkey-secrets')])
                         + c.resources.withRequests({ memory: '10Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '24Mi', cpu: '100m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
@@ -205,6 +212,7 @@
                 + d.pvcVolumeMount('valkey', '/data', false, {})
                 + d.configVolumeMount('valkey-config', '/config/', {})
                 + d.spec.strategy.withType('Recreate')
+                + d.spec.template.spec.withVolumesMixin([v1.volume.fromSecret('valkey-secrets', 'valkey-secrets')])
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',

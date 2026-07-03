@@ -57,11 +57,11 @@
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
-    config: v1.configMap.new('authelia-config', {
-              'users.yml': std.manifestYamlDoc({
+    config: v1.secret.new('authelia-config', {
+              'users.yml': std.base64(std.manifestYamlDoc({
                 users: std.extVar('secrets').authelia.users,
-              }),
-              'configuration.yml': std.manifestYamlDoc(std.mergePatch({
+              })),
+              'configuration.yml': std.base64(std.manifestYamlDoc(std.mergePatch({
                 identity_providers: {
                   oidc: {
                     enable_client_debug_messages: false,
@@ -140,9 +140,9 @@
                   },
                   address: 'tcp://0.0.0.0:9091',
                 },
-              }, std.extVar('secrets').authelia.config)),
+              }, std.extVar('secrets').authelia.config))),
             })
-            + v1.configMap.metadata.withNamespace('home-infra'),
+            + v1.secret.metadata.withNamespace('home-infra'),
     deployment: d.new('authelia',
                       1,
                       [
@@ -169,7 +169,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'authelia' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.configVolumeMount('authelia-config', '/config', {})
+                + d.secretVolumeMount('authelia-config', '/config', volumeMountMixin={})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)

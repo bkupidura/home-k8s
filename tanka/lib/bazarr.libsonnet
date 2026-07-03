@@ -28,11 +28,11 @@
          + p.spec.resources.withRequests({ storage: '1Gi' }),
     cronjob_backup: $._custom.cronjob_backup.new('bazarr', 'arr', '45 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'bazarr-config'),
     cronjob_restore: $._custom.cronjob_restore.new('bazarr', 'arr', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'bazarr-config'),
     ingress_route: $._custom.ingress_route.new('bazarr', 'arr', ['websecure'], [
       {

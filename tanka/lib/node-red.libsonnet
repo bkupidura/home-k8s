@@ -21,11 +21,11 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('node-red', 'smart-home', '55 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'node-red'),
     cronjob_restore: $._custom.cronjob_restore.new('node-red', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'node-red'),
     service: s.new('node-red', { 'app.kubernetes.io/name': 'node-red' }, [v1.servicePort.withPort(1880) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('smart-home')

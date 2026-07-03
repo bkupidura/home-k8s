@@ -28,11 +28,11 @@
          + p.spec.resources.withRequests({ storage: '1Gi' }),
     cronjob_backup: $._custom.cronjob_backup.new('nzbget', 'arr', '35 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'nzbget-config'),
     cronjob_restore: $._custom.cronjob_restore.new('nzbget', 'arr', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'nzbget-config'),
     ingress_route: $._custom.ingress_route.new('nzbget', 'arr', ['websecure'], [
       {

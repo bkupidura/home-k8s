@@ -48,6 +48,14 @@
     service_postgres: s.new('immich-postgres', { 'app.kubernetes.io/name': 'immich-postgres' }, [v1.servicePort.withPort(5432) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('postgres')])
                       + s.metadata.withNamespace('self-hosted')
                       + s.metadata.withLabels({ 'app.kubernetes.io/name': 'immich-postgres' }),
+    secret: v1.secret.new('immich-secrets', {
+      DB_PASSWORD: std.base64(std.extVar('secrets').immich.postgres.password),
+      REDIS_PASSWORD: std.base64(std.extVar('secrets').immich.valkey.password),
+    }) + v1.secret.metadata.withNamespace('self-hosted'),
+    secret_postgres: v1.secret.new('immich-postgres-secrets', {
+      POSTGRES_PASSWORD: std.base64(std.extVar('secrets').immich.postgres.password),
+      PGPASSWORD: std.base64(std.extVar('secrets').immich.postgres.password),
+    }) + v1.secret.metadata.withNamespace('self-hosted'),
     config_postgres: v1.configMap.new('immich-postgres-config', {
                        'postgresql.override.conf': |||
                          listen_addresses = '*'
@@ -71,7 +79,7 @@
                                                        '-ec',
                                                        std.join('\n', [
                                                          'cd /data',
-                                                         std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                         'restic --verbose backup .',
                                                        ]),
                                                      ]),
                                                    ],
@@ -80,12 +88,13 @@
                                                      + c.withVolumeMounts([
                                                        v1.volumeMount.new('workdir', '/data', false),
                                                      ])
+                                                     + c.withEnvFrom([v1.envFromSource.secretRef.withName('immich-postgres-secrets')])
                                                      + c.withCommand([
                                                        '/bin/sh',
                                                        '-ec',
                                                        std.join('\n', [
                                                          'cd /data',
-                                                         std.format('PGPASSWORD="%s" pg_dumpall -U postgres -h immich-postgres.self-hosted -f db-backup-$(date +%%d-%%m-%%YT%%H:%%M:%%S).sql', std.extVar('secrets').immich.postgres.password),
+                                                         'pg_dumpall -U postgres -h immich-postgres.self-hosted -f db-backup-$(date +%%d-%%m-%%YT%%H:%%M:%%S).sql',
                                                        ]),
                                                      ]),
                                                    ])
@@ -102,6 +111,7 @@
                                                       + c.withVolumeMounts([
                                                         v1.volumeMount.new('workdir', '/data', false),
                                                       ])
+                                                      + c.withEnvFrom([v1.envFromSource.secretRef.withName('immich-postgres-secrets')])
                                                       + c.withCommand([
                                                         '/bin/sh',
                                                         '-ec',
@@ -109,7 +119,7 @@
                                                           'cd /data',
                                                           'LATEST=`find . -type f -printf "%T+ %p\n" | sort -r | head  -1 | cut -f2 -d" "`',
                                                           'echo using $LATEST backup',
-                                                          std.format('PGPASSWORD="%s" psql -U postgres -h immich-postgres.self-hosted -f $LATEST', std.extVar('secrets').immich.postgres.password),
+                                                          'psql -U postgres -h immich-postgres.self-hosted -f $LATEST',
                                                         ]),
                                                       ]),
                                                     ],
@@ -128,7 +138,7 @@
                                                         '-ec',
                                                         std.join('\n', [
                                                           'cd /data',
-                                                          std.format('restic --repo "%s" --verbose restore latest -H immich-postgres --target .', std.extVar('secrets').restic.repo.default.connection),
+                                                          'restic --verbose restore latest -H immich-postgres --target .',
                                                         ]),
                                                       ]),
                                                     ])
@@ -140,11 +150,11 @@
                               ]),
     cronjob_backup_immich: $._custom.cronjob_backup.new('immich', 'self-hosted', '00 05,21 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'immich-data'),
     cronjob_restore_immich: $._custom.cronjob_restore.new('immich', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'immich-data'),
     deployment_immich: d.new('immich',
                              if $.immich.restore then 0 else 1,
@@ -154,14 +164,17 @@
                                + c.withPorts([v1.containerPort.newNamed(2283, 'http'), v1.containerPort.newNamed(8081, 'api-metrics'), v1.containerPort.newNamed(8082, 'ms-metrics')])
                                + c.withEnvMap({
                                  TZ: $._config.tz,
-                                 DB_URL: std.format('postgresql://postgres:%s@immich-postgres.self-hosted:5432/immich', std.extVar('secrets').immich.postgres.password),
+                                 DB_HOSTNAME: 'immich-postgres.self-hosted',
+                                 DB_PORT: '5432',
+                                 DB_DATABASE_NAME: 'immich',
+                                 DB_USERNAME: 'postgres',
                                  DB_VECTOR_EXTENSION: 'vectorchord',
-                                 REDIS_PASSWORD: std.extVar('secrets').immich.valkey.password,
                                  REDIS_HOSTNAME: 'valkey.home-infra',
                                  REDIS_USERNAME: 'immich',
                                  IMMICH_TELEMETRY_INCLUDE: 'all',
                                  IMMICH_PORT: '2283',
                                })
+                               + c.withEnvFrom([v1.envFromSource.secretRef.withName('immich-secrets')])
                                + c.securityContext.withAllowPrivilegeEscalation(false)
                                + c.securityContext.withReadOnlyRootFilesystem(true)
                                + c.securityContext.capabilities.withDrop('all')
@@ -198,11 +211,11 @@
                                  + c.withEnvMap({
                                    TZ: $._config.tz,
                                    POSTGRES_INITDB_ARGS: '--data-checksums',
-                                   POSTGRES_PASSWORD: std.extVar('secrets').immich.postgres.password,
                                    POSTGRES_USER: 'postgres',
                                    POSTGRES_DB: 'immich',
                                    PGDATA: '/var/lib/postgresql/data/pgdata',
                                  })
+                                 + c.withEnvFrom([v1.envFromSource.secretRef.withName('immich-postgres-secrets')])
                                  + c.withVolumeMounts([
                                    v1.volumeMount.new('etc-postgresql', '/etc/postgresql', false),
                                    v1.volumeMount.new('immich-postgres', '/var/lib/postgresql/data', false),

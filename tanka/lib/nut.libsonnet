@@ -59,8 +59,9 @@
       + $.k.core.v1.container.withCommand([
         '/bin/sh',
         '-ec',
-        std.format("/usr/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.quick", std.extVar('secrets').nut.admin),
-      ]),
+        '/usr/bin/upscmd -u admin -p "$NUT_ADMIN_PASSWORD" apc@network-ups-tools.home-infra test.battery.start.quick',
+      ])
+      + $.k.core.v1.container.withEnvFrom([$.k.core.v1.envFromSource.secretRef.withName('network-ups-tools-secrets')]),
     ]),
     cron_job_ups_deep_check: $._custom.cronjob.new('deep-ups-battery-check', 'home-infra', '0 18 16 */6 *', [
       $.k.core.v1.container.new('battery-check', $._version.nut.image)
@@ -68,8 +69,9 @@
       + $.k.core.v1.container.withCommand([
         '/bin/sh',
         '-ec',
-        std.format("/usr/bin/upscmd -u admin -p '%s' apc@network-ups-tools.home-infra test.battery.start.deep", std.extVar('secrets').nut.admin),
-      ]),
+        '/usr/bin/upscmd -u admin -p "$NUT_ADMIN_PASSWORD" apc@network-ups-tools.home-infra test.battery.start.deep',
+      ])
+      + $.k.core.v1.container.withEnvFrom([$.k.core.v1.envFromSource.secretRef.withName('network-ups-tools-secrets')]),
     ]),
     config: v1.configMap.new('network-ups-tools-config', {
               'nut.conf': |||
@@ -87,19 +89,24 @@
               'upsd.conf': |||
                 LISTEN 0.0.0.0 3493
               |||,
-              'upsd.users': |||
-                              [admin]
-                            |||
-                            +
-                            std.format('password = %s\n', std.extVar('secrets').nut.admin)
-                            +
-                            |||
-                              actions = SET FSD
-                              instcmds = ALL
-                              upsmon master
-                            |||,
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
+    secret: v1.secret.new('network-ups-tools-secrets', {
+              'upsd.users': std.base64(
+                |||
+                  [admin]
+                |||
+                + std.format('password = %s\n', std.extVar('secrets').nut.admin)
+                + |||
+                  actions = SET FSD
+                  instcmds = ALL
+                  upsmon master
+                |||
+              ),
+              NUT_ADMIN_PASSWORD: std.base64(std.extVar('secrets').nut.admin),
+              NUT_EXPORTER_PASSWORD: std.base64(std.extVar('secrets').nut.admin),
+            })
+            + v1.secret.metadata.withNamespace('home-infra'),
     service: s.new('network-ups-tools', { 'app.kubernetes.io/name': 'network-ups-tools' }, [v1.servicePort.withPort(3493) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('nut')])
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'network-ups-tools' }),
@@ -125,7 +132,12 @@
                         + c.securityContext.capabilities.withDrop('all')
                         + c.withVolumeMounts([
                           v1.volumeMount.new('var-run', '/var/run', false),
+                          v1.volumeMount.new('network-ups-tools-config', '/etc/nut/nut.conf', true) + v1.volumeMount.withSubPath('nut.conf'),
+                          v1.volumeMount.new('network-ups-tools-config', '/etc/nut/ups.conf', true) + v1.volumeMount.withSubPath('ups.conf'),
+                          v1.volumeMount.new('network-ups-tools-config', '/etc/nut/upsd.conf', true) + v1.volumeMount.withSubPath('upsd.conf'),
+                          v1.volumeMount.new('network-ups-tools-secrets', '/etc/nut/upsd.users', true) + v1.volumeMount.withSubPath('upsd.users'),
                         ])
+                        + c.withEnvFrom([v1.envFromSource.secretRef.withName('network-ups-tools-secrets')])
                         + c.readinessProbe.tcpSocket.withPort('nut')
                         + c.readinessProbe.withInitialDelaySeconds(30)
                         + c.readinessProbe.withPeriodSeconds(10)
@@ -137,16 +149,16 @@
                         + c.lifecycle.postStart.exec.withCommand([
                           '/bin/sh',
                           '-ec',
-                          std.join('\n', ['sleep 30', std.format('/usr/bin/upscmd -u admin -p "%s" apc@127.0.0.1 beeper.disable', std.extVar('secrets').nut.admin)]),
+                          std.join('\n', ['sleep 30', '/usr/bin/upscmd -u admin -p "$NUT_ADMIN_PASSWORD" apc@127.0.0.1 beeper.disable']),
                         ]),
                         c.new('network-ups-tools-exporter', $._version.nut.metrics)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts(v1.containerPort.newNamed(9199, 'metrics'))
                         + c.withEnvMap({
                           NUT_EXPORTER_USERNAME: 'admin',
-                          NUT_EXPORTER_PASSWORD: std.extVar('secrets').nut.admin,
                           NUT_EXPORTER_VARIABLES: 'battery.charge,battery.voltage,battery.voltage.nominal,input.voltage,input.voltage.nominal,ups.load,ups.status,battery.runtime',
                         })
+                        + c.withEnvFrom([v1.envFromSource.secretRef.withName('network-ups-tools-secrets')])
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withDrop('all')
@@ -164,13 +176,14 @@
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],
                       { 'app.kubernetes.io/name': 'network-ups-tools' })
-                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes([
                   v1.volume.fromEmptyDir('var-run', emptyDir={ sizeLimit: '1M' }),
+                  v1.volume.fromConfigMap('network-ups-tools-config', 'network-ups-tools-config'),
                 ])
-                + d.configVolumeMount('network-ups-tools-config', '/etc/nut', {})
+                + d.spec.template.spec.withVolumesMixin([v1.volume.fromSecret('network-ups-tools-secrets', 'network-ups-tools-secrets')])
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ ups_controller: 'true' })
+                + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(10)
                 + d.spec.template.metadata.withAnnotations({

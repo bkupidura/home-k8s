@@ -88,8 +88,8 @@
       }
       for username in std.objectFields(std.extVar('secrets').broker_ha.mqtt.users)
     ],
-    config: v1.configMap.new('broker-ha-config', {
-              'config.yaml': std.manifestYamlDoc({
+    config: v1.secret.new('broker-ha-config', {
+              'config.yaml': std.base64(std.manifestYamlDoc({
                 api: {
                   user: std.extVar('secrets').broker_ha.api.user,
                 },
@@ -114,9 +114,9 @@
                     secret_key: std.extVar('secrets').broker_ha.cluster.config.secret_key,
                   },
                 },
-              }),
+              })),
             })
-            + v1.configMap.metadata.withNamespace('home-infra'),
+            + v1.secret.metadata.withNamespace('home-infra'),
     deployment: d.new('broker-ha',
                       3,
                       [
@@ -142,7 +142,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'broker-ha' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.configVolumeMount('broker-ha-config', '/config/', {})
+                + d.secretVolumeMount('broker-ha-config', '/config/', volumeMountMixin={})
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.spec.template.spec.affinity.podAntiAffinity.withPreferredDuringSchedulingIgnoredDuringExecution(
                   v1.weightedPodAffinityTerm.withWeight(1)

@@ -54,11 +54,11 @@
          + p.spec.resources.withRequests({ storage: '1Gi' }),
     cronjob_backup: $._custom.cronjob_backup.new('sonarr', 'arr', '20 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'sonarr-config'),
     cronjob_restore: $._custom.cronjob_restore.new('sonarr', 'arr', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'sonarr-config'),
     ingress_route: $._custom.ingress_route.new('sonarr', 'arr', ['websecure'], [
       {

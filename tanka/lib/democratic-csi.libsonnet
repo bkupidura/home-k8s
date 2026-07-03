@@ -31,7 +31,7 @@
                   'node-db.node.session.auth.password': std.extVar('secrets').democratic_csi.iscsi.auth.password,
                 })
                 + $.k.core.v1.secret.metadata.withNamespace('democratic-csi'),
-    helm_nfs: $._custom.helm.new('democratic-csi-nfs', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {
+    helm_nfs_values_secret: $._custom.helm.valuesSecret('democratic-csi-nfs-values', {
       controller: {
         driver: {
           image: {
@@ -176,7 +176,8 @@
         },
       },
     }),
-    helm_iscsi: $._custom.helm.new('democratic-csi-iscsi', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {
+    helm_nfs: $._custom.helm.new('democratic-csi-nfs', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {}, 'democratic-csi-nfs-values'),
+    helm_iscsi_values_secret: $._custom.helm.valuesSecret('democratic-csi-iscsi-values', {
       controller: {
         driver: {
           image: {
@@ -331,5 +332,6 @@
         },
       },
     }),
+    helm_iscsi: $._custom.helm.new('democratic-csi-iscsi', 'democratic-csi', 'https://democratic-csi.github.io/charts', $._version.democratic_csi.chart, 'democratic-csi', {}, 'democratic-csi-iscsi-values'),
   },
 }

@@ -42,11 +42,11 @@
          + p.spec.resources.withRequests({ storage: '128Mi' }),
     cronjob_backup: $._custom.cronjob_backup.new('freshrss', 'self-hosted', '05 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'freshrss'),
     cronjob_restore: $._custom.cronjob_restore.new('freshrss', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'freshrss'),
     deployment: d.new('freshrss',
                       if $.freshrss.restore then 0 else 1,

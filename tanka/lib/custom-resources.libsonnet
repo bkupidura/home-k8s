@@ -2,7 +2,10 @@
   k: import 'github.com/jsonnet-libs/k8s-libsonnet/1.35/main.libsonnet',
   _custom:: {
     helm: {
-      new(name, chart_name, repo, version, targetNamespace, values): {
+      valuesSecret(name, values): $.k.core.v1.secret.new(name, {
+        'values.yaml': std.base64(std.manifestYamlDoc(values, true)),
+      }) + $.k.core.v1.secret.metadata.withNamespace('kube-system'),
+      new(name, chart_name, repo, version, targetNamespace, values, valuesSecretName=null): {
         apiVersion: 'helm.cattle.io/v1',
         kind: 'HelmChart',
         metadata: {
@@ -14,7 +17,8 @@
           chart: chart_name,
           version: version,
           targetNamespace: targetNamespace,
-          valuesContent: std.manifestYamlDoc(values, true),
+          [if valuesSecretName == null then 'valuesContent']: std.manifestYamlDoc(values, true),
+          [if valuesSecretName != null then 'valuesSecrets']: [{ name: valuesSecretName }],
         },
       },
     },

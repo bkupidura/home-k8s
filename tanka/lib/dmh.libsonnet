@@ -54,17 +54,17 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('dmh', 'self-hosted', '05 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'dmh'),
     cronjob_restore: $._custom.cronjob_restore.new('dmh', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'dmh'),
     service: s.new('dmh', { 'app.kubernetes.io/name': 'dmh' }, [v1.servicePort.withPort(8080) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http')])
              + s.metadata.withNamespace('self-hosted')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'dmh' }),
-    config: v1.configMap.new('dmh-config', {
-              'config.yaml': std.manifestYamlDoc({
+    config: v1.secret.new('dmh-config', {
+              'config.yaml': std.base64(std.manifestYamlDoc({
                 components: ['dmh'],
                 state: { file: '/data/state.json' },
                 remote_vault: {
@@ -84,9 +84,9 @@
                     },
                   },
                 },
-              }),
+              })),
             })
-            + v1.configMap.metadata.withNamespace('self-hosted'),
+            + v1.secret.metadata.withNamespace('self-hosted'),
     deployment: d.new('dmh',
                       if $.dmh.restore then 0 else 1,
                       [
@@ -116,7 +116,7 @@
                       ],
                       { 'app.kubernetes.io/name': 'dmh' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.configVolumeMount('dmh-config', '/config/', {})
+                + d.secretVolumeMount('dmh-config', '/config/', volumeMountMixin={})
                 + d.pvcVolumeMount('dmh', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('self-hosted')

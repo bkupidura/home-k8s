@@ -70,6 +70,14 @@
   mariadb: {
     update:: $._config.update,
     restore:: $._config.restore,
+    secret: v1.secret.new('mariadb-secrets', {
+      MARIADB_ROOT_PASSWORD: std.base64(std.extVar('secrets').mariadb.password),
+      'client.cnf': std.base64(std.format(|||
+        [client]
+        user = root
+        password = %s
+      |||, std.extVar('secrets').mariadb.password)),
+    }) + v1.secret.metadata.withNamespace('home-infra'),
     pvc: p.new('mariadb')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -93,7 +101,7 @@
                                               '-ec',
                                               std.join('\n', [
                                                 'cd /data',
-                                                std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection),
+                                                'restic --verbose backup .',
                                               ]),
                                             ]),
                                           ],
@@ -101,7 +109,7 @@
                                             c.new('pre-backup', $._version.mariadb.image)
                                             + c.withVolumeMounts([
                                               v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
-                                              v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
+                                              v1.volumeMount.new('mariadb-secrets', '/etc/mysql/conf.d/', true),
                                               v1.volumeMount.new('workdir', '/data', false),
                                             ])
                                             + c.withCommand([
@@ -109,7 +117,7 @@
                                               '-ec',
                                               std.join('\n', [
                                                 'cd /data',
-                                                std.format('mariadb-backup --backup --target-dir=/data --host=mariadb.home-infra --user=root --password="%s"', std.extVar('secrets').mariadb.password),
+                                                'mariadb-backup --defaults-extra-file=/etc/mysql/conf.d/client.cnf --backup --target-dir=/data --host=mariadb.home-infra',
                                               ]),
                                             ]),
                                           ])
@@ -117,7 +125,7 @@
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
                       v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                       v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
-                      v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
+                      v1.volume.fromSecret('mariadb-secrets', 'mariadb-secrets'),
                       { name: 'workdir', emptyDir: {} },
                     ])
                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.affinity.podAffinity.withRequiredDuringSchedulingIgnoredDuringExecution(
@@ -132,7 +140,6 @@
                                            [
                                              c.new('restore', $._version.mariadb.image)
                                              + c.withVolumeMounts([
-                                               v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
                                                v1.volumeMount.new('mariadb-data', '/var/lib/mysql', false),
                                                v1.volumeMount.new('workdir', '/data', false),
                                              ])
@@ -142,7 +149,7 @@
                                                std.join('\n', [
                                                  'cd /data',
                                                  'mariadb-backup --prepare --target-dir=/data',
-                                                 'mariadb-backup --copy-back --target-dir=/data',
+                                                 'mariadb-backup --copy-back --target-dir=/data --datadir=/var/lib/mysql/data',
                                                  'chown -R mysql:mysql /var/lib/mysql/data',
                                                ]),
                                              ]),
@@ -162,7 +169,7 @@
                                                '-ec',
                                                std.join('\n', [
                                                  'cd /data',
-                                                 std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection),
+                                                 'restic --verbose restore latest --target .',
                                                ]),
                                              ]),
                                            ])
@@ -171,19 +178,26 @@
                      + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
                        v1.volume.fromSecret('ssh', 'restic-ssh-default') + $.k.core.v1.volume.secret.withDefaultMode(256),
                        v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
-                       v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
                        { name: 'workdir', emptyDir: {} },
                      ]),
     cronjob_check: $._custom.cronjob.new('mariadb-check', 'home-infra', '45 * * * *', [
-      $.k.core.v1.container.new('check', $._version.mariadb.image)
-      + $.k.core.v1.container.withCommand([
-        '/bin/sh',
-        '-ec',
-        std.format('mariadb-check --host=mariadb.home-infra --user=root --password="%s" --check --all-databases | grep -i "error" && RC=1 || RC=0; exit $RC', std.extVar('secrets').mariadb.password),
-      ]),
-    ]),
-    init: v1.configMap.new('mariadb-init', {
-            'init.sql': std.strReplace(|||
+                     $.k.core.v1.container.new('check', $._version.mariadb.image)
+                     + $.k.core.v1.container.withVolumeMounts([
+                       v1.volumeMount.new('mariadb-secrets', '/etc/mysql/conf.d/', true),
+                     ])
+                     + $.k.core.v1.container.withCommand([
+                       '/bin/sh',
+                       '-ec',
+                       std.join('\n', [
+                         'mariadb-check --defaults-extra-file=/etc/mysql/conf.d/client.cnf --host=mariadb.home-infra --check --all-databases | grep -i "error" && RC=1 || RC=0; exit $RC',
+                       ]),
+                     ]),
+                   ])
+                   + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([
+                     v1.volume.fromSecret('mariadb-secrets', 'mariadb-secrets'),
+                   ]),
+    init: v1.secret.new('mariadb-init', {
+            'init.sql': std.base64(std.strReplace(|||
               CREATE DATABASE homeassistant CHARACTER SET utf8mb4;
               CREATE USER 'homeassistant'@'!!' IDENTIFIED BY '%(homeassistant_password)s';
               GRANT ALL PRIVILEGES ON homeassistant.* TO 'homeassistant'@'!!';
@@ -207,9 +221,9 @@
               CREATE USER 'paperless'@'!!' IDENTIFIED BY '%(paperless_password)s';
               GRANT ALL PRIVILEGES ON paperless.* TO 'paperless'@'!!';
               FLUSH PRIVILEGES;
-            ||| % std.extVar('secrets').mariadb.init_script, '!!', '%'),
+            ||| % std.extVar('secrets').mariadb.init_script, '!!', '%')),
           })
-          + v1.configMap.metadata.withNamespace('home-infra'),
+          + v1.secret.metadata.withNamespace('home-infra'),
     config: v1.configMap.new('mariadb-config', {
               'my.cnf': |||
                 [mysqld]
@@ -255,14 +269,6 @@
               |||,
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
-    config_exporter: v1.configMap.new('mariadb-exporter-config', {
-                       'my.cnf': |||
-                         [client]
-                         user = root
-                         password = %(password)s
-                       ||| % { password: std.extVar('secrets').mariadb.password },
-                     })
-                     + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('mariadb',
                       if $.mariadb.restore then 0 else 1,
                       [
@@ -272,9 +278,9 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                           LD_PRELOAD: '/usr/lib/x86_64-linux-gnu/libjemalloc.so.2',
-                          MARIADB_ROOT_PASSWORD: std.extVar('secrets').mariadb.password,
                           MARIADB_AUTO_UPGRADE: '1',
                         })
+                        + c.withEnvFrom(v1.envFromSource.secretRef.withName('mariadb-secrets'))
                         + c.withVolumeMounts([
                           v1.volumeMount.new('mariadb-init', '/docker-entrypoint-initdb.d/', true),
                           v1.volumeMount.new('mariadb-config', '/etc/mysql/conf.d/', true),
@@ -282,6 +288,7 @@
                           v1.volumeMount.new('tmp', '/tmp', false),
                           v1.volumeMount.new('run-mysqld', '/run/mysqld', false),
                         ])
+                        + c.withVolumeMountsMixin([v1.volumeMount.new('mariadb-secrets', '/secret/client.cnf', true) + v1.volumeMount.withSubPath('client.cnf')])
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['DAC_OVERRIDE', 'SETUID', 'SETGID', 'CHOWN'])
@@ -292,7 +299,7 @@
                              + c.readinessProbe.exec.withCommand([
                                '/bin/bash',
                                '-ec',
-                               std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                               '/usr/bin/mariadb-admin --defaults-extra-file=/secret/client.cnf status',
                              ])
                              + c.readinessProbe.withInitialDelaySeconds(20)
                              + c.readinessProbe.withPeriodSeconds(15)
@@ -300,7 +307,7 @@
                              + c.livenessProbe.exec.withCommand([
                                '/bin/bash',
                                '-ec',
-                               std.format('/usr/bin/mariadb-admin status -uroot -p"%s"', std.extVar('secrets').mariadb.password),
+                               '/usr/bin/mariadb-admin --defaults-extra-file=/secret/client.cnf status',
                              ])
                              + c.livenessProbe.withInitialDelaySeconds(90)
                              + c.livenessProbe.withPeriodSeconds(15)
@@ -309,7 +316,7 @@
                         c.new('mariadb-metrics', $._version.mariadb.metrics)
                         + c.withArgs([
                           '--config.my-cnf',
-                          '/config/my.cnf',
+                          '/config/client.cnf',
                           '--collect.global_status',
                           '--collect.global_variables',
                           '--no-collect.info_schema.processlist',
@@ -324,7 +331,7 @@
                           TZ: $._config.tz,
                         })
                         + c.withVolumeMounts([
-                          v1.volumeMount.new('mariadb-exporter-config', '/config/', true),
+                          v1.volumeMount.new('mariadb-secrets', '/config/', true),
                         ])
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
@@ -347,9 +354,9 @@
                       { 'app.kubernetes.io/name': 'mariadb' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.spec.template.spec.withVolumes([
-                  v1.volume.fromConfigMap('mariadb-init', 'mariadb-init'),
+                  v1.volume.fromSecret('mariadb-init', 'mariadb-init'),
                   v1.volume.fromConfigMap('mariadb-config', 'mariadb-config'),
-                  v1.volume.fromConfigMap('mariadb-exporter-config', 'mariadb-exporter-config'),
+                  v1.volume.fromSecret('mariadb-secrets', 'mariadb-secrets'),
                   v1.volume.fromPersistentVolumeClaim('mariadb-data', 'mariadb'),
                   v1.volume.fromEmptyDir('tmp', emptyDir={ sizeLimit: '1G' }),
                   v1.volume.fromEmptyDir('run-mysqld', emptyDir={ sizeLimit: '1M' }),

@@ -15,11 +15,11 @@
          + p.spec.resources.withRequests({ storage: '6Gi' }),
     cronjob_backup: $._custom.cronjob_backup.new('jellyfin', 'arr', '40 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'jellyfin-config'),
     cronjob_restore: $._custom.cronjob_restore.new('jellyfin', 'arr', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'jellyfin-config'),
     ingress_route: $._custom.ingress_route.new('jellyfin', 'arr', ['websecure'], [
       {

@@ -28,11 +28,11 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('registry', 'home-infra', '15 04 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'registry'),
     cronjob_restore: $._custom.cronjob_restore.new('registry', 'home-infra', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'registry'),
     cronjob_cleanup: $._custom.cronjob.new('registry-cleanup', 'home-infra', '10 20,12 * * *', [
                        $.k.core.v1.container.new('cleanup', $._version.registry.image)

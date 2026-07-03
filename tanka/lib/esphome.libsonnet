@@ -41,12 +41,12 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('esphome', 'smart-home', '45 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
                       '\n',
-                      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+                      ['cd /data', 'restic --verbose backup .']
                     )], 'esphome')
                     + { spec+: { jobTemplate+: { spec+: { template+: { spec+: { affinity: {} } } } } } },
     cronjob_restore: $._custom.cronjob_restore.new('esphome', 'smart-home', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'esphome'),
     deployment: d.new('esphome',
                       0,

@@ -39,12 +39,17 @@
     ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
     cronjob_backup: $._custom.cronjob_backup.new('paperless', 'self-hosted', '10 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose backup .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose backup .']
     )], 'paperless'),
     cronjob_restore: $._custom.cronjob_restore.new('paperless', 'self-hosted', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
-      ['cd /data', std.format('restic --repo "%s" --verbose restore latest --target .', std.extVar('secrets').restic.repo.default.connection)]
+      ['cd /data', 'restic --verbose restore latest --target .']
     )], 'paperless'),
+    secret: v1.secret.new('paperless-secrets', {
+      PAPERLESS_DBPASS: std.base64(std.extVar('secrets').paperless.db.password),
+      PAPERLESS_REDIS: std.base64(std.extVar('secrets').paperless.redis_url),
+      PAPERLESS_SECRET_KEY: std.base64(std.extVar('secrets').paperless.secret_key),
+    }) + v1.secret.metadata.withNamespace('self-hosted'),
     deployment: d.new('paperless',
                       if $.paperless.restore then 0 else 1,
                       [
@@ -59,7 +64,6 @@
                           PAPERLESS_DBPORT: '3306',
                           PAPERLESS_DBNAME: 'paperless',
                           PAPERLESS_DBUSER: 'paperless',
-                          PAPERLESS_DBPASS: std.extVar('secrets').paperless.db.password,
                           PAPERLESS_URL: std.format('https://paperless.%s', std.extVar('secrets').domain),
                           PAPERLESS_OCR_LANGUAGE: 'pol+eng',
                           PAPERLESS_OCR_LANGUAGES: 'pol',
@@ -68,9 +72,7 @@
                           PAPERLESS_DATA_DIR: '/data/data',
                           PAPERLESS_EMPTY_TRASH_DIR: '/data/trash',
                           PAPERLESS_MEDIA_ROOT: '/data/media',
-                          PAPERLESS_REDIS: std.extVar('secrets').paperless.redis_url,
                           PAPERLESS_REDIS_PREFIX: 'paperless',
-                          PAPERLESS_SECRET_KEY: std.extVar('secrets').paperless.secret_key,
                           PAPERLESS_ENABLE_HTTP_REMOTE_USER: 'true',
                           PAPERLESS_ENABLE_HTTP_REMOTE_USER_API: 'true',
                           PAPERLESS_HTTP_REMOTE_USER_HEADER_NAME: 'HTTP_REMOTE_USER',
@@ -81,6 +83,7 @@
                           PAPERLESS_THREADS_PER_WORKER: '1',
                           PAPERLESS_EMAIL_TASK_CRON: '*/10 * * * *',
                         })
+                        + c.withEnvFrom(v1.envFromSource.secretRef.withName('paperless-secrets'))
                         + c.resources.withRequests({ memory: '700M', cpu: '300m' })
                         + c.resources.withLimits({ memory: '2000M', cpu: '400m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
@@ -93,7 +96,7 @@
                              + c.readinessProbe.withTimeoutSeconds(1)
                              + c.livenessProbe.httpGet.withPath('/')
                              + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(180)
+                             + c.livenessProbe.withInitialDelaySeconds(240)
                              + c.livenessProbe.withPeriodSeconds(10)
                              + c.livenessProbe.withTimeoutSeconds(3)
                            else {}),

@@ -2,6 +2,7 @@
   secret_restic_password: {
     [std.format('restic_secrets_%s', repo_name)]: $.k.core.v1.secret.new(std.format('restic-secrets-%s', repo_name), {
                                                     RESTIC_PASSWORD: std.base64(std.extVar('secrets').restic.repo[repo_name].password),
+                                                    RESTIC_REPOSITORY: std.base64(std.extVar('secrets').restic.repo[repo_name].connection),
                                                   })
                                                   + $.k.core.v1.secret.metadata.withNamespace('kube-system')
                                                   + $.k.core.v1.secret.metadata.withAnnotations({
