@@ -408,16 +408,16 @@
     immich: {
       cache: [
         {
-          source: 'ghcr.io/immich-app/immich-server:v2.7.5',
-          destination: std.format('registry.%s/immich-server:v2.7.5', std.extVar('secrets').domain),
+          source: 'ghcr.io/immich-app/immich-server:v3.0.1',
+          destination: std.format('registry.%s/immich-server:v3.0.1', std.extVar('secrets').domain),
         },
         {
-          source: 'docker.io/tensorchord/pgvecto-rs:pg16-v0.4.0',
-          destination: std.format('registry.%s/pgvecto-rs:pg16-v0.4.0', std.extVar('secrets').domain),
+          source: 'ghcr.io/immich-app/postgres:16-vectorchord0.5.3',
+          destination: std.format('registry.%s/immich-postgres:16-vectorchord0.5.3', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/immich-server:v2.7.5', std.extVar('secrets').domain),
-      postgres: std.format('registry.%s/pgvecto-rs:pg16-v0.4.0', std.extVar('secrets').domain),
+      image: std.format('registry.%s/immich-server:v3.0.1', std.extVar('secrets').domain),
+      postgres: std.format('registry.%s/immich-postgres:16-vectorchord0.5.3', std.extVar('secrets').domain),
     },
     dmh: {
       cache: [

@@ -49,14 +49,10 @@
                       + s.metadata.withNamespace('self-hosted')
                       + s.metadata.withLabels({ 'app.kubernetes.io/name': 'immich-postgres' }),
     config_postgres: v1.configMap.new('immich-postgres-config', {
-                       'postgresql.conf': |||
+                       'postgresql.override.conf': |||
                          listen_addresses = '*'
-                         shared_preload_libraries = 'vectors.so'
-                         search_path = '"$user", public, vectors'
-                         logging_collector = on
                          max_wal_size = 512MB
                          shared_buffers = 128MB
-                         wal_compression = on
                        |||,
                      })
                      + v1.configMap.metadata.withNamespace('self-hosted'),
@@ -159,7 +155,7 @@
                                + c.withEnvMap({
                                  TZ: $._config.tz,
                                  DB_URL: std.format('postgresql://postgres:%s@immich-postgres.self-hosted:5432/immich', std.extVar('secrets').immich.postgres.password),
-                                 DB_VECTOR_EXTENSION: 'pgvecto.rs',
+                                 DB_VECTOR_EXTENSION: 'vectorchord',
                                  REDIS_PASSWORD: std.extVar('secrets').immich.valkey.password,
                                  REDIS_HOSTNAME: 'valkey.home-infra',
                                  REDIS_USERNAME: 'immich',
@@ -197,11 +193,6 @@
                                1,
                                [
                                  c.new('postgres', $._version.immich.postgres)
-                                 + c.withArgs([
-                                   'postgres',
-                                   '-c',
-                                   'config_file=/etc/postgresql/postgresql.conf',
-                                 ])
                                  + c.withImagePullPolicy('IfNotPresent')
                                  + c.withPorts(v1.containerPort.newNamed(5432, 'postgres'))
                                  + c.withEnvMap({
@@ -213,9 +204,11 @@
                                    PGDATA: '/var/lib/postgresql/data/pgdata',
                                  })
                                  + c.withVolumeMounts([
-                                   v1.volumeMount.new('immich-postgres-config', '/etc/postgresql', true),
+                                   v1.volumeMount.new('etc-postgresql', '/etc/postgresql', false),
                                    v1.volumeMount.new('immich-postgres', '/var/lib/postgresql/data', false),
-                                   v1.volumeMount.new('var-run', '/var/run', false),
+                                   v1.volumeMount.new('var-run-postgresql', '/var/run/postgresql', false),
+                                   v1.volumeMount.new('tmp', '/tmp', false),
+                                   v1.volumeMount.new('var-log-postgresql', '/var/log/postgresql', false),
                                  ])
                                  + c.securityContext.withAllowPrivilegeEscalation(false)
                                  + c.securityContext.withReadOnlyRootFilesystem(true)
@@ -224,21 +217,11 @@
                                  + (if $.immich.update == false then
                                       c.resources.withRequests({ cpu: '200m', memory: '200M' })
                                       + c.resources.withLimits({ cpu: '350m', memory: '300M' })
-                                      + c.readinessProbe.exec.withCommand([
-                                        '/bin/bash',
-                                        '-ec',
-                                        '/usr/bin/pg_isready || exit 1',
-                                      ])
+                                      + c.readinessProbe.exec.withCommand(['/usr/local/bin/healthcheck.sh'])
                                       + c.readinessProbe.withInitialDelaySeconds(20)
                                       + c.readinessProbe.withPeriodSeconds(15)
                                       + c.readinessProbe.withTimeoutSeconds(3)
-                                      + c.livenessProbe.exec.withCommand([
-                                        '/bin/bash',
-                                        '-ec',
-                                        '/usr/bin/pg_isready || exit 1',
-                                        'CHKSUM=`psql -t -A -Upostgres --command="SELECT COALESCE(SUM(checksum_failures), 0) FROM pg_stat_database"`',
-                                        '[ $CHKSUM -eq 0 ] || exit 2',
-                                      ])
+                                      + c.livenessProbe.exec.withCommand(['/usr/local/bin/healthcheck.sh'])
                                       + c.livenessProbe.withInitialDelaySeconds(60)
                                       + c.livenessProbe.withPeriodSeconds(15)
                                       + c.livenessProbe.withTimeoutSeconds(5)
@@ -246,10 +229,25 @@
                                ],
                                { 'app.kubernetes.io/name': 'immich-postgres' })
                          + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
+                         + d.spec.template.spec.withInitContainers([
+                           c.new('init-pg-config', $._version.ubuntu.image)
+                           + c.withCommand(['/bin/sh', '-c'])
+                           + c.withArgs(['cp /config/postgresql.override.conf /etc/postgresql/postgresql.override.conf'])
+                           + c.securityContext.withAllowPrivilegeEscalation(false)
+                           + c.securityContext.withReadOnlyRootFilesystem(true)
+                           + c.securityContext.capabilities.withDrop('all')
+                           + c.withVolumeMounts([
+                             v1.volumeMount.new('etc-postgresql', '/etc/postgresql', false),
+                             v1.volumeMount.new('immich-postgres-config', '/config', true),
+                           ]),
+                         ])
                          + d.spec.template.spec.withVolumes([
                            v1.volume.fromConfigMap('immich-postgres-config', 'immich-postgres-config'),
                            v1.volume.fromPersistentVolumeClaim('immich-postgres', 'immich-postgres'),
-                           v1.volume.fromEmptyDir('var-run', emptyDir={ sizeLimit: '1M' }),
+                           v1.volume.fromEmptyDir('etc-postgresql', emptyDir={ sizeLimit: '1M' }),
+                           v1.volume.fromEmptyDir('var-run-postgresql', emptyDir={ sizeLimit: '1M' }),
+                           v1.volume.fromEmptyDir('tmp', emptyDir={}),
+                           v1.volume.fromEmptyDir('var-log-postgresql', emptyDir={ sizeLimit: '100M' }),
                          ])
                          + d.spec.strategy.withType('Recreate')
                          + d.metadata.withNamespace('self-hosted')
