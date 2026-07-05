@@ -90,6 +90,7 @@
                         + c.resources.withRequests({ memory: '150Mi', cpu: '50m' })
                         + c.resources.withLimits({ memory: '300Mi', cpu: '100m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['SETUID', 'SETGID', 'CHOWN', 'DAC_OVERRIDE'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/')
@@ -106,6 +107,8 @@
                       { 'app.kubernetes.io/name': 'sonarr' })
                 + d.pvcVolumeMount('sonarr-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
+                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr'),
   },

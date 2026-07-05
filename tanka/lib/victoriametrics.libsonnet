@@ -169,6 +169,12 @@
         podAnnotations: {
           'fluentbit.io/parser': 'json',
         },
+        securityContext: {
+          enabled: true,
+          allowPrivilegeEscalation: false,
+          readOnlyRootFilesystem: true,
+          capabilities: { drop: ['ALL'] },
+        },
       },
     }),
     helm_server_values_secret: $._custom.helm.valuesSecret('victoria-metrics-single-values', {
@@ -197,6 +203,12 @@
         },
         podAnnotations: {
           'fluentbit.io/parser': 'json',
+        },
+        securityContext: {
+          enabled: true,
+          allowPrivilegeEscalation: false,
+          readOnlyRootFilesystem: true,
+          capabilities: { drop: ['ALL'] },
         },
         scrape: {
           enabled: true,
@@ -537,7 +549,7 @@
         },
       },
     }),
-    helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', {}, 'victoria-metrics-single-values'),
+    helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', valuesSecretObj=self.helm_server_values_secret),
     helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
       image: {
         registry: $._version.blackbox_exporter.registry,
@@ -545,6 +557,9 @@
         tag: $._version.blackbox_exporter.tag,
       },
       securityContext: {
+        allowPrivilegeEscalation: false,
+        readOnlyRootFilesystem: true,
+        runAsNonRoot: true,
         capabilities: {
           drop: ['ALL'],
           add: ['NET_RAW'],
@@ -595,9 +610,23 @@
           requests: { memory: '30Mi' },
           limits: { memory: '70Mi' },
         },
+        securityContext: {
+          allowPrivilegeEscalation: false,
+          readOnlyRootFilesystem: true,
+          capabilities: { drop: ['ALL'] },
+        },
       },
       podAnnotations: {
         'fluentbit.io/parser': 'logfmt',
+      },
+      securityContext: {
+        allowPrivilegeEscalation: false,
+        readOnlyRootFilesystem: true,
+        capabilities: { drop: ['ALL'] },
+        runAsNonRoot: true,
+      },
+      podSecurityContext: {
+        fsGroup: 65534,
       },
       config: {
         global: {},
@@ -656,7 +685,7 @@
         ],
       },
     }),
-    helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', {}, 'alertmanager-values'),
+    helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', valuesSecretObj=self.helm_alertmanager_values_secret),
     helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
       image: {
         registry: $._version.kube_state_metrics.registry,
@@ -666,6 +695,11 @@
       resources: {
         requests: { memory: '64Mi' },
         limits: { memory: '128Mi' },
+      },
+      containerSecurityContext: {
+        readOnlyRootFilesystem: true,
+        allowPrivilegeEscalation: false,
+        capabilities: { drop: ['ALL'] },
       },
     }),
     helm_node_exporter: $._custom.helm.new('prometheus-node-exporter', 'prometheus-node-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.node_exporter.chart, 'monitoring', {
@@ -680,6 +714,11 @@
       },
       podAnnotations: {
         'fluentbit.io/parser': 'logfmt',
+      },
+      containerSecurityContext: {
+        readOnlyRootFilesystem: true,
+        allowPrivilegeEscalation: false,
+        capabilities: { drop: ['ALL'] },
       },
     }),
     pvc_dmh: p.new('dmh-victoria-metrics')

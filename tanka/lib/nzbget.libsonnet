@@ -59,15 +59,15 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          PUID: '911',
-                          PGID: '911',
+                          PUID: '1000',
+                          PGID: '100',
                         })
                         + c.resources.withRequests({ cpu: '150m' })
                         + c.resources.withLimits({ cpu: '300m' })
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.securityContext.withAllowPrivilegeEscalation(false)
-                        + c.securityContext.capabilities.withAdd(['SETUID', 'SETGID', 'CHOWN'])
                         + c.securityContext.capabilities.withDrop('all')
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.readinessProbe.httpGet.withPath('/')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
@@ -80,10 +80,12 @@
                         + c.livenessProbe.withTimeoutSeconds(5),
                       ],
                       { 'app.kubernetes.io/name': 'nzbget' })
+                + d.spec.template.spec.securityContext.withRunAsUser(1000)
+                + d.spec.template.spec.securityContext.withRunAsGroup(100)
+                + d.spec.template.spec.securityContext.withFsGroup(100)
                 + d.pvcVolumeMount('nzbget-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr'),
-
   },
 }

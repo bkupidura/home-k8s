@@ -78,6 +78,11 @@
         'prometheus.io/scrape': 'true',
         'prometheus.io/path': '/api/v1/metrics/prometheus',
       },
+      securityContext: {
+        allowPrivilegeEscalation: false,
+        readOnlyRootFilesystem: true,
+        capabilities: { drop: ['ALL'] },
+      },
       resources: {
         limits: { memory: '64Mi', cpu: '50m' },
       },
@@ -117,6 +122,12 @@
         persistentVolume: {
           enabled: true,
           existingClaim: 'victoria-logs',
+        },
+        securityContext: {
+          enabled: true,
+          allowPrivilegeEscalation: false,
+          readOnlyRootFilesystem: true,
+          capabilities: { drop: ['ALL'] },
         },
       },
     }),
@@ -160,6 +171,12 @@
         },
         podAnnotations: {
           'fluentbit.io/parser': 'json',
+        },
+        securityContext: {
+          enabled: true,
+          allowPrivilegeEscalation: false,
+          readOnlyRootFilesystem: true,
+          capabilities: { drop: ['ALL'] },
         },
       },
     }),

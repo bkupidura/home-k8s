@@ -5,20 +5,24 @@
       valuesSecret(name, values): $.k.core.v1.secret.new(name, {
         'values.yaml': std.base64(std.manifestYamlDoc(values, true)),
       }) + $.k.core.v1.secret.metadata.withNamespace('kube-system'),
-      new(name, chart_name, repo, version, targetNamespace, values, valuesSecretName=null): {
+      new(name, chart_name, repo, version, targetNamespace, values={}, valuesSecretObj=null): {
+        local secretName = if valuesSecretObj != null then valuesSecretObj.metadata.name else null,
         apiVersion: 'helm.cattle.io/v1',
         kind: 'HelmChart',
         metadata: {
           name: name,
           namespace: 'kube-system',
+          [if valuesSecretObj != null then 'annotations']: {
+            'checksum/values-secret': std.md5(std.manifestJson(valuesSecretObj)),
+          },
         },
         spec: {
           repo: repo,
           chart: chart_name,
           version: version,
           targetNamespace: targetNamespace,
-          [if valuesSecretName == null then 'valuesContent']: std.manifestYamlDoc(values, true),
-          [if valuesSecretName != null then 'valuesSecrets']: [{ name: valuesSecretName }],
+          [if secretName == null then 'valuesContent']: std.manifestYamlDoc(values, true),
+          [if secretName != null then 'valuesSecrets']: [{ name: secretName, keys: ['values.yaml'] }],
         },
       },
     },

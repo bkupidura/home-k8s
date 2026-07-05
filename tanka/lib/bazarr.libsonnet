@@ -64,7 +64,8 @@
                         + c.resources.withRequests({ cpu: '150m', memory: '400Mi' })
                         + c.resources.withLimits({ cpu: '300m', memory: '800Mi' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
-                        + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID'])
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['CHOWN', 'SETGID', 'SETUID'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.httpGet.withPath('/ping')
                         + c.readinessProbe.httpGet.withPort('http')
@@ -80,6 +81,8 @@
                       { 'app.kubernetes.io/name': 'bazarr' })
                 + d.pvcVolumeMount('bazarr-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
+                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr'),
   },

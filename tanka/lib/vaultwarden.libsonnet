@@ -127,7 +127,7 @@
                         ])
                         + c.withEnvMap({
                           TZ: $._config.tz,
-                          DISABLE_ADMIN_TOKEN: 'true',
+                          //DISABLE_ADMIN_TOKEN: 'true',
                           DOMAIN: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         })
                         + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })

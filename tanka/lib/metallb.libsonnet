@@ -50,7 +50,7 @@
         },
         speaker: {
           resources: {
-            limits: { cpu: '75m', memory: '90M' },
+            limits: { cpu: '75m', memory: '120M' },
           },
           image: {
             repository: std.splitLimitR($._version.metallb.speaker, ':', 1)[0],

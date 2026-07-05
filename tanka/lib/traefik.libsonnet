@@ -91,7 +91,6 @@
         '--log.level=INFO',
         '--log.format=json',
         '--metrics.prometheus=true',
-        '--providers.kubernetescrd.allowCrossNamespace=true',
       ],
       ports: {
         traefik: { expose: { default: false } },

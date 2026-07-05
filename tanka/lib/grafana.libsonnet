@@ -70,11 +70,14 @@
                         + c.withEnvFrom(v1.envFromSource.secretRef.withName('grafana-secrets'))
                         + c.withVolumeMounts([
                           v1.volumeMount.new('grafana-config', '/etc/grafana/grafana.ini', false) + v1.volumeMount.withSubPath('grafana.ini'),
+                          v1.volumeMount.new('grafana-data', '/var/lib/grafana'),
+                          v1.volumeMount.new('grafana-tmp', '/tmp'),
                         ])
-                        + c.resources.withRequests({ memory: '100M' })
-                        + c.resources.withLimits({ memory: '250M' })
+                        + c.resources.withRequests({ memory: '100M', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '250M', cpu: '200m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withDrop('all')
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.readinessProbe.httpGet.withPath('/api/health')
                         + c.readinessProbe.httpGet.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(20)
@@ -88,7 +91,11 @@
                       ],
                       { 'app.kubernetes.io/name': 'grafana' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
-                + d.spec.template.spec.withVolumes(v1.volume.fromConfigMap('grafana-config', 'grafana-config'))
+                + d.spec.template.spec.withVolumes([
+                  v1.volume.fromConfigMap('grafana-config', 'grafana-config'),
+                  v1.volume.fromEmptyDir('grafana-data', emptyDir={ sizeLimit: '500M' }),
+                  v1.volume.fromEmptyDir('grafana-tmp', emptyDir={ sizeLimit: '10M' }),
+                ])
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('monitoring')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5)

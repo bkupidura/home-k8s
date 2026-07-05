@@ -64,7 +64,8 @@
                         + c.resources.withRequests({ memory: '64Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '128Mi', cpu: '130m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
-                        + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID', 'CHOWN', 'FOWNER', 'DAC_OVERRIDE'])
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
+                        + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID', 'CHOWN', 'FOWNER', 'DAC_READ_SEARCH', 'DAC_OVERRIDE'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.tcpSocket.withPort('http')
                         + c.readinessProbe.withInitialDelaySeconds(10)
@@ -78,6 +79,22 @@
                       ],
                       { 'app.kubernetes.io/name': 'freshrss' })
                 + d.pvcVolumeMount('freshrss', '/var/www/FreshRSS/data', false, {})
+                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('var-log-apache2', '/var/log/apache2', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('var-spool-cron', '/var/spool/cron/crontabs', volumeMixin=v1.volume.emptyDir.withSizeLimit('1M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('php-sessions', '/var/lib/php/sessions', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.spec.template.spec.withInitContainers([
+                  c.new('init-run-dirs', $._version.ubuntu.image)
+                  + c.withCommand(['/bin/sh', '-c', 'mkdir -p /run/apache2 && chmod 1733 /var/lib/php/sessions'])
+                  + c.securityContext.withAllowPrivilegeEscalation(false)
+                  + c.securityContext.withReadOnlyRootFilesystem(true)
+                  + c.securityContext.capabilities.withDrop('all')
+                  + c.withVolumeMounts([
+                    v1.volumeMount.new('run', '/run', false),
+                    v1.volumeMount.new('php-sessions', '/var/lib/php/sessions', false),
+                  ]),
+                ])
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
                 + d.metadata.withNamespace('self-hosted'),
