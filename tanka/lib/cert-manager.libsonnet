@@ -32,7 +32,7 @@
       ],
       extraArgs: [
         '--dns01-recursive-nameservers-only',
-        '--dns01-recursive-nameservers=9.9.9.9:53,194.242.2.2:53',
+        '--dns01-recursive-nameservers=9.9.9.10:53,1.1.1.1:53',
       ],
       installCRDs: true,
       prometheus: {

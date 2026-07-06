@@ -220,8 +220,6 @@
                                    v1.volumeMount.new('etc-postgresql', '/etc/postgresql', false),
                                    v1.volumeMount.new('immich-postgres', '/var/lib/postgresql/data', false),
                                    v1.volumeMount.new('var-run-postgresql', '/var/run/postgresql', false),
-                                   v1.volumeMount.new('tmp', '/tmp', false),
-                                   v1.volumeMount.new('var-log-postgresql', '/var/log/postgresql', false),
                                  ])
                                  + c.securityContext.withAllowPrivilegeEscalation(false)
                                  + c.securityContext.withReadOnlyRootFilesystem(true)
@@ -259,8 +257,6 @@
                            v1.volume.fromPersistentVolumeClaim('immich-postgres', 'immich-postgres'),
                            v1.volume.fromEmptyDir('etc-postgresql', emptyDir={ sizeLimit: '1M' }),
                            v1.volume.fromEmptyDir('var-run-postgresql', emptyDir={ sizeLimit: '1M' }),
-                           v1.volume.fromEmptyDir('tmp', emptyDir={}),
-                           v1.volume.fromEmptyDir('var-log-postgresql', emptyDir={ sizeLimit: '100M' }),
                          ])
                          + d.spec.strategy.withType('Recreate')
                          + d.metadata.withNamespace('self-hosted')

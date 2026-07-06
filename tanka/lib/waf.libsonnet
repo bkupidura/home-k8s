@@ -137,6 +137,7 @@
                         + c.resources.withRequests({ memory: '256Mi', cpu: '100m' })
                         + c.resources.withLimits({ memory: '256Mi', cpu: '100m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.livenessProbe.httpGet.withPath('/healthz')
@@ -148,6 +149,9 @@
                       ],
                       { 'app.kubernetes.io/name': 'waf' })
                 + d.configVolumeMount('waf-config', '/nginx/conf.d', {})
+                + d.emptyVolumeMount('etc-nginx', '/etc/nginx', volumeMixin=v1.volume.emptyDir.withSizeLimit('50M'))
+                + d.emptyVolumeMount('etc-modsecurity', '/etc/modsecurity.d', volumeMixin=v1.volume.emptyDir.withSizeLimit('50M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('5G'))
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'waf' })

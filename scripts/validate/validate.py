@@ -4,6 +4,8 @@ import yaml
 import json
 import argparse
 
+from schema import SchemaError
+
 from schemas import deployment as schema_deployment
 from schemas import ingress_route as schema_ingress_route
 from schemas import daemonset as schema_daemonset
@@ -47,21 +49,76 @@ validator_mapping = {
 k8s_definitions = yaml.safe_load_all(sys.stdin)
 
 broken_manifests = list()
+seen_manifests = dict()
 
 for manifests in k8s_definitions:
     for manifest in manifests["items"]:
+        kind = manifest["kind"]
+        ns = manifest.get("metadata", dict()).get("namespace")
+        name = manifest.get("metadata", dict()).get("name")
+        seen_manifests[(kind, ns, name)] = manifest
+
         for validator_kind, validator in validator_mapping.items():
-            if manifest["kind"] != validator_kind:
+            if kind != validator_kind:
                 continue
             errors = validator.run_checks(manifest)
             if len(errors) > 0:
                 broken_manifests.append(
                     {
-                        "kind": manifest["kind"],
-                        "name": manifest.get("metadata", dict()).get("name"),
-                        "namespace": manifest.get("metadata", dict()).get("namespace"),
+                        "kind": kind,
+                        "name": name,
+                        "namespace": ns,
                         "errors": errors,
                     }
                 )
 
-print(json.dumps(broken_manifests, indent=4))
+obsolete_exceptions = list()
+disabled_validators = list()
+
+for validator_kind, validator in validator_mapping.items():
+    for v in validator.validators:
+        if v["name"] not in validator.conf:
+            disabled_validators.append(
+                {
+                    "validator": v["name"],
+                    "resource": validator_kind,
+                    "reason": "not enabled",
+                }
+            )
+        validator_config = validator.conf.get(v["name"]) or dict()
+        for check in v["check"]:
+            check_config = validator_config.get(check["name"]) or dict()
+            for skipped_resource in check_config.get("skip", list()):
+                ns, _, name = skipped_resource.partition("/")
+                manifest = seen_manifests.get((validator_kind, ns, name))
+                check_label = f"{validator.name}/{v['name']}/{check['name']}"
+
+                if manifest is None:
+                    obsolete_exceptions.append(
+                        {
+                            "check": check_label,
+                            "resource": skipped_resource,
+                            "reason": "resource not found in cluster",
+                        }
+                    )
+                    continue
+
+                try:
+                    check["schema"].validate(manifest)
+                    obsolete_exceptions.append(
+                        {
+                            "check": check_label,
+                            "resource": skipped_resource,
+                            "reason": "resource is compliant, exception is not needed",
+                        }
+                    )
+                except SchemaError:
+                    pass
+
+output = {
+    "violations": broken_manifests,
+    "obsolete_exceptions": obsolete_exceptions,
+    "disabled_validators": disabled_validators,
+}
+
+print(json.dumps(output, indent=4))

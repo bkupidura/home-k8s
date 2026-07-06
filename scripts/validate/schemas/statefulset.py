@@ -62,7 +62,9 @@ class Validator(ValidatorBase):
                             {
                                 "spec": {
                                     "updateStrategy": {
-                                        "type": And(str, lambda x: x == "RollingUpdate"),
+                                        "type": And(
+                                            str, lambda x: x == "RollingUpdate"
+                                        ),
                                     },
                                 },
                             },

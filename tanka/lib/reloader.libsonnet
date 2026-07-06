@@ -19,6 +19,7 @@
   reloader: {
     helm: $._custom.helm.new('reloader', 'reloader', 'https://stakater.github.io/stakater-charts', $._version.reloader.chart, 'kube-system', {
       reloader: {
+        readOnlyRootFileSystem: true,
         deployment: {
           resources: {
             requests: { cpu: '15m', memory: '32Mi' },
@@ -30,6 +31,10 @@
               'prometheus.io/port': '9090',
               'fluentbit.io/parser': 'logfmt',
             },
+          },
+          containerSecurityContext: {
+            capabilities: { drop: ['all'] },
+            allowPrivilegeEscalation: false,
           },
         },
       },

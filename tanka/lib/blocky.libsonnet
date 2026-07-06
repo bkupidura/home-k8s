@@ -97,8 +97,8 @@
                           TZ: $._config.tz,
                           BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '256Mi', cpu: '150m' })
-                        + c.resources.withLimits({ memory: '256Mi', cpu: '150m' })
+                        + c.resources.withRequests({ memory: '150M', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '300M', cpu: '200m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE'])

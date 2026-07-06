@@ -109,8 +109,8 @@
                     forward . 127.0.0.1:5301 127.0.0.1:5302
                 }
                 .:5301 {
-                    forward . tls://9.9.9.9 {
-                        tls_servername dns.quad9.net
+                    forward . tls://9.9.9.10 {
+                        tls_servername dns10.quad9.net
                     }
                     cache 600 . {
                         success 3000
@@ -120,8 +120,8 @@
                     }
                 }
                 .:5302 {
-                    forward . tls://194.242.2.2 {
-                        tls_servername dns.mullvad.net
+                    forward . tls://1.1.1.1 {
+                        tls_servername cloudflare-dns.com
                     }
                     cache 600 . {
                         success 3000

@@ -63,6 +63,7 @@
                           TZ: $._config.tz,
                         })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
+                        + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withDrop('all')
                         + (if $.home_assistant.update == false then
                              c.resources.withRequests({ memory: '800Mi', cpu: '300m' })
@@ -80,6 +81,8 @@
                       ],
                       { 'app.kubernetes.io/name': 'home-assistant' })
                 + d.pvcVolumeMount('home-assistant', '/config', false, {})
+                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withEnableServiceLinks(true)
                 + d.metadata.withNamespace('smart-home')

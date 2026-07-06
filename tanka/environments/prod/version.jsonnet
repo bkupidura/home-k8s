@@ -70,11 +70,11 @@
     waf: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/waf-modsecurity:13062026',
-          destination: std.format('registry.%s/waf-modsecurity:13062026', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/waf-modsecurity:05072026',
+          destination: std.format('registry.%s/waf-modsecurity:05072026', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/waf-modsecurity:13062026', std.extVar('secrets').domain),
+      image: std.format('registry.%s/waf-modsecurity:05072026', std.extVar('secrets').domain),
     },
     authelia: {
       cache: [
