@@ -38,7 +38,7 @@
         services: [{ name: 'esphome', port: 6052, namespace: 'smart-home' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     cronjob_backup: $._custom.cronjob_backup.new('esphome', 'smart-home', '45 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
                       '\n',
                       ['cd /data', 'restic --verbose backup .']

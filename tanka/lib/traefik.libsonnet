@@ -153,6 +153,19 @@
         ],
       },
     }),
+    tls_store: {
+      apiVersion: 'traefik.io/v1alpha1',
+      kind: 'TLSStore',
+      metadata: {
+        name: 'default',
+        namespace: 'traefik-system',
+      },
+      spec: {
+        defaultCertificate: {
+          secretName: std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls',
+        },
+      },
+    },
     ingress_route: $._custom.ingress_route.new('traefik-dashboard', 'traefik-system', ['websecure'], [
       {
         match: std.format('Host(`traefik.%s`)', std.extVar('secrets').domain),
@@ -168,6 +181,6 @@
           { name: 'auth-authelia', namespace: 'traefik-system' },
         ],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
   },
 }

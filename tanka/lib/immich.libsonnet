@@ -37,7 +37,7 @@
         services: [{ name: 'immich', port: 2283 }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     service_immich: s.new('immich', { 'app.kubernetes.io/name': 'immich' }, [
                       v1.servicePort.withPort(2283) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
                       v1.servicePort.withPort(8081) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('api-metrics'),

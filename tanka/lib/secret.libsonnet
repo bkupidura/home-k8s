@@ -8,6 +8,7 @@
                                                   + $.k.core.v1.secret.metadata.withAnnotations({
                                                     'reflector.v1.k8s.emberstack.com/reflection-auto-enabled': 'true',
                                                     'reflector.v1.k8s.emberstack.com/reflection-allowed': 'true',
+                                                    'reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces': 'arr,home-infra,monitoring,self-hosted,smart-home',
                                                   })
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
   },
@@ -20,6 +21,7 @@
                                               + $.k.core.v1.secret.metadata.withAnnotations({
                                                 'reflector.v1.k8s.emberstack.com/reflection-auto-enabled': 'true',
                                                 'reflector.v1.k8s.emberstack.com/reflection-allowed': 'true',
+                                                'reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces': 'arr,home-infra,monitoring,self-hosted,smart-home',
                                               })
     for repo_name in std.objectFields(std.extVar('secrets').restic.repo)
     if std.get(std.extVar('secrets').restic.repo[repo_name], 'ssh_key', false) != false

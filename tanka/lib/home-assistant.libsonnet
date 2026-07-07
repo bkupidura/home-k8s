@@ -37,7 +37,7 @@
         services: [{ name: 'home-assistant', port: 8123, namespace: 'smart-home' }],
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     cronjob_backup: $._custom.cronjob_backup.new('home-assistant', 'smart-home', '50 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', 'restic --verbose backup .']

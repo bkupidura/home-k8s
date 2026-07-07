@@ -56,7 +56,7 @@
         services: [{ name: 'authelia', port: 9091 }],
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     config: v1.secret.new('authelia-config', {
               'users.yml': std.base64(std.manifestYamlDoc({
                 users: std.extVar('secrets').authelia.users,

@@ -18,7 +18,7 @@
         services: [{ name: 'node-red', port: 1880, namespace: 'smart-home' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     cronjob_backup: $._custom.cronjob_backup.new('node-red', 'smart-home', '55 03 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', 'restic --verbose backup .']

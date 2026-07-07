@@ -36,7 +36,7 @@
         services: [{ name: 'paperless', port: 8000 }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     cronjob_backup: $._custom.cronjob_backup.new('paperless', 'self-hosted', '10 03,11,19 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', 'restic --verbose backup .']

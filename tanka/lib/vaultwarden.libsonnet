@@ -111,7 +111,7 @@
         match: std.format('Host(`vaultwarden.%s`)', std.extVar('secrets').domain),
         services: [{ name: 'vaultwarden', port: 80, namespace: 'self-hosted' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     service: s.new('vaultwarden', { 'app.kubernetes.io/name': 'vaultwarden' }, [
                v1.servicePort.withPort(80) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('http'),
              ])

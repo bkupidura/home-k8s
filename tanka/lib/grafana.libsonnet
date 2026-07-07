@@ -19,7 +19,7 @@
         services: [{ name: 'grafana', port: 3000, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     config: v1.configMap.new('grafana-config', {
               'grafana.ini': std.manifestIni({
                 sections: {

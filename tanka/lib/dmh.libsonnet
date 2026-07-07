@@ -51,7 +51,7 @@
         services: [{ name: 'dmh', port: 8080, namespace: 'self-hosted' }],
         middlewares: [{ name: 'x-forwarded-proto-https', namespace: 'traefik-system' }, { name: 'lan-whitelist', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     cronjob_backup: $._custom.cronjob_backup.new('dmh', 'self-hosted', '05 05 * * *', 'restic-secrets-default', 'restic-ssh-default', ['/bin/sh', '-ec', std.join(
       '\n',
       ['cd /data', 'restic --verbose backup .']

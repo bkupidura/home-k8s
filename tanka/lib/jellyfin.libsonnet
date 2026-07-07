@@ -28,7 +28,7 @@
         services: [{ name: 'jellyfin', port: 8096 }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     service: s.new('jellyfin',
                    { 'app.kubernetes.io/name': 'jellyfin' },
                    [

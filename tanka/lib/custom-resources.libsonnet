@@ -87,7 +87,7 @@
         spec: {
           entryPoints: entrypoints,
           routes: routes,
-          [if tls != null then 'tls']: {
+          [if tls != null then 'tls']: if tls == true then {} else {
             secretName: tls,
           },
 

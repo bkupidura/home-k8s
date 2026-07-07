@@ -111,7 +111,7 @@
         services: [{ name: 'victoria-metrics-alert-server', port: 8880, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     ingress_route_server: $._custom.ingress_route.new('victoria-metrics', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
@@ -119,7 +119,7 @@
         services: [{ name: 'victoria-metrics-single-server', port: 8428, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     ingress_route_alertmanager: $._custom.ingress_route.new('alertmanager', 'monitoring', ['websecure'], [
       {
         kind: 'Rule',
@@ -127,7 +127,7 @@
         services: [{ name: 'alertmanager', port: 9093, namespace: 'monitoring' }],
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     helm_alert: $._custom.helm.new('victoria-metrics-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,

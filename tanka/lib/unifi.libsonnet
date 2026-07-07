@@ -18,7 +18,7 @@
         services: [{ name: 'unifi', port: 443, namespace: 'home-infra', scheme: 'https' }],
         middlewares: [{ name: 'lanmgmt-whitelist', namespace: 'traefik-system' }, { name: 'x-forwarded-proto-https', namespace: 'traefik-system' }],
       },
-    ], std.strReplace(std.extVar('secrets').domain, '.', '-') + '-tls'),
+    ], true),
     ingress_route_http: $._custom.ingress_route.new('unifi-http', 'home-infra', ['web'], [
       {
         kind: 'Rule',
