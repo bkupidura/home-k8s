@@ -1,4 +1,5 @@
 kube-config.yaml
+.vault_password
 pocs/*
 tanka/vendor/*
 tanka/environments/dev/*
@@ -6,5 +7,4 @@ tanka/lib/*-dev.libsonnet
 scripts/manage-images/manage-images
 .DS_Store
 venv/*
-ideas/*
 __pycache__

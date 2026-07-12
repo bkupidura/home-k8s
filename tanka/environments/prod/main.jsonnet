@@ -96,22 +96,19 @@
       blacklist: {
         malware: [
           'https://hole.cert.pl/domains/domains_hosts.txt',
-          'https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt',
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/KADhosts.txt',
-          'https://blocklistproject.github.io/Lists/abuse.txt',
-          'https://blocklistproject.github.io/Lists/malware.txt',
+          'https://raw.githubusercontent.com/FiltersHeroes/KADhosts/master/KADhosts.txt',
+          'https://urlhaus.abuse.ch/downloads/hostfile/',
+          'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/tif.mini.txt',
           'https://blocklistproject.github.io/Lists/phishing.txt',
           'https://blocklistproject.github.io/Lists/ransomware.txt',
         ],
         ads: [
           'https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=1&mimetype=plaintext',
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/Ad_filter_list_by_Disconnect.txt',
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/adguard_mobile_host.txt',
-          'https://blocklistproject.github.io/Lists/fraud.txt',
+          'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro.txt',
+          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/hostfile.txt',
           'https://blocklistproject.github.io/Lists/scam.txt',
         ],
         privacy: [
-          'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/NoTrack_Tracker_Blocklist.txt',
           'https://raw.githubusercontent.com/MajkiIT/polish-ads-filter/master/polish-pihole-filters/easy_privacy_host.txt',
           'https://blocklistproject.github.io/Lists/tracking.txt',
         ],

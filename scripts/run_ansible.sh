@@ -21,6 +21,7 @@ EOF
 
 EXTRA_VARS=()
 HOST_GROUP="all"
+ANSIBLE_ARGS="--vault-password-file=../.vault_password"
 
 while getopts "hve:H:lsfr:c:" o; do
     case "${o}" in

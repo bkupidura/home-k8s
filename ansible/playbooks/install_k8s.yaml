@@ -32,6 +32,25 @@
         hour: "*"
         job: "/usr/sbin/k3s-health.sh"
       become: true
+    - name: Determine cert rotation schedule offset
+      set_fact:
+        cert_rotate_weekday: "{{ (groups['k8s_master_primary'] + groups['k8s_master']).index(inventory_hostname) }}"
+    - name: Create k3s cert rotation check file
+      vars:
+        create:
+          cert-rotate:
+            dst: /usr/sbin/k3s-cert-rotate.sh
+            src: ../templates/k3s-cert-rotate.sh
+            permission: "0755"
+      include_tasks: tasks/custom_files.yaml
+    - name: Add k3s cert rotation cron
+      cron:
+        name: k3s-cert-rotate
+        minute: "0"
+        hour: "4"
+        weekday: "{{ cert_rotate_weekday }}"
+        job: "/usr/sbin/k3s-cert-rotate.sh"
+      become: true
 
 - name: Configre k8s master primary (k3s)
   hosts: k8s_master_primary

@@ -58,7 +58,7 @@
                   },
                 },
                 caching: {
-                  maxTime: '-1',
+                  maxTime: '-1m',
                 },
                 queryLog: {
                   type: 'none',
@@ -69,11 +69,12 @@
                 },
                 blocking: {
                   loading: {
-                    concurrency: 4,
+                    concurrency: 1,
                     refreshPeriod: '120m',
                     downloads: {
-                      timeout: '180s',
-                      cooldown: '15s',
+                      timeout: '240s',
+                      readTimeout: '240s',
+                      cooldown: '30s',
                     },
                   },
                   blockType: 'zeroIP',
@@ -97,17 +98,17 @@
                           TZ: $._config.tz,
                           BLOCKY_CONFIG_FILE: '/config/config.yml',
                         })
-                        + c.resources.withRequests({ memory: '150M', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '300M', cpu: '200m' })
+                        + c.resources.withRequests({ memory: '200M', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '400M', cpu: '200m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE'])
                         + c.securityContext.capabilities.withDrop('all')
                         + c.readinessProbe.tcpSocket.withPort(53)
-                        + c.readinessProbe.withInitialDelaySeconds(15)
+                        + c.readinessProbe.withInitialDelaySeconds(60)
                         + c.readinessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.tcpSocket.withPort(4000)
-                        + c.livenessProbe.withInitialDelaySeconds(240)
+                        + c.livenessProbe.withInitialDelaySeconds(180)
                         + c.livenessProbe.withPeriodSeconds(10)
                         + c.livenessProbe.withTimeoutSeconds(2),
                       ],

@@ -95,7 +95,7 @@
           annotations: {
             'reflector.v1.k8s.emberstack.com/reflection-allowed': 'true',
             'reflector.v1.k8s.emberstack.com/reflection-auto-enabled': 'true',
-            'reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces': 'traefik-system',
+            'reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces': 'traefik-system,home-infra',
           },
         },
         privateKey: {

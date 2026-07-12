@@ -23,6 +23,22 @@
   until: k3s_ready.rc == 0
   become: true
 
+- block:
+  - name: Get k3s secrets-encrypt status
+    command: k3s secrets-encrypt status
+    register: k3s_enc_status
+    changed_when: false
+
+  - name: Fail if secrets encryption is not enabled
+    fail:
+      msg: "k3s secrets encryption is NOT enabled: {{ k3s_enc_status.stdout | replace('\n', ' ') }}"
+    when: "'Encryption Status: Enabled' not in k3s_enc_status.stdout"
+
+  - name: Report secrets encryption status
+    debug:
+      msg: "{{ k3s_enc_status.stdout_lines }}"
+  become: true
+
 - name: Create CNI dirs
   file:
     path: /opt/cni/bin
