@@ -740,6 +740,7 @@
     config: v1.secret.new('dmh-victoria-metrics-config', {
               'config.yaml': std.base64(std.manifestYamlDoc({
                 components: ['dmh', 'vault'],
+                auth: { enabled: false },
                 state: { file: '/data/state.json' },
                 vault: { file: '/data/vault.json', key: std.extVar('secrets').dmh.vault.key },
                 action: { process_unit: 'minute' },
@@ -795,6 +796,7 @@
                 + d.pvcVolumeMount('dmh-victoria-metrics', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('monitoring')
+                + d.spec.template.spec.securityContext.withFsGroup(1000)
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',

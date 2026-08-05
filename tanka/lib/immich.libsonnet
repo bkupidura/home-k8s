@@ -181,7 +181,7 @@
                                + (
                                  if $.immich.update == false then
                                    c.resources.withRequests({ cpu: '250m', memory: '700M' })
-                                   + c.resources.withLimits({ cpu: '400m', memory: '1400M', 'devic.es/video-dri': 1 })
+                                   + c.resources.withLimits({ cpu: '400m', memory: '1600M', 'devic.es/video-dri': 1 })
                                    + c.livenessProbe.httpGet.withPath('/api/server/ping')
                                    + c.livenessProbe.httpGet.withPort('http')
                                    + c.livenessProbe.withInitialDelaySeconds(90)

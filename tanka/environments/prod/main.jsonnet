@@ -47,6 +47,7 @@
 (import 'homer.libsonnet') +
 (import 'immich.libsonnet') +
 (import 'dmh.libsonnet') +
+(import 'mealie.libsonnet') +
 (import 'debugpod.libsonnet') +
 (import 'truenas.libsonnet') +
 (import 'main-dev.libsonnet') +

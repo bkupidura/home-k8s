@@ -65,11 +65,22 @@
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'dmh' }),
     config: v1.secret.new('dmh-config', {
               'config.yaml': std.base64(std.manifestYamlDoc({
+                auth: {
+                  bearer: {
+                    token: std.extVar('secrets').dmh.auth.bearer.token,
+                  },
+                  signed_url: {
+                    secret: std.extVar('secrets').dmh.auth.signed_url.token,
+                    ttl: 24,
+                  },
+                  anonymous_scope: ['ready', 'healthz', 'metrics'],
+                },
                 components: ['dmh'],
                 state: { file: '/data/state.json' },
                 remote_vault: {
                   client_uuid: std.extVar('secrets').dmh.remote_vault.client_uuid,
                   url: std.extVar('secrets').dmh.remote_vault.url,
+                  token: std.extVar('secrets').dmh.remote_vault.token,
                 },
                 action: { process_unit: 'hour' },
                 execute: {
@@ -120,6 +131,7 @@
                 + d.pvcVolumeMount('dmh', '/data', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('self-hosted')
+                + d.spec.template.spec.securityContext.withFsGroup(1000)
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',

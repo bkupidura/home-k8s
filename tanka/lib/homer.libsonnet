@@ -140,6 +140,19 @@
                       },
                     ],
                   },
+                  {
+                    name: 'Other',
+                    icon: 'fas fa-layer-group',
+                    items: [
+                      {
+                        name: 'Mealie',
+                        icon: 'fa-solid fa-burger',
+                        subtitle: 'Cookbook',
+                        url: std.format('https://mealie.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
+                    ],
+                  },
                 ],
               }),
             })

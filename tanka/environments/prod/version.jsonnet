@@ -288,11 +288,11 @@
     vaultwarden: {
       cache: [
         {
-          source: 'vaultwarden/server:1.36.0-alpine',
-          destination: std.format('registry.%s/vaultwarden:1.36.0-alpine', std.extVar('secrets').domain),
+          source: 'vaultwarden/server:1.37.0-alpine',
+          destination: std.format('registry.%s/vaultwarden:1.37.0-alpine', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/vaultwarden:1.36.0-alpine', std.extVar('secrets').domain),
+      image: std.format('registry.%s/vaultwarden:1.37.0-alpine', std.extVar('secrets').domain),
     },
     nextcloud: {
       cache: [
@@ -422,11 +422,20 @@
     dmh: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/dead-man-hand:0.3.4',
-          destination: std.format('registry.%s/dead-man-hand:0.3.4', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/dead-man-hand:0.4.0',
+          destination: std.format('registry.%s/dead-man-hand:0.4.0', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/dead-man-hand:0.3.4', std.extVar('secrets').domain),
+      image: std.format('registry.%s/dead-man-hand:0.4.0', std.extVar('secrets').domain),
+    },
+    mealie: {
+      cache: [
+        {
+          source: 'ghcr.io/mealie-recipes/mealie:v3.21.0',
+          destination: std.format('registry.%s/mealie:v3.21.0', std.extVar('secrets').domain),
+        },
+      ],
+      image: std.format('registry.%s/mealie:v3.21.0', std.extVar('secrets').domain),
     },
     generic_device_plugin: {
       cache: [
