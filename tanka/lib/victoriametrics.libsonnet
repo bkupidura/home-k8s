@@ -4,6 +4,18 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  logging+: {
+    parsers+:: {
+      'victoria-json': |||
+        [PARSER]
+            name victoria-json
+            format json
+            time_key ts
+            time_format %Y-%m-%dT%H:%M:%S.%LZ
+            time_keep On
+      |||,
+    },
+  },
   monitoring+: {
     extra_scrape+:: {
       [std.format('blackbox_icmp_%s', group_name)]: {
@@ -167,7 +179,7 @@
           },
         },
         podAnnotations: {
-          'fluentbit.io/parser': 'json',
+          'fluentbit.io/parser': 'victoria-json',
         },
         securityContext: {
           enabled: true,
@@ -202,7 +214,7 @@
           limits: { memory: '1200M' },
         },
         podAnnotations: {
-          'fluentbit.io/parser': 'json',
+          'fluentbit.io/parser': 'victoria-json',
         },
         securityContext: {
           enabled: true,

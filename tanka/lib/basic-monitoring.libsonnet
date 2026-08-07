@@ -1,6 +1,14 @@
 {
   logging: {
     parsers:: {
+      'json-rfc3339': |||
+        [PARSER]
+            name json-rfc3339
+            format json
+            time_key time
+            time_format %Y-%m-%dT%H:%M:%S%z
+            time_keep On
+      |||,
     },
     rules:: [
       {

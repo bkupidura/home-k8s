@@ -127,7 +127,7 @@
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '4000',
-                  'fluentbit.io/parser': 'json',
+                  'fluentbit.io/parser': 'json-rfc3339',
                 }),
   },
 }

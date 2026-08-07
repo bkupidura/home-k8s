@@ -73,7 +73,7 @@
       },
       deployment: {
         enabled: true,
-        replicas: 1,
+        replicas: 2,
         podAnnotations: {
           'prometheus.io/scrape': 'true',
           'prometheus.io/port': '9100',

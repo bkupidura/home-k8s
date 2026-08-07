@@ -32,7 +32,7 @@
               match kube.*
               merge_log on
               merge_log_key parsed
-              keep_log off
+              keep_log on
               annotations off
               k8s-logging.parser on
               k8s-logging.exclude on
@@ -84,7 +84,7 @@
         capabilities: { drop: ['ALL'] },
       },
       resources: {
-        limits: { memory: '64Mi', cpu: '50m' },
+        limits: { memory: '128M', cpu: '50m' },
       },
       image: {
         repository: std.splitLimitR($._version.fluentbit.image, ':', 1)[0],
@@ -122,6 +122,9 @@
         persistentVolume: {
           enabled: true,
           existingClaim: 'victoria-logs',
+        },
+        podAnnotations: {
+          'fluentbit.io/parser': 'victoria-json',
         },
         securityContext: {
           enabled: true,
@@ -170,7 +173,7 @@
           },
         },
         podAnnotations: {
-          'fluentbit.io/parser': 'json',
+          'fluentbit.io/parser': 'victoria-json',
         },
         securityContext: {
           enabled: true,
