@@ -74,7 +74,7 @@
                           v1.volumeMount.new('grafana-tmp', '/tmp'),
                         ])
                         + c.resources.withRequests({ memory: '100M', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '250M', cpu: '200m' })
+                        + c.resources.withLimits({ memory: '300M', cpu: '200m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withDrop('all')
                         + c.securityContext.withReadOnlyRootFilesystem(true)

@@ -33,7 +33,10 @@
                        + c.resources.withRequests({ memory: '8Mi' })
                        + c.resources.withLimits({ memory: '16Mi' })
                        + c.securityContext.withAllowPrivilegeEscalation(false)
-                       + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE', 'SYS_TIME', 'SETUID', 'SETGID'])
+                       + c.securityContext.withReadOnlyRootFilesystem(true)
+                       + c.securityContext.withRunAsUser(100)
+                       + c.securityContext.withRunAsGroup(101)
+                       + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE', 'SYS_TIME', 'FOWNER', 'CHOWN'])
                        + c.securityContext.capabilities.withDrop('all')
                        + c.readinessProbe.exec.withCommand(['chronyc', 'tracking'])
                        + c.readinessProbe.withInitialDelaySeconds(30)
@@ -48,9 +51,12 @@
                + d.metadata.withNamespace('home-infra')
                + d.spec.updateStrategy.withType('RollingUpdate')
                + d.spec.template.spec.withTerminationGracePeriodSeconds(3)
+               + d.spec.template.spec.securityContext.withFsGroup(101)
                + d.spec.template.spec.withVolumes([
                  v1.volume.fromHostPath('etc-localtime', '/etc/localtime') + v1.volume.hostPath.withType('File'),
                  v1.volume.fromHostPath('etc-timezone', '/etc/timezone') + v1.volume.hostPath.withType('File'),
-               ]),
+               ])
+               + d.emptyVolumeMount('chrony-lib', '/var/lib/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+               + d.emptyVolumeMount('chrony-run', '/var/run/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('1M')),
   },
 }

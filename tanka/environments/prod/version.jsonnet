@@ -6,11 +6,11 @@
     chrony: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/chrony:13062026',
-          destination: std.format('registry.%s/chrony:13062026', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/chrony:08082026',
+          destination: std.format('registry.%s/chrony:08082026', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/chrony:13062026', std.extVar('secrets').domain),
+      image: std.format('registry.%s/chrony:08082026', std.extVar('secrets').domain),
     },
     ubuntu: {
       cache: [
@@ -422,11 +422,11 @@
     dmh: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/dead-man-hand:0.4.0',
-          destination: std.format('registry.%s/dead-man-hand:0.4.0', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/dead-man-hand:0.4.1',
+          destination: std.format('registry.%s/dead-man-hand:0.4.1', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/dead-man-hand:0.4.0', std.extVar('secrets').domain),
+      image: std.format('registry.%s/dead-man-hand:0.4.1', std.extVar('secrets').domain),
     },
     mealie: {
       cache: [

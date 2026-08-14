@@ -427,7 +427,7 @@
           },
           {
             alert: 'K8sRunningPodsFlapping',
-            expr: 'abs(delta(kubelet_running_pods{job="kubernetes-nodes"}[1h])) > 2',
+            expr: 'abs(delta(kubelet_running_pods{job="kubernetes-nodes"}[1h])) > 5',
             'for': '20m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {

@@ -96,7 +96,7 @@
                              + c.livenessProbe.exec.withCommand([
                                '/bin/bash',
                                '-ec',
-                               'ps p1',
+                               'kill -0 1',
                              ])
                              + c.livenessProbe.withInitialDelaySeconds(30)
                              + c.livenessProbe.withPeriodSeconds(15)
