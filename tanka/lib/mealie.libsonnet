@@ -110,7 +110,7 @@
                         })
                         + c.withEnvFrom(v1.envFromSource.secretRef.withName('mealie-secrets'))
                         + c.resources.withRequests({ memory: '300M', cpu: '100m' })
-                        + c.resources.withLimits({ memory: '700M', cpu: '300m' })
+                        + c.resources.withLimits({ memory: '800M', cpu: '300m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.withRunAsUser(911)

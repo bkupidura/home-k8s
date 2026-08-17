@@ -113,6 +113,9 @@
         'prometheus.io/scrape': 'true',
         'prometheus.io/port': '9500',
       },
+      networkPolicies: {
+        restrictInternalTraffic: false,
+      },
     }),
     ingress_route: $._custom.ingress_route.new('longhorn', 'longhorn-system', ['websecure'], [
       {
