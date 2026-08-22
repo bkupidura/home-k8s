@@ -62,7 +62,7 @@
 
       - name: Get primary interface IP
         set_fact:
-          primary_ip: "{{ hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address }}"
+          primary_ip: "{{ hostvars[inventory_hostname].ansible_facts[os.primary_interface].ipv4.address }}"
 
       - name: Prepare K3s exec env
         set_fact:
@@ -115,7 +115,7 @@
     - block:
       - name: Get primary master IP
         set_fact:
-          primary_node_ip: "{{ item.value['ansible_' + item.value.os.primary_interface].ipv4.address }}"
+          primary_node_ip: "{{ item.value.ansible_facts[item.value.os.primary_interface].ipv4.address }}"
         with_dict: "{{ hostvars }}"
         when:
           - primary_node_ip is not defined
@@ -127,7 +127,7 @@
 
       - name: Get primary interface IP
         set_fact:
-          primary_ip: "{{ hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address }}"
+          primary_ip: "{{ hostvars[inventory_hostname].ansible_facts[os.primary_interface].ipv4.address }}"
 
       - name: Prepare K3s exec env
         set_fact:

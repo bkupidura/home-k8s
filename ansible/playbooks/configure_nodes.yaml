@@ -54,6 +54,11 @@
         cpu_governor: "{{ os.cpu_governor }}"
       include_tasks: tasks/base_config.yaml
 
+    - name: Configure LVM
+      vars:
+        vgs: "{{ os.lvm.vgs | default({}) }}"
+      include_tasks: tasks/configure_lvm.yaml
+
     - name: Mount additional disks
       vars:
         additional_mounts: "{{ os.additional_mounts | default([]) }}"

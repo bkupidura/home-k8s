@@ -1,0 +1,34 @@
+- name: Create volume groups
+  community.general.lvg:
+    vg: "{{ item.key }}"
+    pvs: "{{ item.value.disks }}"
+  with_dict: "{{ vgs }}"
+  become: true
+
+- name: Check existing logical volumes
+  stat:
+    path: "/dev/{{ item.0.key }}/{{ item.1.name }}"
+  with_subelements:
+    - "{{ vgs | dict2items }}"
+    - value.lvs
+    - skip_missing: true
+  register: lv_stat
+
+- name: Create logical volumes
+  community.general.lvol:
+    vg: "{{ item.item.0.key }}"
+    lv: "{{ item.item.1.name }}"
+    size: "{{ item.item.1.size }}"
+  loop: "{{ lv_stat.results }}"
+  when: not item.stat.exists
+  become: true
+
+- name: Create filesystems on logical volumes
+  community.general.filesystem:
+    dev: "/dev/{{ item.0.key }}/{{ item.1.name }}"
+    fstype: "{{ item.1.fstype | default('ext4') }}"
+  with_subelements:
+    - "{{ vgs | dict2items }}"
+    - value.lvs
+    - skip_missing: true
+  become: true

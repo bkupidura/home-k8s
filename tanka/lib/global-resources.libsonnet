@@ -127,7 +127,7 @@
       namespace: 'kube-system',
     },
     spec: {
-      config: '{\n            "name": "multus-dhcp-lan",\n            "plugins": [\n                {\n                    "type": "macvlan",\n                    "master": "net0",\n                    "ipam": {\n                        "type": "dhcp"\n                    }\n                }\n            ]\n        }',
+      config: '{\n            "name": "multus-dhcp-lan",\n            "plugins": [\n                {\n                    "type": "macvlan",\n                    "master": "vlan100",\n                    "ipam": {\n                        "type": "dhcp"\n                    }\n                }\n            ]\n        }',
     },
   },
   multus_dhcp_iot: {

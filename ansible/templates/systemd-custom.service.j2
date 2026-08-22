@@ -2,6 +2,7 @@
 [Unit]
 After={{ data.after }}
 Wants={{ data.wants }}
+StartLimitIntervalSec=0
 [Service]
 ExecStart={{ data.exec_start }}
 {% if data.environment_file is defined %}
@@ -10,5 +11,7 @@ EnvironmentFile={{ data.environment_file }}
 {% if data.user is defined %}
 User={{ data.user }}
 {% endif %}
+Restart=always
+RestartSec=5
 [Install]
 WantedBy={{ data.wanted_by }}

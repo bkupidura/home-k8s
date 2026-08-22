@@ -2,8 +2,8 @@ all:
   children:
     k8s_master_primary:
       hosts:
-        10.0.120.31:
+        10.0.100.31:
     k8s_master:
       hosts:
-        10.0.120.32:
-        10.0.120.33:
+        10.0.100.32:
+        10.0.100.33:

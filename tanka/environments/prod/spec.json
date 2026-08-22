@@ -5,7 +5,7 @@
     "name": "environments/prod"
   },
   "spec": {
-     "apiServer": "https://10.0.120.31:6443",
+     "apiServer": "https://10.0.100.31:6443",
      "injectLabels": true
   }
 }

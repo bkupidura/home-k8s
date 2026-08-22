@@ -73,3 +73,10 @@
         src: "../templates/multus-daemonset.yaml"
         permission: "0644"
   include_tasks: tasks/custom_files.yaml
+
+- name: Restart custom services
+  systemd:
+    name: "{{ item.key }}"
+    state: restarted
+  with_dict: "{{ k3s.service.create }}"
+  become: true

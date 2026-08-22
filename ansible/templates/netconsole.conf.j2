@@ -1,12 +1,12 @@
 {%- set local_port = "6666" %}
 {%- set remote_port = "6666" %}
-{%- set local_ip = hostvars[inventory_hostname]['ansible_' + os.primary_interface].ipv4.address %}
+{%- set local_ip = hostvars[inventory_hostname].ansible_facts[os.primary_interface].ipv4.address %}
 {%- set local_interface = os.primary_interface %}
 {%- set remote_destinations = [] %}
 {%- for host in hostvars %}
     {%- if host != 'localhost' -%}
-    {%- set remote_ip = hostvars[host]['ansible_' + hostvars[host].os.primary_interface].ipv4.address -%}
-    {%- set remote_mac = hostvars[host]['ansible_' + hostvars[host].os.primary_interface].macaddress -%}
+    {%- set remote_ip = hostvars[host].ansible_facts[hostvars[host].os.primary_interface].ipv4.address -%}
+    {%- set remote_mac = hostvars[host].ansible_facts[hostvars[host].os.primary_interface].macaddress -%}
     {%- if remote_ip != local_ip -%}
         {{ remote_destinations.append(local_port + "@" + local_ip + "/" + local_interface + "," + remote_port + "@" + remote_ip + "/" + remote_mac) }}
     {%- endif -%}

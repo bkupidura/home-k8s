@@ -10,6 +10,7 @@ package:
   install:
     - watchdog
     - cpufrequtils
+    - linux-tools-generic
     - avahi-daemon
     - jq
     - cryptsetup

@@ -2,7 +2,7 @@ global:
   timezone: "Europe/Warsaw"
   dns:
     servers:
-    - "10.0.120.1"
+    - "10.0.100.1"
 os:
   cpu_governor: performance
   ssh_keys:

@@ -2,12 +2,22 @@ os:
   primary_interface: net0
   primary_mac: C8:F7:50:FC:F4:A5
   vlans:
+    - 100
     - 200
   hostname: k3s-delta
+  lvm:
+    vgs:
+      vg_data:
+        disks:
+          - /dev/nvme0n1p3
+        lvs:
+          - name: lv_data
+            size: 60%FREE
+            fstype: ext4
   additional_mounts:
     - path: /var/lib/longhorn
       opts: defaults,noatime
-      src: /dev/nvme0n1p3
+      src: /dev/vg_data/lv_data
       fstype: ext4
 watchdog:
   module: iTCO_wdt
