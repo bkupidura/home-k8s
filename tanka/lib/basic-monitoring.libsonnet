@@ -108,7 +108,7 @@
             expr: 'min by (device, instance) (node_filesystem_free_bytes{device=~"/dev/[a-z]d[a-z][0-9]*"} / node_filesystem_size_bytes) < 0.1',
             labels: { service: 'system', severity: 'warning' },
             annotations: {
-              summary: 'High disk usage on {{ $labels.node }} on {{ $labels.device }} mounted as {{ $labels.mountpoint }}',
+              summary: 'High disk usage on {{ $labels.device }} mounted on {{ $labels.instance }}',
             },
           },
           {
@@ -409,20 +409,20 @@
           },
           {
             alert: 'K8sEndpointNotReady',
-            expr: 'kube_endpoint_address_not_ready / (kube_endpoint_address_not_ready + kube_endpoint_address_available) > 0.4',
+            expr: 'sum(kube_endpointslice_endpoints{ready="false"}) by (namespace, endpointslice) / sum(kube_endpointslice_endpoints) by (namespace, endpointslice) > 0.4',
             'for': '5m',
             labels: { service: 'k8s', severity: 'info' },
             annotations: {
-              summary: 'Endpoint {{ $labels.endpoint }} has more than 40% of not ready members for last 5m',
+              summary: 'Endpointslice {{ $labels.endpointslice }} in {{ $labels.namespace }} has more than 40% of not ready members for last 5m',
             },
           },
           {
             alert: 'K8sPendingPods',
-            expr: 'scheduler_pending_pods{job="kubernetes-nodes"} > 0',
+            expr: 'scheduler_pending_pods{job="kubernetes-apiservers"} > 0',
             'for': '5m',
             labels: { service: 'k8s', severity: 'warning' },
             annotations: {
-              summary: 'Pending pods on {{ $labels.kubernetes_io_hostname }} in queue {{ $labels.queue }}',
+              summary: 'Pending pods in queue {{ $labels.queue }}',
             },
           },
           {

@@ -8,6 +8,7 @@ brew install tanka
 brew install jsonnet-bundler
 brew install esolitos/ipa/sshpass
 brew install sops
+brew install pint
 ```
 
 ## Cluster deployment from scratch

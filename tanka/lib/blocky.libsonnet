@@ -10,7 +10,7 @@
         rules: [
           {
             alert: 'BlockyFailedDownload',
-            expr: 'delta(blocky_failed_download_count[10m]) > 0',
+            expr: 'delta(blocky_failed_downloads_total[10m]) > 0',
             labels: { service: 'blocky', severity: 'info' },
             annotations: {
               summary: 'Failed downloads increasing on {{ $labels.pod }}',

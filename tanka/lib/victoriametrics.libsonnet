@@ -241,6 +241,7 @@
               },
               {
                 job_name: 'kubernetes-apiservers',
+                max_scrape_size: '32MB',
                 kubernetes_sd_configs: [
                   { role: 'endpoints' },
                 ],
@@ -260,6 +261,7 @@
               },
               {
                 job_name: 'kubernetes-nodes',
+                max_scrape_size: '32MB',
                 scheme: 'https',
                 tls_config: {
                   ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
@@ -274,9 +276,16 @@
                     action: 'labelmap',
                     regex: '__meta_kubernetes_node_label_(.+)',
                   },
+                ],
+                // k3s runs kubelet, apiserver, etcd and scheduler in one process on
+                // control-plane nodes, so kubelet's own /metrics also exposes the whole
+                // embedded control plane's series here - already captured once, correctly,
+                // by the kubernetes-apiservers job.
+                metric_relabel_configs: [
                   {
-                    target_label: '__address__',
-                    replacement: 'kubernetes.default.svc:443',
+                    source_labels: ['__name__'],
+                    regex: '(apiserver|etcd|scheduler|workqueue|apiextensions)_.*',
+                    action: 'drop',
                   },
                 ],
               },
@@ -292,6 +301,7 @@
                   { role: 'node' },
                 ],
                 metrics_path: '/metrics/cadvisor',
+                honor_timestamps: false,
                 relabel_configs: [
                   {
                     action: 'labelmap',

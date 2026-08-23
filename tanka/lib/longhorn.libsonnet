@@ -7,7 +7,7 @@
         rules: [
           {
             alert: 'LonghornWrongVolumeRobustness',
-            expr: 'longhorn_volume_robustness > 1',
+            expr: 'longhorn_volume_robustness{state=~"degraded|faulted"} == 1',
             'for': '10m',
             labels: { service: 'longhorn', severity: 'warning' },
             annotations: {
