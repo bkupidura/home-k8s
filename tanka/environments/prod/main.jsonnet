@@ -34,6 +34,7 @@
 (import 'recorder.libsonnet') +
 (import 'sms-gammu.libsonnet') +
 (import 'esphome.libsonnet') +
+(import 'nfc2mqtt.libsonnet') +
 (import 'vaultwarden.libsonnet') +
 (import 'nextcloud.libsonnet') +
 (import 'freshrss.libsonnet') +

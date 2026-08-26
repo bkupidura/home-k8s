@@ -20,6 +20,9 @@ os:
       opts: defaults,noatime
       src: /dev/vg_data/lv_data
       fstype: ext4
+  udev_rules:
+    - name: mobile
+      rule: 'SUBSYSTEM=="tty", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1506", ENV{ID_USB_INTERFACE_NUM}=="00", SYMLINK+="mobile"'
 watchdog:
   module: iTCO_wdt
 k3s:

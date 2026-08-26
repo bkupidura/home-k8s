@@ -122,6 +122,7 @@ validators:
                 skip:
                     - ENC[AES256_GCM,data:v4s3Yllf5/j1jKVewv73IHNuep1LtkZgbjIqzw==,iv:L6yV43m7OkTNE51RS1LpJ/tkySbI0J/xxaQuC3Rsoy8=,tag:F9EUgnNCDU/fKLihUij2yA==,type:str]
                     - ENC[AES256_GCM,data:t92gXyp3DRkB6gKA9zkrjLYqLzY=,iv:uIqEcv03sfyWMRsSGFZmY/T2ud2ih7ZiR+P04ejj/ME=,tag:PZYmHBOI+26uBLHviscUww==,type:str]
+                    - ENC[AES256_GCM,data:mneoXD5AkkePOdX+D0jIqwZm1w==,iv:QiyNJCrKUmMjlix7ss3YYW1bCqrYcm4COvZiavTHmgo=,tag:W1QLSiGAqMikXh6Cea45CQ==,type:str]
         with_multiple_replicas: null
     daemonset:
         generic:
@@ -276,7 +277,7 @@ sops:
             T0xIaU1VUjA4dXNZcm83Tk8vK043QlUKQreA5skPV0Ut9LzVYNleSMSk8sJRqk6I
             sOIQqvTdrwluaXCXOqZI+8GhCIfb1mK+h97aBywXRumtEyP3OPuO2g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-08-17T19:42:31Z"
-    mac: ENC[AES256_GCM,data:plgbv+IQCiG4d8bzLHWwEMG1CJ6LGJZ0MOr9sKMB6gHW/nKJtqN0hRbMAeW3yBcEAQJl2OG3C2e0q27H/NKwyLiCFakjIlrjFt7ruIi0MeccZqMPjdeQRqIbTFkkqAtYsvUmO/4xN1+NdHYp711aFJcXs5wM8jn9aMw5G342Bjg=,iv:AC109ZcvAIkptYY2+D0RWA3ZnuWow/ee/Ejx6xnxGsw=,tag:7Eggeo7uDnFDo+6sYjsLJA==,type:str]
+    lastmodified: "2026-08-26T10:38:41Z"
+    mac: ENC[AES256_GCM,data:iDa05pVcQYBYyd/uViUM6cdj09nP5x546HlU7Cgs7NyenuNVMaRUvSDs1wEaflb938k2ivdnXSXU2gv1wqLNQ9QaEuDZ7wm0/pfUhLX2iJBrYniymnyofJz5DgkODupZ688ddpofftT8ydAPFxD5b33wjTS6COD3GM7PfMd+sr8=,iv:4wNfZpVrV5Ls5/IqfTJOHPke7EBrWvChDgOfRV7ZInk=,tag:ri3o6RaaT7Ug5kuhRffSLA==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.11.0

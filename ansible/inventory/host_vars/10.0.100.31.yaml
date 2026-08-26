@@ -19,6 +19,9 @@ os:
       opts: defaults,noatime
       src: /dev/vg_data/lv_data
       fstype: ext4
+  udev_rules:
+    - name: zigbee
+      rule: 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1cf1", ATTRS{idProduct}=="0030", ATTRS{serial}=="DE2151967", SYMLINK+="zigbee"'
 watchdog:
   module: iTCO_wdt
 k3s:

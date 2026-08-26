@@ -59,6 +59,16 @@
         vgs: "{{ os.lvm.vgs | default({}) }}"
       include_tasks: tasks/configure_lvm.yaml
 
+    - name: Configure module blacklist
+      vars:
+        modules: "{{ os.modprobe_blacklist | default([]) }}"
+      include_tasks: tasks/configure_module_blacklist.yaml
+
+    - name: Configure udev rules
+      vars:
+        udev_rules: "{{ os.udev_rules | default([]) }}"
+      include_tasks: tasks/configure_udev_rules.yaml
+
     - name: Mount additional disks
       vars:
         additional_mounts: "{{ os.additional_mounts | default([]) }}"

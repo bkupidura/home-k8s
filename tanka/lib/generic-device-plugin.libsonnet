@@ -21,7 +21,7 @@
                          std.manifestYamlDoc({
                            name: 'mobile',
                            groups: [
-                             { paths: [{ path: '/dev/ttyUSB0', mountPath: '/dev/mobile' }] },
+                             { paths: [{ path: '/dev/mobile', mountPath: '/dev/mobile' }] },
                            ],
                          }),
                          '--device',
@@ -35,14 +35,21 @@
                          std.manifestYamlDoc({
                            name: 'ups',
                            groups: [
-                             { paths: [{ path: '/dev/bus/usb/001/003', mountPath: '/dev/bus/usb/001/003' }] },
+                             { paths: [{ path: '/dev/usb-ups', mountPath: '/dev/bus/usb/001/003' }] },
                            ],
                          }),
                          '--device',
                          std.manifestYamlDoc({
                            name: 'zigbee',
                            groups: [
-                             { paths: [{ path: '/dev/ttyACM0', mountPath: '/dev/ttyACM0' }] },
+                             { paths: [{ path: '/dev/zigbee', mountPath: '/dev/ttyACM0' }] },
+                           ],
+                         }),
+                         '--device',
+                         std.manifestYamlDoc({
+                           name: 'nfc-reader',
+                           groups: [
+                             { paths: [{ path: '/dev/usb-nfc-reader', mountPath: '/dev/bus/usb/001/005' }] },
                            ],
                          }),
                        ])

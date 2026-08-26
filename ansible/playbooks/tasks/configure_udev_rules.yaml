@@ -1,0 +1,18 @@
+- name: create custom udev rules
+  vars:
+    create:
+      custom-udev-rules:
+        dst: /etc/udev/rules.d/99-custom.rules
+        src: "../templates/udev_rules.conf.j2"
+        permission: "0644"
+        execute: udevadm control --reload-rules
+  include_tasks: custom_files.yaml
+  when: udev_rules | default([]) | length > 0
+
+- name: trigger udev rules
+  command: udevadm trigger
+  become: true
+  when:
+    - udev_rules | default([]) | length > 0
+    - custom_file_created is defined
+    - custom_file_created.changed

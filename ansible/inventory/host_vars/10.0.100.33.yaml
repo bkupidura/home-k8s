@@ -19,9 +19,17 @@ os:
       opts: defaults,noatime
       src: /dev/vg_data/lv_data
       fstype: ext4
+  modprobe_blacklist:
+    - pn533_usb
+  udev_rules:
+    - name: ups
+      rule: 'SUBSYSTEM=="usb", ATTR{idVendor}=="051d", ATTR{idProduct}=="0002", ATTR{serial}=="4B2005P48202", MODE="0660", SYMLINK+="usb-ups"'
+    - name: nfc-reader
+      rule: 'SUBSYSTEM=="usb", ATTR{idVendor}=="072f", ATTR{idProduct}=="2200", MODE="0660", SYMLINK+="usb-nfc-reader"'
 watchdog:
   module: iTCO_wdt
 k3s:
   labels:
     video_processing: "true"
     ups_controller: "true"
+    nfc_controller: "true"

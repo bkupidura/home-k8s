@@ -428,6 +428,15 @@
       ],
       image: std.format('registry.%s/dead-man-hand:0.4.1', std.extVar('secrets').domain),
     },
+    nfc2mqtt: {
+      cache: [
+        {
+          source: 'ghcr.io/bkupidura/nfc2mqtt:0.1.7',
+          destination: std.format('registry.%s/nfc2mqtt:0.1.7', std.extVar('secrets').domain),
+        },
+      ],
+      image: std.format('registry.%s/nfc2mqtt:0.1.7', std.extVar('secrets').domain),
+    },
     mealie: {
       cache: [
         {

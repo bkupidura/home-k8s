@@ -1,0 +1,16 @@
+- name: create modprobe blacklist conf
+  vars:
+    create:
+      custom-modprobe-blacklist:
+        dst: /etc/modprobe.d/blacklist-custom.conf
+        src: "../templates/modprobe_blacklist.conf.j2"
+        permission: "0644"
+  include_tasks: custom_files.yaml
+  when: modules | default([]) | length > 0
+
+- name: unload blacklisted kernel modules
+  modprobe:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ modules | default([]) }}"
+  become: true
