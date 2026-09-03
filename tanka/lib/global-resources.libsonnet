@@ -30,7 +30,7 @@
                                                          '/bin/sh',
                                                          '-ec',
                                                          std.join('\n', [
-                                                           'restic check --read-data',
+                                                           'restic check --read-data || { rc=$?; restic unlock || true; exit $rc; }',
                                                          ]),
                                                        ])
                                                        + if std.get(std.extVar('secrets').restic.repo[repo_name], 'ssh_key', false) != false then c.withVolumeMounts([
