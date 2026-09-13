@@ -11,7 +11,7 @@ os:
     - user: ansible
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC8yktF6/N1ho0QYQX0uFT9EX2fv6VCJyz58o3knrpIu bartosz@banshee.local"
 k3s:
-  version: "v1.35.3+k3s1"
+  version: "v1.36.4+k3s1"
   cni_url: "https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz"
   service:
     create:

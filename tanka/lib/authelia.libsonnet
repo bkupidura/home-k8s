@@ -155,8 +155,8 @@
                         + c.withEnvMap({
                           TZ: $._config.tz,
                         })
-                        + c.resources.withRequests({ memory: '196Mi', cpu: '80m' })
-                        + c.resources.withLimits({ memory: '196Mi', cpu: '80m' })
+                        + c.resources.withRequests({ memory: '256M', cpu: '80m' })
+                        + c.resources.withLimits({ memory: '256M', cpu: '80m' })
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withAdd(['SETGID', 'SETUID'])
