@@ -9,7 +9,6 @@
 (import 'kubernetes-reflector.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
 (import 'reloader.libsonnet') +
-(import 'metallb.libsonnet') +
 (import 'cert-manager.libsonnet') +
 (import 'authelia.libsonnet') +
 (import 'traefik.libsonnet') +
@@ -19,6 +18,7 @@
 (import 'generic-device-plugin.libsonnet') +
 (import 'democratic-csi.libsonnet') +
 (import 'victoriametrics.libsonnet') +
+(import 'cilium.libsonnet') +
 (import 'victorialogs.libsonnet') +
 (import 'nut.libsonnet') +
 (import 'waf.libsonnet') +
@@ -60,8 +60,6 @@
       blocky_dns: '10.0.10.40',
       core_dns: '10.0.10.41',
       ingress: '10.0.10.42',
-      mqtt: '10.0.10.43',
-      valkey: '10.0.10.44',
       ntp: '10.0.10.45',
       waf: '10.0.10.47',
     },
@@ -81,18 +79,6 @@
         $._config.network.mgmt,
       ],
       pool: '0.pl.pool.ntp.org',
-    },
-    metallb: {
-      pool: [
-        '10.0.10.0/24',
-      ],
-      peers: [
-        {
-          my_asn: 64500,
-          address: '10.0.100.1',
-          asn: 64501,
-        },
-      ],
     },
     blocky: {
       blacklist: {

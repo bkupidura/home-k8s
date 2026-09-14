@@ -75,11 +75,7 @@
                [v1.servicePort.withPort(1883) + v1.servicePort.withProtocol('TCP') + v1.servicePort.withName('mqtt')]
              )
              + s.metadata.withNamespace('home-infra')
-             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mqtt' })
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.mqtt })
-             + s.spec.withType('LoadBalancer')
-             + s.spec.withExternalTrafficPolicy('Local')
-             + s.spec.withPublishNotReadyAddresses(false),
+             + s.metadata.withLabels({ 'app.kubernetes.io/name': 'mqtt' }),
     auth_rendered:: [
       {
         username: username,

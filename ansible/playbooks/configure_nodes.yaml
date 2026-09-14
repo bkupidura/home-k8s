@@ -52,6 +52,7 @@
         swap_file: "{{ os.swap_file }}"
         ssh_keys: "{{ os.ssh_keys + [ ansible_global_ssh_key ] }}"
         cpu_governor: "{{ os.cpu_governor }}"
+        modprobe_load: "{{ os.modprobe_load | default([]) }}"
       include_tasks: tasks/base_config.yaml
 
     - name: Configure LVM

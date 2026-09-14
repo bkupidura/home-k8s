@@ -105,5 +105,20 @@
         spec: spec,
       },
     },
+    cilium_network_policy: {
+      new(name, namespace, endpointSelector, ingress=[], egress=[]): {
+        apiVersion: 'cilium.io/v2',
+        kind: 'CiliumNetworkPolicy',
+        metadata: {
+          name: name,
+          namespace: namespace,
+        },
+        spec: {
+          endpointSelector: endpointSelector,
+          [if ingress != [] then 'ingress']: ingress,
+          [if egress != [] then 'egress']: egress,
+        },
+      },
+    },
   },
 }

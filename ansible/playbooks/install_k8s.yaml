@@ -76,10 +76,13 @@
 
       - name: Install K3s
         vars:
-          env: 
+          env:
             INSTALL_K3S_VERSION: "{{ k3s.version }}"
             INSTALL_K3S_EXEC: "{{ k3s_exec }}"
         include_tasks: tasks/install_k3s.yaml
+
+      - name: Install Cilium
+        include_tasks: tasks/install_cilium.yaml
 
       - name: Cat k3s token
         command: cat /var/lib/rancher/k3s/server/token

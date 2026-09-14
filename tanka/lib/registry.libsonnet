@@ -53,7 +53,7 @@
                        )
                      ),
     deployment: d.new('registry',
-                      if $.registry.restore then 0 else 1,
+                      1,
                       [
                         c.new('registry', $._version.registry.image)
                         + c.withImagePullPolicy('IfNotPresent')

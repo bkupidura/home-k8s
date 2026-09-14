@@ -1,0 +1,43 @@
+ipam:
+  operator:
+    clusterPoolIPv4PodCIDRList:
+      - "{{ cilium.pod_cidr }}"
+kubeProxyReplacement: false
+cni:
+  exclusive: false
+bpf:
+  vlanBypass:
+{% for vlan_id in cilium.vlan_bpf_bypass %}
+    - {{ vlan_id }}
+{% endfor %}
+bgpControlPlane:
+  enabled: true
+envoy:
+  enabled: true
+image:
+  repository: quay.io/cilium/cilium
+  tag: v{{ cilium.version }}
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  metrics:
+    enableOpenMetrics: true
+    enabled:
+      - dns
+      - "drop:labelsContext=source_namespace,source_pod,destination_namespace,destination_pod"
+      - "flow:labelsContext=source_namespace,source_pod,destination_namespace,destination_pod,traffic_direction"
+prometheus:
+  enabled: true
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9962"
+operator:
+  image:
+    repository: quay.io/cilium/operator
+    tag: v{{ cilium.version }}
+  prometheus:
+    enabled: true
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9963"

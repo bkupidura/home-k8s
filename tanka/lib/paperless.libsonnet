@@ -85,7 +85,7 @@
                         })
                         + c.withEnvFrom(v1.envFromSource.secretRef.withName('paperless-secrets'))
                         + c.resources.withRequests({ memory: '700M', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '2000M', cpu: '400m' })
+                        + c.resources.withLimits({ memory: '2300M', cpu: '400m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withAdd(['CHOWN', 'SETUID', 'SETGID', 'DAC_OVERRIDE'])
                         + c.securityContext.capabilities.withDrop('all')

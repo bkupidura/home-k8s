@@ -28,12 +28,19 @@ brew install pint
 
 `export KUBECONFIG=kube-config.yaml`
 
-## Deploy k8s workload
+##### Deploy k8s workload
 
 ```
 jb install github.com/jsonnet-libs/k8s-libsonnet/1.32@main
 ./scripts/tanka apply tanka/environments/prod/
 ```
+
+Trigger every `*-restore` CronJob.:
+
+```
+./scripts/prepare_backup_cmnds.sh restore | bash
+```
+
 
 ## Show ansible variables
 

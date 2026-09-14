@@ -11,7 +11,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'chrony' })
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.ntp })
+             + s.metadata.withAnnotations({ 'lbipam.cilium.io/ips': $._config.vip.ntp })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

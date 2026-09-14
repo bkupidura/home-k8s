@@ -122,7 +122,9 @@
       service: {
         spec: {
           externalTrafficPolicy: 'Local',
-          loadBalancerIP: $._config.vip.ingress,
+        },
+        annotations: {
+          'lbipam.cilium.io/ips': $._config.vip.ingress,
         },
       },
     }),

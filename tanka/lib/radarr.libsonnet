@@ -60,6 +60,48 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'radarr-config'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'radarr',
+      'arr',
+      { matchLabels: { 'app.kubernetes.io/name': 'radarr' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+            { matchLabels: { 'app.kubernetes.io/name': 'bazarr' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '7878', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'nzbget' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6789', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchPattern: '*' },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     ingress_route: $._custom.ingress_route.new('radarr', 'arr', ['websecure'], [
       {
         kind: 'Rule',

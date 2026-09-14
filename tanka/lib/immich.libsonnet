@@ -226,8 +226,8 @@
                                  + c.securityContext.capabilities.withAdd(['DAC_OVERRIDE', 'FOWNER', 'SETUID', 'SETGID', 'CHOWN'])
                                  + c.securityContext.capabilities.withDrop('all')
                                  + (if $.immich.update == false then
-                                      c.resources.withRequests({ cpu: '200m', memory: '200M' })
-                                      + c.resources.withLimits({ cpu: '350m', memory: '300M' })
+                                      c.resources.withRequests({ cpu: '300m', memory: '200M' })
+                                      + c.resources.withLimits({ cpu: '500m', memory: '300M' })
                                       + c.readinessProbe.exec.withCommand(['/usr/local/bin/healthcheck.sh'])
                                       + c.readinessProbe.withInitialDelaySeconds(20)
                                       + c.readinessProbe.withPeriodSeconds(15)

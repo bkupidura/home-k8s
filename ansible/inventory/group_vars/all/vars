@@ -18,7 +18,7 @@ k3s:
       custom-cni-dhcp:
         wants: network-online.target
         after: network.service
-        exec_start: /var/lib/rancher/k3s/data/cni/dhcp daemon
+        exec_start: /opt/cni/bin/dhcp daemon
         wanted_by: default.target
   args:
     - "--disable"
@@ -29,6 +29,9 @@ k3s:
     - "coredns"
     - "--disable"
     - "local-storage"
+    - "--flannel-backend"
+    - "none"
+    - "--disable-network-policy"
     - "--kube-apiserver-arg"
     - "default-unreachable-toleration-seconds=120"
     - "--kube-apiserver-arg"
@@ -40,3 +43,15 @@ k3s:
     - "--kubelet-arg"
     - "node-status-max-images=-1"
     - "--secrets-encryption"
+cilium:
+  cli_version: "v0.20.0"
+  version: "1.20.1"
+  pod_cidr: "10.42.0.0/16"
+  bgp:
+    local_asn: 64500
+    peer_asn: 64501
+    peer_address: "10.0.100.1"
+  lb_pool: "10.0.10.0/24"
+  vlan_bpf_bypass:
+    - 100
+    - 200

@@ -1,0 +1,94 @@
+- name: Download Cilium CLI
+  get_url:
+    url: "https://github.com/cilium/cilium-cli/releases/download/{{ cilium.cli_version }}/cilium-linux-amd64.tar.gz"
+    dest: /tmp/cilium-linux-amd64.tar.gz
+    checksum: "sha256:https://github.com/cilium/cilium-cli/releases/download/{{ cilium.cli_version }}/cilium-linux-amd64.tar.gz.sha256sum"
+  become: true
+
+- name: Install Cilium CLI
+  unarchive:
+    src: /tmp/cilium-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: true
+  become: true
+
+- name: Render Cilium Helm values
+  template:
+    src: "../templates/cilium-values.yaml.j2"
+    dest: /etc/cilium/values.yaml
+    mode: "0600"
+  register: cilium_values
+  become: true
+
+- name: Render Cilium BGP and LoadBalancer IP pool resources
+  template:
+    src: "../templates/cilium-bgp-resources.yaml.j2"
+    dest: /etc/cilium/bgp-resources.yaml
+    mode: "0600"
+  become: true
+
+- name: Check if Cilium is already installed
+  command: kubectl get daemonset cilium -n kube-system
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  register: cilium_installed
+  failed_when: false
+  changed_when: false
+  become: true
+
+- name: Install Cilium
+  command: >
+    cilium install --version {{ cilium.version }}
+    --namespace kube-system
+    --values /etc/cilium/values.yaml
+    --wait
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  become: true
+  when: cilium_installed.rc != 0
+
+- name: Upgrade Cilium
+  command: >
+    cilium upgrade --version {{ cilium.version }}
+    --namespace kube-system
+    --values /etc/cilium/values.yaml
+    --wait
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  become: true
+  when:
+    - cilium_installed.rc == 0
+    - cilium_values.changed
+
+- name: Wait for Cilium DaemonSet rollout
+  command: kubectl rollout status daemonset/cilium -n kube-system --timeout=300s
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  changed_when: false
+  become: true
+
+- name: Wait for Cilium operator rollout
+  command: kubectl rollout status deployment/cilium-operator -n kube-system --timeout=300s
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  changed_when: false
+  become: true
+
+- name: Report Cilium status
+  command: cilium status
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  register: cilium_status
+  failed_when: false
+  changed_when: false
+  become: true
+
+- name: Show Cilium status
+  debug:
+    msg: "{{ cilium_status.stdout_lines }}"
+
+- name: Apply Cilium BGP and LoadBalancer IP pool resources
+  command: kubectl apply -f /etc/cilium/bgp-resources.yaml
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  become: true

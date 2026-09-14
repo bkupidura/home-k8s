@@ -142,7 +142,7 @@
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false)
              + s.metadata.withNamespace('kube-system')
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.core_dns })
+             + s.metadata.withAnnotations({ 'lbipam.cilium.io/ips': $._config.vip.core_dns })
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'coredns' }),
     deployment: d.new('coredns',
                       2,

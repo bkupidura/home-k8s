@@ -129,12 +129,7 @@ data:
           "name": "default-cni-network",
           "plugins": [
             {
-              "type": "flannel",
-              "name": "flannel.1",
-                "delegate": {
-                  "isDefaultGateway": true,
-                  "hairpinMode": true
-                }
+              "type": "cilium-cni"
               },
               {
                 "type": "portmap",
@@ -185,7 +180,7 @@ spec:
         - "--multus-conf-file=auto"
         - "--multus-autoconfig-dir=/host/etc/cni/net.d"
         - "--cni-conf-dir=/host/etc/cni/net.d"
-        - "--multus-kubeconfig-file-host=/var/lib/rancher/k3s/agent/etc/cni/net.d/multus.d/multus.kubeconfig"
+        - "--multus-kubeconfig-file-host=/etc/cni/net.d/multus.d/multus.kubeconfig"
         resources:
           requests:
             cpu: "100m"
@@ -223,10 +218,10 @@ spec:
       volumes:
         - name: cni
           hostPath:
-            path: /var/lib/rancher/k3s/agent/etc/cni/net.d
+            path: /etc/cni/net.d
         - name: cnibin
           hostPath:
-            path: /var/lib/rancher/k3s/data/cni
+            path: /opt/cni/bin
         - name: multus-cfg
           configMap:
             name: multus-cni-config

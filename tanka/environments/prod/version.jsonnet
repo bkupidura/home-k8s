@@ -27,11 +27,6 @@
     kubernetes_reflector: {
       chart: '10.0.65',
     },
-    metallb: {
-      chart: '0.16.1',
-      controller: 'quay.io/metallb/controller:v0.16.1',
-      speaker: 'quay.io/metallb/speaker:v0.16.1',
-    },
     nut: {
       cache: [
         {

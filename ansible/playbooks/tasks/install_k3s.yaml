@@ -15,8 +15,8 @@
   environment: "{{ env }}"
   become: true
 
-- name: Wait for K3s
-  shell: "kubectl get node | grep '^{{ os.hostname }}[[:space:]]*Ready'"
+- name: Wait for K3s node registration
+  shell: "kubectl get node | grep '^{{ os.hostname }}[[:space:]]'"
   retries: 60
   delay: 2
   register: k3s_ready
@@ -50,14 +50,6 @@
     src: "{{ k3s.cni_url }}"
     dest: /opt/cni/bin/
     remote_src: yes
-  become: true
-
-- name: Create CNI symlinks
-  file:
-    src: "/opt/cni/bin/{{ item }}"
-    dest: "/var/lib/rancher/k3s/data/cni/{{ item }}"
-    state: link
-  with_items: ["dhcp", "macvlan"]
   become: true
 
 - name: Manage services

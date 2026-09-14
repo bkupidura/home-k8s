@@ -44,7 +44,7 @@
              )
              + s.metadata.withNamespace('home-infra')
              + s.metadata.withLabels({ 'app.kubernetes.io/name': 'blocky' })
-             + s.metadata.withAnnotations({ 'metallb.io/loadBalancerIPs': $._config.vip.blocky_dns })
+             + s.metadata.withAnnotations({ 'lbipam.cilium.io/ips': $._config.vip.blocky_dns })
              + s.spec.withType('LoadBalancer')
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),

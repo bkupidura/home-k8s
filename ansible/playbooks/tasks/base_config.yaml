@@ -91,6 +91,14 @@
         notify: ssh
   include_tasks: custom_files.yaml
 
+- name: Load kernel modules
+  modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+  loop: "{{ modprobe_load | default([]) }}"
+  become: true
+
 - name: Set sysctl
   sysctl:
     name: "{{ item.key }}"
