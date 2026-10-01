@@ -106,7 +106,7 @@
       },
     },
     cilium_network_policy: {
-      new(name, namespace, endpointSelector, ingress=[], egress=[]): {
+      new(name, namespace, endpointSelector, ingress=null, egress=null, ingressDeny=null, egressDeny=null): {
         apiVersion: 'cilium.io/v2',
         kind: 'CiliumNetworkPolicy',
         metadata: {
@@ -115,8 +115,10 @@
         },
         spec: {
           endpointSelector: endpointSelector,
-          [if ingress != [] then 'ingress']: ingress,
-          [if egress != [] then 'egress']: egress,
+          [if ingress != null then 'ingress']: ingress,
+          [if egress != null then 'egress']: egress,
+          [if ingressDeny != null then 'ingressDeny']: ingressDeny,
+          [if egressDeny != null then 'egressDeny']: egressDeny,
         },
       },
     },

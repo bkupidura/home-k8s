@@ -4,6 +4,20 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'freshrss', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '80', protocol: 'TCP' }] }] },
+        ],
+      },
+      mariadb+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'freshrss', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '3306', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -20,6 +34,47 @@
   },
   freshrss: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'freshrss',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'freshrss' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '80', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3306', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '80', protocol: 'TCP' }, { port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     service: s.new('freshrss',
                    { 'app.kubernetes.io/name': 'freshrss' },
                    [

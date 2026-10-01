@@ -3,6 +3,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } }], toPorts: [{ ports: [{ port: '9153', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -46,6 +55,68 @@
   },
   coredns: {
     kubelet_cluster_dns:: '10.43.0.10',
+    network_policy: $._custom.cilium_network_policy.new(
+      'coredns',
+      'kube-system',
+      { matchLabels: { 'app.kubernetes.io/name': 'coredns' } },
+      ingress=[
+        {
+          fromEntities: ['cluster'],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'TCP' }, { port: '53', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          fromCIDR: [
+            $._config.network.lan,
+            $._config.network.iot,
+            $._config.network.mgmt,
+            $._config.network.guest,
+            $._config.network.vpn,
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'TCP' }, { port: '53', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9153', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: ['9.9.9.10/32'],
+          toPorts: [
+            { ports: [{ port: '853', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: ['1.1.1.1/32'],
+          toPorts: [
+            { ports: [{ port: '853', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: [
+            std.format('%s/32', std.split(forward.server, ':')[0])
+            for forward in std.extVar('secrets').coredns.forward
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'TCP' }, { port: '53', protocol: 'UDP' }] },
+          ],
+        },
+      ],
+    ),
     service_account: $.k.core.v1.serviceAccount.new('coredns')
                      + $.k.core.v1.serviceAccount.metadata.withNamespace('kube-system'),
     cluster_role: $.k.rbac.v1.clusterRole.new('system:coredns')

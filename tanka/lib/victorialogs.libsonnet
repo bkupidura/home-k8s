@@ -1,6 +1,16 @@
 {
   local v1 = $.k.core.v1,
   local p = v1.persistentVolumeClaim,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'fluent-bit', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '2020', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'victoria-logs-single', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '9428', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     rules+:: [
       {
@@ -20,6 +30,45 @@
     ],
   },
   fluentbit: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'fluent-bit',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'fluent-bit' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '2020', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-logs-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     [if $.logging.parsers != null then 'parsers']:: [
       $.logging.parsers[parser]
       for parser in std.objectFields($.logging.parsers)
@@ -93,6 +142,46 @@
     }),
   },
   victoria_logs: {
+    network_policy_server: $._custom.cilium_network_policy.new(
+      'victoria-logs-single',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'victoria-logs-single', 'app.kubernetes.io/instance': 'victoria-logs-single' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'fluent-bit', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-alert', 'app.kubernetes.io/instance': 'victoria-logs-alert', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'grafana', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     rules_rendered:: [
       if std.get(group, 'enabled', true) then {
         name: group.name,
@@ -134,6 +223,60 @@
         },
       },
     }),
+    network_policy_alert: $._custom.cilium_network_policy.new(
+      'victoria-logs-alert',
+      'monitoring',
+      {
+        matchLabels: {
+          'app.kubernetes.io/name': 'victoria-metrics-alert',
+          'app.kubernetes.io/instance': 'victoria-logs-alert',
+        },
+      },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8880', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-logs-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'alertmanager', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9093', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     helm_alert: $._custom.helm.new('victoria-logs-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,

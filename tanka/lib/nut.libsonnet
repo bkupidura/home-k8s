@@ -3,6 +3,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'network-ups-tools', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '9199', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -53,6 +62,31 @@
     ],
   },
   nut: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'network-ups-tools',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'network-ups-tools' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9199', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { name: 'quick-ups-battery-check' } },
+            { matchLabels: { name: 'deep-ups-battery-check' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3493', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     cron_job_ups_quick_check: $._custom.cronjob.new('quick-ups-battery-check', 'home-infra', '0 20 25 * *', [
       $.k.core.v1.container.new('battery-check', $._version.nut.image)
       + $.k.core.v1.container.withImagePullPolicy('IfNotPresent')

@@ -4,6 +4,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'valkey', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '9121', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -55,6 +64,30 @@
   },
   valkey: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'valkey',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'valkey' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { name: 'valkey-backup' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6379', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9121', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy.valkey, 'ingress', []),
+      egress=[],
+    ),
     pvc: p.new('valkey')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])

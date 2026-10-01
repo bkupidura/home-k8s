@@ -4,6 +4,20 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'dmh', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'dmh', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -39,6 +53,55 @@
   },
   dmh: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'dmh',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'dmh' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchName: std.extVar('secrets').smtp.server },
+          ],
+          toPorts: [
+            { ports: [{ port: std.toString(std.extVar('secrets').smtp.port), protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('dmh')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])

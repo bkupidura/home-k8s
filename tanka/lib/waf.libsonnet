@@ -3,6 +3,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'waf', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     rules+:: [
       {
@@ -53,11 +62,49 @@
     ],
   },
   waf: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'waf',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'waf' } },
+      ingress=[
+        {
+          fromEntities: ['world'],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEntities: ['world'],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     nginx_snippet:: |||
       server {
           listen 443 ssl;
           http2 on;
           server_name %(domain)s;
+          resolver %(resolver)s valid=30s;
           set $upstream https://%(upstream)s;
           ssl_certificate %(cert_dir)s/tls.crt;
           ssl_certificate_key %(cert_dir)s/tls.key;
@@ -89,7 +136,7 @@
       }
     |||,
     nginx_config:: [
-      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: $._config.vip.ingress, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s'), cert_dir: std.extVar('secrets').waf.server[server_name].cert_dir }
+      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: 'traefik.traefik-system.svc.cluster.local', resolver: $.coredns.kubelet_cluster_dns, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s'), cert_dir: std.extVar('secrets').waf.server[server_name].cert_dir }
       for server_name in std.objectFields(std.extVar('secrets').waf.server)
     ],
     certs:: [

@@ -4,8 +4,106 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'node-red', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '1880', protocol: 'TCP' }] }] },
+        ],
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'node-red', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+      'broker-ha'+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'node-red', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '1883', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   node_red: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'node-red',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'node-red' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '1880', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'home-assistant', 'io.kubernetes.pod.namespace': 'smart-home' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8123', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '1883', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'sms-gammu' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '5000', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'recorder' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'unifi', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchName: 'api.bulksms.com' },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: std.format('%s/32', $._config.vip.ingress) },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('node-red')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])

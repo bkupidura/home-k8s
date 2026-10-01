@@ -2,7 +2,40 @@
   local v1 = $.k.core.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'broker-ha'+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'nfc2mqtt', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '1883', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   nfc2mqtt: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'nfc2mqtt',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'nfc2mqtt' } },
+      ingress=[],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '1883', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     secret: v1.secret.new('nfc2mqtt-secrets', {
               'config.yaml': std.base64(std.manifestYamlDoc({
                 nfc: {

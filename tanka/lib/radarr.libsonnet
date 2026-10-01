@@ -5,6 +5,20 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'radarr', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '7878', protocol: 'TCP' }] }] },
+        ],
+      },
+      nzbget+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'radarr', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '6789', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     rules+:: [
       {
@@ -93,8 +107,8 @@
           ],
         },
         {
-          toFQDNs: [
-            { matchPattern: '*' },
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
           ],
           toPorts: [
             { ports: [{ port: '443', protocol: 'TCP' }] },
@@ -149,8 +163,8 @@
                       { 'app.kubernetes.io/name': 'radarr' })
                 + d.pvcVolumeMount('radarr-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
-                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
-                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
+                + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('20M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('20M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr'),
   },

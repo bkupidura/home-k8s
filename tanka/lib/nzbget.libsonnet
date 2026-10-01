@@ -5,6 +5,15 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'nzbget', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '6789', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -34,6 +43,39 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'nzbget-config'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'nzbget',
+      'arr',
+      { matchLabels: { 'app.kubernetes.io/name': 'nzbget' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6789', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy.nzbget, 'ingress', []),
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '563', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     ingress_route: $._custom.ingress_route.new('nzbget', 'arr', ['websecure'], [
       {
         kind: 'Rule',

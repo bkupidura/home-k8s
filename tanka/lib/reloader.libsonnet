@@ -1,4 +1,13 @@
 {
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'reloader', 'io.kubernetes.pod.namespace': 'kube-system' } }], toPorts: [{ ports: [{ port: '9090', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -17,6 +26,29 @@
     ],
   },
   reloader: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'reloader',
+      'kube-system',
+      { matchLabels: { 'app.kubernetes.io/name': 'reloader' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9090', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     helm: $._custom.helm.new('reloader', 'reloader', 'https://stakater.github.io/stakater-charts', $._version.reloader.chart, 'kube-system', {
       reloader: {
         readOnlyRootFileSystem: true,

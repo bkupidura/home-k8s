@@ -4,6 +4,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '9104', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -70,6 +79,31 @@
   mariadb: {
     update:: $._config.update,
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'mariadb',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'mariadb' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { name: 'mariadb-backup' } },
+            { matchLabels: { name: 'mariadb-check' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3306', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9104', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy.mariadb, 'ingress', []),
+      egress=[],
+    ),
     secret: v1.secret.new('mariadb-secrets', {
       MARIADB_ROOT_PASSWORD: std.base64(std.extVar('secrets').mariadb.password),
       'client.cnf': std.base64(std.format(|||

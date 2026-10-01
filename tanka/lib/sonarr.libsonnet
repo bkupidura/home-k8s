@@ -5,6 +5,20 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'sonarr', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '8989', protocol: 'TCP' }] }] },
+        ],
+      },
+      nzbget+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'sonarr', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '6789', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     rules+:: [
       {
@@ -60,6 +74,48 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'sonarr-config'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'sonarr',
+      'arr',
+      { matchLabels: { 'app.kubernetes.io/name': 'sonarr' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+            { matchLabels: { 'app.kubernetes.io/name': 'bazarr' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8989', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'nzbget' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6789', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     ingress_route: $._custom.ingress_route.new('sonarr', 'arr', ['websecure'], [
       {
         kind: 'Rule',

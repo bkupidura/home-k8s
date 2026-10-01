@@ -4,6 +4,30 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'home-assistant', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8123', protocol: 'TCP' }] }] },
+        ],
+      },
+      mariadb+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'home-assistant', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '3306', protocol: 'TCP' }] }] },
+        ],
+      },
+      'broker-ha'+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'home-assistant', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '1883', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'home-assistant', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8123', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     extra_scrape+:: {
       home_assistant: {
@@ -25,6 +49,121 @@
   home_assistant: {
     update:: $._config.update,
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'home-assistant',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'home-assistant' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8123', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'node-red', 'io.kubernetes.pod.namespace': 'smart-home' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8123', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8123', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3306', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'nextcloud', 'io.kubernetes.pod.namespace': 'self-hosted' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '80', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '1883', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '8883', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: ['255.255.255.255/32'],
+          toPorts: [
+            { ports: [{ port: '7000', protocol: 'UDP' }, { port: '1900', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          toCIDR: ['239.255.255.250/32'],
+          toPorts: [
+            { ports: [{ port: '1900', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          toCIDR: ['224.0.0.251/32'],
+          toPorts: [
+            { ports: [{ port: '5353', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'EchoRequest' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('home-assistant')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])

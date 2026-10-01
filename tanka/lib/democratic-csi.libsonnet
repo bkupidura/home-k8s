@@ -24,6 +24,58 @@
   },
   democratic_csi: {
     namespace: $.k.core.v1.namespace.new('democratic-csi'),
+    network_policy_nfs_controller: $._custom.cilium_network_policy.new(
+      'democratic-csi-nfs-controller',
+      'democratic-csi',
+      {
+        matchLabels: {
+          'app.kubernetes.io/name': 'democratic-csi',
+          'app.kubernetes.io/instance': 'democratic-csi-nfs',
+          'app.kubernetes.io/component': 'controller-linux',
+        },
+      },
+      ingress=[],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: [std.format('%s/32', std.extVar('secrets').democratic_csi.http.host)],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_iscsi_controller: $._custom.cilium_network_policy.new(
+      'democratic-csi-iscsi-controller',
+      'democratic-csi',
+      {
+        matchLabels: {
+          'app.kubernetes.io/name': 'democratic-csi',
+          'app.kubernetes.io/instance': 'democratic-csi-iscsi',
+          'app.kubernetes.io/component': 'controller-linux',
+        },
+      },
+      ingress=[],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: [std.format('%s/32', std.extVar('secrets').democratic_csi.http.host)],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     iscsi_chap: $.k.core.v1.secret.new('democratic-csi-iscsi-chap', {})
                 + $.k.core.v1.secret.withStringData({
                   'node-db.node.session.auth.authmethod': 'CHAP',

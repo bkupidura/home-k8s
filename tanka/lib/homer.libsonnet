@@ -4,6 +4,15 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'homer', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -18,6 +27,22 @@
     ],
   },
   homer: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'homer',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'homer' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     service: s.new(
                'homer',
                { 'app.kubernetes.io/name': 'homer' },

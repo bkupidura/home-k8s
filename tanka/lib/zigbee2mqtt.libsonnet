@@ -4,6 +4,20 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'zigbee2mqtt', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+      'broker-ha'+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'zigbee2mqtt', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '1883', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -20,6 +34,39 @@
   },
   zigbee2mqtt: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'zigbee2mqtt',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'zigbee2mqtt' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '1883', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('zigbee2mqtt')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])

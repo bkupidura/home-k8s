@@ -1,4 +1,15 @@
 {
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'cert-manager', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'controller', 'io.kubernetes.pod.namespace': 'cert-manager' } }], toPorts: [{ ports: [{ port: '9402', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'webhook', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'webhook', 'io.kubernetes.pod.namespace': 'cert-manager' } }], toPorts: [{ ports: [{ port: '9402', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'cainjector', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'cainjector', 'io.kubernetes.pod.namespace': 'cert-manager' } }], toPorts: [{ ports: [{ port: '9402', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -18,6 +29,103 @@
   },
   cert_manager: {
     namespace: $.k.core.v1.namespace.new('cert-manager'),
+    network_policy_controller: $._custom.cilium_network_policy.new(
+      'cert-manager',
+      'cert-manager',
+      { matchLabels: { 'app.kubernetes.io/name': 'cert-manager', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'controller' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9402', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: ['9.9.9.10/32', '1.1.1.1/32'],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_webhook: $._custom.cilium_network_policy.new(
+      'cert-manager-webhook',
+      'cert-manager',
+      { matchLabels: { 'app.kubernetes.io/name': 'webhook', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'webhook' } },
+      ingress=[
+        {
+          fromEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '10250', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9402', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_cainjector: $._custom.cilium_network_policy.new(
+      'cert-manager-cainjector',
+      'cert-manager',
+      { matchLabels: { 'app.kubernetes.io/name': 'cainjector', 'app.kubernetes.io/instance': 'cert-manager', 'app.kubernetes.io/component': 'cainjector' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9402', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     secret: $.k.core.v1.secret.new('cert-manager', {
               token: std.base64(std.extVar('secrets').cert_manager.digialocean.token),
             })

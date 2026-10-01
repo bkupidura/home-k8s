@@ -4,6 +4,15 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'esphome', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '6052', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -19,6 +28,45 @@
     ],
   },
   esphome: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'esphome',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'esphome' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6052', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: [$._config.network.iot],
+          toPorts: [
+            { ports: [{ port: '6053', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('esphome')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])

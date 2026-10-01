@@ -4,6 +4,22 @@
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
   sms_gammu: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'sms-gammu',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'sms-gammu' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'node-red' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '5000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     secret: $.k.core.v1.secret.new('sms-gammu-secret', {
               'credentials.txt': std.base64(std.format('admin:%s', std.extVar('secrets').sms_gammu.password)),
             })

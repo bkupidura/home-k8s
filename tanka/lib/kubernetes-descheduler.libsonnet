@@ -1,5 +1,19 @@
 {
   kubernetes_descheduler: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'descheduler',
+      'kube-system',
+      { matchLabels: { 'app.kubernetes.io/name': 'descheduler' } },
+      ingress=[],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     helm: $._custom.helm.new('descheduler', 'descheduler', 'https://kubernetes-sigs.github.io/descheduler/', $._version.kubernetes_descheduler.chart, 'kube-system', {
       kind: 'Deployment',
       deschedulingInterval: '10m',

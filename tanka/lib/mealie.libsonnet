@@ -4,8 +4,62 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'mealie', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '9000', protocol: 'TCP' }] }] },
+        ],
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'mealie', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   mealie: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'mealie',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'mealie' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchName: std.extVar('secrets').smtp.server },
+          ],
+          toPorts: [
+            { ports: [{ port: std.toString(std.extVar('secrets').smtp.port), protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+            { cidr: std.format('%s/32', $._config.vip.ingress) },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('mealie')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])

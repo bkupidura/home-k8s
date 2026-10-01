@@ -4,7 +4,82 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'grafana', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '3000', protocol: 'TCP' }] }] },
+        ],
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'grafana', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+      mariadb+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'grafana', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '3306', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   grafana: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'grafana',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'grafana' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3306', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-logs-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+            { cidr: std.format('%s/32', $._config.vip.ingress) },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     service: s.new(
                'grafana',
                { 'app.kubernetes.io/name': 'grafana' },

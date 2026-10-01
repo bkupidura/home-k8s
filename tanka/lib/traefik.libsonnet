@@ -1,4 +1,13 @@
 {
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } }], toPorts: [{ ports: [{ port: '9100', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     parsers+:: {
       traefik: |||
@@ -44,6 +53,67 @@
   },
   traefik: {
     namespace: $.k.core.v1.namespace.new('traefik-system'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'traefik',
+      'traefik-system',
+      { matchLabels: { 'app.kubernetes.io/name': 'traefik' } },
+      ingress=[
+        {
+          fromCIDR: [
+            $._config.network.lan,
+            $._config.network.iot,
+            $._config.network.mgmt,
+            $._config.network.guest,
+            $._config.network.vpn,
+          ],
+          toPorts: [
+            { ports: [{ port: '8000', protocol: 'TCP' }, { port: '8443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromCIDR: [
+            $._config.network.lan,
+            $._config.network.iot,
+            $._config.network.mgmt,
+            $._config.network.guest,
+            $._config.network.vpn,
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+        {
+          fromEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '8443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9100', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy.traefik, 'ingress', []),
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+      ] + std.get($.cilium.policy.traefik, 'egress', []),
+    ),
     helm: $._custom.helm.new('traefik', 'traefik', 'https://helm.traefik.io/traefik', $._version.traefik.chart, 'traefik-system', {
       resources: {
         requests: { cpu: '200m', memory: '120Mi' },
@@ -82,6 +152,8 @@
       },
       persistence: { enabled: false },
       additionalArguments: [
+        '--global.checkNewVersion=false',
+        '--global.sendAnonymousUsage=false',
         '--accesslog',
         '--accesslog.format=json',
         '--serversTransport.insecureSkipVerify=true',

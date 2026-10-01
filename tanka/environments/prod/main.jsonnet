@@ -5,6 +5,7 @@
 (import 'secret.libsonnet') +
 (import 'storage.libsonnet') +
 (import 'basic-monitoring.libsonnet') +
+(import 'cilium.libsonnet') +
 (import 'coredns.libsonnet') +
 (import 'kubernetes-reflector.libsonnet') +
 (import 'kubernetes-descheduler.libsonnet') +
@@ -18,7 +19,6 @@
 (import 'generic-device-plugin.libsonnet') +
 (import 'democratic-csi.libsonnet') +
 (import 'victoriametrics.libsonnet') +
-(import 'cilium.libsonnet') +
 (import 'victorialogs.libsonnet') +
 (import 'nut.libsonnet') +
 (import 'waf.libsonnet') +
@@ -70,7 +70,16 @@
       iot: '10.0.150.0/24',
       guest: '10.0.160.0/24',
       vpn: '10.0.20.0/24',
+      vip: '10.0.10.0/24',
     },
+    cilium_network_local: [
+      $._config.network.mgmt,
+      $._config.network.lan,
+      $._config.network.iot,
+      $._config.network.guest,
+      $._config.network.vpn,
+      $._config.network.vip,
+    ],
     tz: 'Europe/Warsaw',
     chrony: {
       allow: [

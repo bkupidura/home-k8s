@@ -3,7 +3,32 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.daemonSet,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'generic-device-plugin', 'io.kubernetes.pod.namespace': 'kube-system' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   generic_device_plugin: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'generic-device-plugin',
+      'kube-system',
+      { matchLabels: { 'app.kubernetes.io/name': 'generic-device-plugin' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     daemonset: d.new('generic-device-plugin',
                      [
                        c.new('generic-device-plugin', $._version.generic_device_plugin.image)

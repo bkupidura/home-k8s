@@ -4,6 +4,28 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'immich', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '2283', protocol: 'TCP' }] }] },
+        ],
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'immich', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+      valkey+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'immich', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '6379', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'immich', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8081', protocol: 'TCP' }, { port: '8082', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     extra_scrape+:: {
       immich: {
@@ -20,6 +42,81 @@
   immich: {
     update:: $._config.update,
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'immich',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'immich' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '2283', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8081', protocol: 'TCP' }, { port: '8082', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'immich-postgres', 'io.kubernetes.pod.namespace': 'self-hosted' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '5432', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'valkey', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6379', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: std.format('%s/32', $._config.vip.ingress) },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_postgres: $._custom.cilium_network_policy.new(
+      'immich-postgres',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'immich-postgres' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'immich' } },
+            { matchLabels: { name: 'immich-postgres-backup' } },
+            { matchLabels: { name: 'immich-postgres-restore' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '5432', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     pvc_immich: p.new('immich-data')
                 + p.metadata.withNamespace('self-hosted')
                 + p.spec.withAccessModes(['ReadWriteOnce'])

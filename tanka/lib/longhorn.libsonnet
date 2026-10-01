@@ -1,5 +1,19 @@
 {
   local s = $.k.storage.v1,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'longhorn', app: 'longhorn-ui', 'io.kubernetes.pod.namespace': 'longhorn-system' } }], toPorts: [{ ports: [{ port: '80', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } }], toPorts: [{ ports: [{ port: '9500', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {

@@ -5,6 +5,15 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'bazarr', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '6767', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -34,6 +43,55 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'bazarr-config'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'bazarr',
+      'arr',
+      { matchLabels: { 'app.kubernetes.io/name': 'bazarr' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6767', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'sonarr' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8989', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'radarr' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '7878', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }, { port: '80', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     ingress_route: $._custom.ingress_route.new('bazarr', 'arr', ['websecure'], [
       {
         kind: 'Rule',

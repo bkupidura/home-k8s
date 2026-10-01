@@ -4,6 +4,25 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'paperless', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '8000', protocol: 'TCP' }] }] },
+        ],
+      },
+      valkey+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'paperless', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '6379', protocol: 'TCP' }] }] },
+        ],
+      },
+      mariadb+: {
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'paperless', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '3306', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -21,6 +40,63 @@
   paperless: {
     update:: $._config.update,
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'paperless',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'paperless' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '3306', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'valkey', 'io.kubernetes.pod.namespace': 'home-infra' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '6379', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '993', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('paperless')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -82,10 +158,11 @@
                           PAPERLESS_TASK_WORKERS: '1',
                           PAPERLESS_THREADS_PER_WORKER: '1',
                           PAPERLESS_EMAIL_TASK_CRON: '*/10 * * * *',
+                          PAPERLESS_CONVERT_MEMORY_LIMIT: '100',
                         })
                         + c.withEnvFrom(v1.envFromSource.secretRef.withName('paperless-secrets'))
-                        + c.resources.withRequests({ memory: '700M', cpu: '300m' })
-                        + c.resources.withLimits({ memory: '2300M', cpu: '400m' })
+                        + c.resources.withRequests({ memory: '700M', cpu: '400m' })
+                        + c.resources.withLimits({ memory: '2000M', cpu: '500m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withAdd(['CHOWN', 'SETUID', 'SETGID', 'DAC_OVERRIDE'])
                         + c.securityContext.capabilities.withDrop('all')
@@ -96,7 +173,7 @@
                              + c.readinessProbe.withTimeoutSeconds(1)
                              + c.livenessProbe.httpGet.withPath('/')
                              + c.livenessProbe.httpGet.withPort('http')
-                             + c.livenessProbe.withInitialDelaySeconds(240)
+                             + c.livenessProbe.withInitialDelaySeconds(300)
                              + c.livenessProbe.withPeriodSeconds(10)
                              + c.livenessProbe.withTimeoutSeconds(3)
                            else {}),

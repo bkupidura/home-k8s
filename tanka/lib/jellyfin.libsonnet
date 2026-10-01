@@ -5,6 +5,18 @@
   local st = $.k.storage.v1,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'jellyfin', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '8096', protocol: 'TCP' }] }] },
+        ],
+        ingress+:: [
+          { fromEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'jellyfin', 'io.kubernetes.pod.namespace': 'arr' } }], toPorts: [{ ports: [{ port: '8443', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   jellyfin: {
     update:: $._config.update,
     restore:: $._config.restore,
@@ -21,6 +33,40 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'jellyfin-config'),
+    network_policy: $._custom.cilium_network_policy.new(
+      'jellyfin',
+      'arr',
+      { matchLabels: { 'app.kubernetes.io/name': 'jellyfin' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8096', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+            { cidr: std.format('%s/32', $._config.vip.ingress) },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     ingress_route: $._custom.ingress_route.new('jellyfin', 'arr', ['websecure'], [
       {
         kind: 'Rule',

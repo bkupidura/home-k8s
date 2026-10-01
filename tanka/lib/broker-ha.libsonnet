@@ -3,6 +3,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'broker-ha', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -58,6 +67,47 @@
     ],
   },
   broker_ha: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'broker-ha',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'broker-ha' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '7946', protocol: 'TCP' }, { port: '7946', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy['broker-ha'], 'ingress', []),
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'broker-ha' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '7946', protocol: 'TCP' }, { port: '7946', protocol: 'UDP' }] },
+          ],
+        },
+      ],
+    ),
     service_headless: s.new(
                         'broker-headless',
                         { 'app.kubernetes.io/name': 'broker-ha' },

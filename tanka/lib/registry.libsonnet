@@ -4,8 +4,33 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'registry', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '5000', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   registry: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'registry',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'registry' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '5000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[],
+    ),
     pvc: p.new('registry')
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])

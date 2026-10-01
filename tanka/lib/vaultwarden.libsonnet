@@ -4,6 +4,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'vaultwarden', 'io.kubernetes.pod.namespace': 'self-hosted' } }], toPorts: [{ ports: [{ port: '80', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     rules+:: [
       {
@@ -46,6 +55,39 @@
   },
   vaultwarden: {
     restore:: $._config.restore,
+    network_policy: $._custom.cilium_network_policy.new(
+      'vaultwarden',
+      'self-hosted',
+      { matchLabels: { 'app.kubernetes.io/name': 'vaultwarden' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '80', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '80', protocol: 'TCP' }, { port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('vaultwarden')
          + p.metadata.withNamespace('self-hosted')
          + p.spec.withAccessModes(['ReadWriteOnce'])

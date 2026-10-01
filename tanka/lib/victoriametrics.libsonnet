@@ -4,6 +4,28 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-alert', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8880', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8428', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'alertmanager', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '9093', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8428', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-alert', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8880', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'alertmanager', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '9093', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'dmh-victoria-metrics', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'kube-state-metrics', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }, { port: '8081', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'prometheus-blackbox-exporter', 'io.kubernetes.pod.namespace': 'monitoring' } }], toPorts: [{ ports: [{ port: '9115', protocol: 'TCP' }] }] },
+          { toEntities: ['host', 'remote-node'], toPorts: [{ ports: [{ port: '9100', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   logging+: {
     parsers+:: {
       'victoria-json': |||
@@ -111,6 +133,67 @@
       }
       for group in $.monitoring.rules
     ],
+    network_policy_server: $._custom.cilium_network_policy.new(
+      'victoria-metrics-single',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-alert', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'grafana', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '10250', protocol: 'TCP' }] },
+          ],
+        },
+      ] + std.get($.cilium.policy['victoria-metrics-single'], 'egress', []),
+    ),
     pvc_server: p.new('victoria-metrics')
                 + p.metadata.withNamespace('monitoring')
                 + p.spec.withAccessModes(['ReadWriteOnce'])
@@ -140,6 +223,60 @@
         middlewares: [{ name: 'lan-whitelist', namespace: 'traefik-system' }, { name: 'auth-authelia', namespace: 'traefik-system' }],
       },
     ], true),
+    network_policy_alert: $._custom.cilium_network_policy.new(
+      'victoria-metrics-alert',
+      'monitoring',
+      {
+        matchLabels: {
+          'app.kubernetes.io/name': 'victoria-metrics-alert',
+          'app.kubernetes.io/instance': 'victoria-metrics-alert',
+        },
+      },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8880', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8880', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'alertmanager', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9093', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     helm_alert: $._custom.helm.new('victoria-metrics-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
       server: {
         enabled: true,
@@ -234,6 +371,8 @@
                     names: [
                       'victoria-metrics-alert-server.monitoring.svc.cluster.local',
                       'victoria-metrics-single-server.monitoring.svc.cluster.local',
+                      'victoria-logs-alert-victoria-metrics-alert-server.monitoring.svc.cluster.local',
+                      'victoria-logs-single-server.monitoring.svc.cluster.local',
                     ],
                     type: 'SRV',
                   },
@@ -606,6 +745,55 @@
         },
       },
     }),
+    network_policy_alertmanager: $._custom.cilium_network_policy.new(
+      'alertmanager',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'alertmanager' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9093', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-alert', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9093', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchName: std.extVar('secrets').smtp.server },
+          ],
+          toPorts: [
+            { ports: [{ port: std.toString(std.extVar('secrets').smtp.port), protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'dmh-victoria-metrics', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     helm_alertmanager_values_secret: $._custom.helm.valuesSecret('alertmanager-values', {
       image: {
         repository: std.splitLimitR($._version.alertmanager.image, ':', 1)[0],
@@ -708,6 +896,62 @@
       },
     }),
     helm_alertmanager: $._custom.helm.new('alertmanager', 'alertmanager', 'https://prometheus-community.github.io/helm-charts', $._version.alertmanager.chart, 'monitoring', valuesSecretObj=self.helm_alertmanager_values_secret),
+    network_policy_kube_state_metrics: $._custom.cilium_network_policy.new(
+      'kube-state-metrics',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'kube-state-metrics' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }, { port: '8081', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_blackbox_exporter: $._custom.cilium_network_policy.new(
+      'prometheus-blackbox-exporter',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'prometheus-blackbox-exporter' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9115', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toCIDR: [
+            $._config.network.mgmt,
+            $._config.network.lan,
+            $._config.network.iot,
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'EchoRequest' }] },
+          ],
+        },
+        {
+          toEntities: ['host', 'remote-node'],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'EchoRequest' }] },
+          ],
+        },
+      ],
+    ),
     helm_kube_state_metrics: $._custom.helm.new('kube-state-metrics', 'kube-state-metrics', 'https://prometheus-community.github.io/helm-charts', $._version.kube_state_metrics.chart, 'monitoring', {
       image: {
         registry: $._version.kube_state_metrics.registry,
@@ -743,6 +987,82 @@
         capabilities: { drop: ['ALL'] },
       },
     }),
+    network_policy_metrics_server: $._custom.cilium_network_policy.new(
+      'metrics-server',
+      'kube-system',
+      { matchLabels: { 'k8s-app': 'metrics-server' } },
+      ingress=[
+        {
+          fromEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '10250', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '10250', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_dmh: $._custom.cilium_network_policy.new(
+      'dmh-victoria-metrics',
+      'monitoring',
+      { matchLabels: { 'app.kubernetes.io/name': 'dmh-victoria-metrics' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'alertmanager', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toFQDNs: [
+            { matchName: std.extVar('secrets').smtp.server },
+          ],
+          toPorts: [
+            { ports: [{ port: std.toString(std.extVar('secrets').smtp.port), protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc_dmh: p.new('dmh-victoria-metrics')
              + p.metadata.withNamespace('monitoring')
              + p.spec.withAccessModes(['ReadWriteOnce'])

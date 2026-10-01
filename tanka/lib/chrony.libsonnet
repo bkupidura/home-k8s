@@ -4,6 +4,37 @@
   local c = v1.container,
   local d = $.k.apps.v1.daemonSet,
   chrony: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'chrony',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'chrony' } },
+      ingress=[
+        {
+          fromCIDR: $._config.chrony.allow,
+          toPorts: [
+            { ports: [{ port: '123', protocol: 'UDP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '123', protocol: 'UDP' }] },
+          ],
+        },
+      ],
+    ),
     service: s.new(
                'chrony',
                { 'app.kubernetes.io/name': 'chrony' },

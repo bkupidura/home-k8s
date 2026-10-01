@@ -4,6 +4,20 @@
   local p = v1.persistentVolumeClaim,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      traefik+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'recorder', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'recorder', 'io.kubernetes.pod.namespace': 'smart-home' } }], toPorts: [{ ports: [{ port: '8080', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -55,6 +69,45 @@
     ],
   },
   recorder: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'recorder',
+      'smart-home',
+      { matchLabels: { 'app.kubernetes.io/name': 'recorder' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+            { matchLabels: { 'app.kubernetes.io/name': 'node-red' } },
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8080', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toCIDR: [$._config.network.iot],
+          toPorts: [
+            { ports: [{ port: '554', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: [std.format('%s/32', std.split(std.extVar('secrets').recorder.server, ':')[0])],
+          toPorts: [
+            { ports: [{ port: std.split(std.extVar('secrets').recorder.server, ':')[1], protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     pvc: p.new('recorder')
          + p.metadata.withNamespace('smart-home')
          + p.spec.withAccessModes(['ReadWriteOnce'])

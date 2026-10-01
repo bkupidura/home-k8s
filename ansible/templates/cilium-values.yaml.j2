@@ -1,3 +1,5 @@
+annotations:
+  reloader.stakater.com/auto: "true"
 ipam:
   operator:
     clusterPoolIPv4PodCIDRList:
@@ -21,6 +23,15 @@ hubble:
   enabled: true
   relay:
     enabled: true
+  export:
+    static:
+      enabled: true
+      filePath: /var/run/cilium/hubble/flows.log
+      allowList:
+        - '{"verdict":["DROPPED","AUDIT"]}'
+      fileMaxSizeMb: 50
+      fileMaxBackups: 20
+      fileCompress: true
   metrics:
     enableOpenMetrics: true
     enabled:

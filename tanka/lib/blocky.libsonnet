@@ -3,6 +3,15 @@
   local s = v1.service,
   local c = v1.container,
   local d = $.k.apps.v1.deployment,
+  cilium+: {
+    policy+: {
+      'victoria-metrics-single'+: {
+        egress+:: [
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'blocky', 'io.kubernetes.pod.namespace': 'home-infra' } }], toPorts: [{ ports: [{ port: '4000', protocol: 'TCP' }] }] },
+        ],
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
@@ -37,6 +46,77 @@
     ],
   },
   blocky: {
+    network_policy: $._custom.cilium_network_policy.new(
+      'blocky',
+      'home-infra',
+      { matchLabels: { 'app.kubernetes.io/name': 'blocky' } },
+      ingress=[
+        {
+          fromCIDR: [
+            $._config.network.lan,
+            $._config.network.iot,
+            $._config.network.mgmt,
+            $._config.network.guest,
+            $._config.network.vpn,
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          fromCIDR: [
+            $._config.network.lan,
+            $._config.network.iot,
+            $._config.network.mgmt,
+            $._config.network.guest,
+            $._config.network.vpn,
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '4000', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }] },
+          ],
+        },
+        {
+          toCIDR: [std.format('%s/32', $.coredns.kubelet_cluster_dns)],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
+          ],
+        },
+        {
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
+          ],
+          toPorts: [
+            { ports: [{ port: '443', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
     service: s.new(
                'blocky',
                { 'app.kubernetes.io/name': 'blocky' },
