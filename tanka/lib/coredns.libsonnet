@@ -95,13 +95,7 @@
           ],
         },
         {
-          toCIDR: ['9.9.9.10/32'],
-          toPorts: [
-            { ports: [{ port: '853', protocol: 'TCP' }] },
-          ],
-        },
-        {
-          toCIDR: ['1.1.1.1/32'],
+          toCIDR: [std.format('%s/32', u.ip) for u in $._config.coredns.upstreams],
           toPorts: [
             { ports: [{ port: '853', protocol: 'TCP' }] },
           ],
@@ -146,6 +140,31 @@
       $.coredns.forward_snippet % forward
       for forward in std.extVar('secrets').coredns.forward
     ],
+    dot_block_snippet:: |||
+      .:%(port)d {
+          forward . tls://%(ip)s {
+              tls_servername %(servername)s
+          }
+          cache 600 . {
+              success 3000
+              denial 500
+              prefetch 10 300s
+              servfail 10s
+          }
+      }
+    |||,
+    dot_blocks:: [
+      $.coredns.dot_block_snippet % {
+        port: 5301 + i,
+        ip: $._config.coredns.upstreams[i].ip,
+        servername: $._config.coredns.upstreams[i].servername,
+      }
+      for i in std.range(0, std.length($._config.coredns.upstreams) - 1)
+    ],
+    dot_forward_targets:: std.join(' ', [
+      std.format('127.0.0.1:%d', 5301 + i)
+      for i in std.range(0, std.length($._config.coredns.upstreams) - 1)
+    ]),
     zone: v1.configMap.new('coredns-zones', {
             [std.format('%s.db', domain)]: std.extVar('secrets').coredns.zone[domain]
             for domain in std.objectFields(std.extVar('secrets').coredns.zone)
@@ -177,31 +196,10 @@
                         fallthrough in-addr.arpa ip6.arpa
                     }
                     %(forwards)s
-                    forward . 127.0.0.1:5301 127.0.0.1:5302
+                    forward . %(dot_targets)s
                 }
-                .:5301 {
-                    forward . tls://9.9.9.10 {
-                        tls_servername dns10.quad9.net
-                    }
-                    cache 600 . {
-                        success 3000
-                        denial 500
-                        prefetch 10 300s
-                        servfail 10s
-                    }
-                }
-                .:5302 {
-                    forward . tls://1.1.1.1 {
-                        tls_servername cloudflare-dns.com
-                    }
-                    cache 600 . {
-                        success 3000
-                        denial 500
-                        prefetch 10 300s
-                        servfail 10s
-                    }
-                }
-              ||| % { forwards: std.join('\n', $.coredns.forward_config), zone: std.join('\n', $.coredns.zone_config) },
+                %(dot_blocks)s
+              ||| % { forwards: std.join('\n', $.coredns.forward_config), zone: std.join('\n', $.coredns.zone_config), dot_targets: $.coredns.dot_forward_targets, dot_blocks: std.join('\n', $.coredns.dot_blocks) },
             })
             + v1.configMap.metadata.withNamespace('kube-system'),
     service: s.new('kube-dns', { 'app.kubernetes.io/name': 'coredns' }, [

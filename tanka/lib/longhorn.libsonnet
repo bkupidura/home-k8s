@@ -110,6 +110,163 @@
   },
   longhorn: {
     namespace: $.k.core.v1.namespace.new('longhorn-system'),
+    network_policy_manager: $._custom.cilium_network_policy.new(
+      'longhorn-manager',
+      'longhorn-system',
+      { matchLabels: { app: 'longhorn-manager' } },
+      ingress=[
+        {
+          fromEntities: ['host', 'remote-node'],
+          toPorts: [
+            { ports: [{ port: '9502', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9502', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9500', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { app: 'longhorn-csi-plugin', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9500', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'longhorn.io/component': 'instance-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8501', protocol: 'TCP' }, { port: '8503', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9502', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_instance_manager: $._custom.cilium_network_policy.new(
+      'longhorn-instance-manager',
+      'longhorn-system',
+      { matchLabels: { 'longhorn.io/component': 'instance-manager' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8501', protocol: 'TCP' }, { port: '8503', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'longhorn.io/component': 'instance-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '10000', endPort: 30000, protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'longhorn.io/component': 'instance-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '10000', endPort: 30000, protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_csi_plugin: $._custom.cilium_network_policy.new(
+      'longhorn-csi-plugin',
+      'longhorn-system',
+      { matchLabels: { app: 'longhorn-csi-plugin' } },
+      ingress=[],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEntities: ['kube-apiserver'],
+          toPorts: [
+            { ports: [{ port: '6443', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { 'longhorn.io/component': 'instance-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8501', protocol: 'TCP' }, { port: '10000', endPort: 30000, protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9500', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_csi_sidecars: {
+      [sidecar]: $._custom.cilium_network_policy.new(
+        sidecar,
+        'longhorn-system',
+        { matchLabels: { app: sidecar } },
+        ingress=[],
+        egress=[
+          {
+            toEntities: ['kube-apiserver'],
+            toPorts: [
+              { ports: [{ port: '6443', protocol: 'TCP' }] },
+            ],
+          },
+        ],
+      )
+      for sidecar in ['csi-attacher', 'csi-provisioner', 'csi-resizer', 'csi-snapshotter']
+    },
     secret_encryption: $.k.core.v1.secret.new('longhorn-encryption-global', {
                          CRYPTO_KEY_VALUE: std.base64(std.extVar('secrets').longhorn.encryption.global),
                          CRYPTO_KEY_PROVIDER: std.base64('secret'),
@@ -122,6 +279,7 @@
         replicaAutoBalance: 'best-effort',
         concurrentAutomaticEngineUpgradePerNodeLimit: 1,
         orphanAutoDeletion: true,
+        upgradeChecker: false,
       },
       annotations: {
         'prometheus.io/scrape': 'true',

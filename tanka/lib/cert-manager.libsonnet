@@ -59,7 +59,7 @@
           ],
         },
         {
-          toCIDR: ['9.9.9.10/32', '1.1.1.1/32'],
+          toCIDR: [std.format('%s/32', ns) for ns in $._config.cert_manager.dns01_nameservers],
           toPorts: [
             { ports: [{ port: '53', protocol: 'ANY' }] },
           ],
@@ -140,7 +140,7 @@
       ],
       extraArgs: [
         '--dns01-recursive-nameservers-only',
-        '--dns01-recursive-nameservers=9.9.9.10:53,1.1.1.1:53',
+        std.format('--dns01-recursive-nameservers=%s', std.join(',', [std.format('%s:53', ns) for ns in $._config.cert_manager.dns01_nameservers])),
       ],
       installCRDs: true,
       prometheus: {

@@ -56,13 +56,27 @@
             { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
           ],
           toPorts: [
-            { ports: [{ port: '443', protocol: 'TCP' }] },
+            { ports: [{ port: '443', protocol: 'TCP' }, { port: '80', protocol: 'TCP' }] },
           ],
         },
         {
           toCIDR: [$._config.network.iot],
           toPorts: [
-            { ports: [{ port: '6053', protocol: 'TCP' }] },
+            { ports: [{ port: '3232', protocol: 'TCP' }, { port: '6053', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          toCIDR: ['224.0.0.251/32'],
+          toPorts: [
+            { ports: [{ port: '5353', protocol: 'UDP' }] },
+          ],
+        },
+        {
+          toCIDR: [
+            $._config.network.iot,
+          ],
+          icmps: [
+            { fields: [{ family: 'IPv4', type: 'EchoRequest' }] },
           ],
         },
       ],

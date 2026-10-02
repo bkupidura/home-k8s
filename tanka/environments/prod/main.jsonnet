@@ -119,5 +119,14 @@
         lanhypervisor: [$._config.network.lan, $._config.network.vpn, $._config.network.kubernetes],
       },
     },
+    coredns: {
+      upstreams: [
+        { ip: '9.9.9.10', servername: 'dns10.quad9.net' },
+        { ip: '1.1.1.1', servername: 'cloudflare-dns.com' },
+      ],
+    },
+    cert_manager: {
+      dns01_nameservers: ['9.9.9.10', '1.1.1.1'],
+    },
   },
 }
