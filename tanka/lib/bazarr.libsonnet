@@ -14,6 +14,22 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      bazarr: {
+        // bazarr run `ip link`
+        'incubating-bazarr-entrypoint-setuid-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_non_sudo_setuid_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/bazarr and evt.arg.uid=abc and proc.name=ip and proc.cmdline="ip link")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {

@@ -1,6 +1,32 @@
 {
   local v1 = $.k.core.v1,
   local c = v1.container,
+  falco+: {
+    exception+:: {
+      restic: {
+        // restic SFTP/SSH reads /root/.ssh
+        'incubating-restic-ssh-info-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_read_ssh_information_activities',
+            condition: 'or (container.image.repository=docker.io/restic/restic) or (container.id!=host and not container.image.repository exists and proc.name="runc:[1:CHILD]" and proc.cmdline="runc:[1:CHILD] init" and fd.name=/root/.ssh)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // restic-canary reads random files from real backups; files can have setgid/setuid
+        'incubating-restic-canary-restore-chmod-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_set_setuid_or_setgid_bit_conditions',
+            condition: 'or (container.image.repository=docker.io/restic/restic and container.name=canary and proc.name=restic)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   restic_check: {
     [std.format('restic_check_%s', repo_name)]: $._custom.cronjob.new(std.format('restic-check-%s', repo_name), 'home-infra', '15 17 * * *', [
                                                   c.new('check', $._version.restic.image)

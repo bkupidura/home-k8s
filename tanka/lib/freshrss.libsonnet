@@ -18,6 +18,39 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      freshrss: {
+        // freshrss built-in cron
+        'freshrss-cron-shell-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_shell_container_exclusions',
+            condition: std.format('or (container.image.repository=registry.%s/freshrss and proc.pcmdline="su www-data -s /bin/sh -c php /var/www/FreshRSS/app/actualize_script.php")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+          {
+            macro: 'user_shell_container_exclusions',
+            condition: std.format('or (container.image.repository=registry.%s/freshrss and proc.pname=run-parts and proc.cmdline="sh -c cd / && run-parts --report /etc/cron.hourly")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // freshrss runs debian apt.systemd.daily
+        'incubating-freshrss-apt-systemd-daily-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_package_manager_in_container',
+            condition: std.format('or (container.image.repository=registry.%s/freshrss and proc.cmdline="dpkg --print-foreign-architectures") or (container.image.repository=registry.%s/freshrss and proc.name="apt.systemd.dai" and proc.cmdline="apt.systemd.dai /usr/lib/apt/apt.systemd.daily") or (container.image.repository=registry.%s/freshrss and proc.cmdline="dpkg /etc/cron.daily/dpkg")', [std.extVar('secrets').domain, std.extVar('secrets').domain, std.extVar('secrets').domain]),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {

@@ -119,6 +119,21 @@
       },
     ],
   },
+  falco+: {
+    exception+:: {
+      victoria_metrics: {
+        'victoria-metrics-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: std.format('or container.image.repository in (registry.%s/victoria-metrics)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   victoria_metrics: {
     restore:: $._config.restore,
     [if $.monitoring.extra_scrape != null then 'extra_scrape_rendered']:: [

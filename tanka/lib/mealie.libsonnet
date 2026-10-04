@@ -16,6 +16,42 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      mealie: {
+        // mealie-backup run sqlite dump
+        'mealie-backup-sqlite3-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'known_drop_and_execute_activities',
+            condition: std.format('or (container.image.repository=registry.%s/ubuntu and proc.name=sqlite3 and proc.cmdline startswith "sqlite3 mealie.db .backup") or (container.id!=host and not container.image.repository exists and proc.name=sqlite3 and proc.cmdline startswith "sqlite3 mealie.db .backup")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // mealie chmods sgid
+        'incubating-mealie-recipe-assets-chmod-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_set_setuid_or_setgid_bit_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/mealie and proc.name=mealie and evt.arg.filename startswith "/app/data/recipes/" and evt.arg.filename endswith "/assets")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // mealie-backup installs sqlite
+        'incubating-mealie-backup-apt-update-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_package_manager_in_container',
+            condition: std.format('or (container.image.repository=registry.%s/ubuntu and proc.cmdline="apt-get update -qq") or (container.image.repository=registry.%s/ubuntu and proc.cmdline="apt-get install -y --no-install-recommends -qq sqlite3") or (container.id!=host and not container.image.repository exists and proc.cmdline="apt-get update -qq") or (container.id!=host and not container.image.repository exists and proc.cmdline="apt-get install -y --no-install-recommends -qq sqlite3")', [std.extVar('secrets').domain, std.extVar('secrets').domain]),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   mealie: {
     restore:: $._config.restore,
     network_policy: $._custom.cilium_network_policy.new(

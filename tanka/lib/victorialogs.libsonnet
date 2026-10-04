@@ -29,6 +29,21 @@
       },
     ],
   },
+  falco+: {
+    exception+:: {
+      fluentbit: {
+        'fluent-bit-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: std.format('or container.image.repository in (registry.%s/fluent-bit)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   fluentbit: {
     network_policy: $._custom.cilium_network_policy.new(
       'fluent-bit',

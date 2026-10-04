@@ -11,6 +11,6 @@
          + p.metadata.withNamespace('arr')
          + p.spec.withAccessModes(['ReadWriteMany'])
          + p.spec.withStorageClassName(std.get($.storage.class_truenas_nfs.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '4800Gi' }),
+         + p.spec.resources.withRequests({ storage: '5000Gi' }),
   },
 }

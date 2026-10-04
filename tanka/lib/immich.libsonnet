@@ -26,6 +26,32 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      immich: {
+        // immich-postgres healthcheck.sh calls pg_isready
+        'immich-postgres-pg-isready-sensitive-file-exception.yaml': std.manifestYamlDoc([
+          {
+            rule: 'Read sensitive file untrusted',
+            condition: std.format('and not (proc.name=pg_isready and container.image.repository=registry.%s/immich-postgres)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // immich-postgres entrypoint chmods socket to set sgid
+        'incubating-immich-postgres-socket-chmod-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_set_setuid_or_setgid_bit_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/immich-postgres and proc.name=chmod and proc.cmdline="chmod 03775 /var/run/postgresql")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   monitoring+: {
     extra_scrape+:: {
       immich: {

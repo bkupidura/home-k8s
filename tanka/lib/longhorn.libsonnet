@@ -14,6 +14,78 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      longhorn: {
+        // longhorn-manager dups stdio into socket
+        'longhorn-manager-redirect-stdout-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_stand_streams_redirect_activities',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-manager and proc.cmdline="longhorn backup cleanup-all-mounts") or (container.image.repository=docker.io/longhornio/longhorn-manager and proc.name=longhorn-manage and proc.cmdline startswith "longhorn-manage -d daemon" and fd.rport in (8500, 8501, 8502, 8503))',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // longhorn-instance-manager health self-check `nc -zv localhost <port>`
+        'incubating-longhorn-instance-manager-nc-network-tool-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_network_tool_activities',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.cmdline in ("nc -zv localhost 8500", "nc -zv localhost 8501", "nc -zv localhost 8502", "nc -zv localhost 8503"))',
+            override: {
+              condition: 'append',
+            },
+          },
+          {
+            macro: 'user_expected_system_procs_network_activity_conditions',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.cmdline="sh -c nc -zv localhost 8500 > /dev/null 2>&1 && nc -zv localhost 8501 > /dev/null 2>&1 && nc -zv localhost 8502 > /dev/null 2>&1 && nc -zv localhost 8503 > /dev/null 2>&1")',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // longhorn-instance-manager dups stdio into socket
+        'longhorn-instance-manager-redirect-stdout-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_stand_streams_redirect_activities',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.cmdline startswith "longhorn-instan --debug daemon --listen :8500")',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // longhorn-manager and longhorn-instance-manager mount/net namespace
+        'incubating-longhorn-manager-namespace-change-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_change_thread_namespace_activities',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-manager and proc.name=longhorn-manage) or (container.image.repository=docker.io/longhornio/longhorn-manager and proc.name=nsenter and proc.pname=longhorn-manage) or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.name=longhorn and proc.pname="longhorn-instan") or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.name=nsenter and proc.pname=longhorn)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // longhorn-csi-plugin run `mount --bind`
+        'incubating-longhorn-csi-mount-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_mount_in_privileged_containers',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-manager and container.name=longhorn-csi-plugin and proc.pname=longhorn-manage)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        'longhorn-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: 'or container.image.repository in (registry.k8s.io/sig-storage/csi-provisioner, docker.io/longhornio/csi-snapshotter, docker.io/longhornio/longhorn-manager, docker.io/longhornio/csi-provisioner, docker.io/longhornio/csi-resizer, docker.io/longhornio/csi-attacher)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {

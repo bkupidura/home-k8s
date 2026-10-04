@@ -156,9 +156,14 @@
         '--global.sendAnonymousUsage=false',
         '--accesslog',
         '--accesslog.format=json',
+        '--accesslog.fields.headers.defaultmode=redact',
         '--serversTransport.insecureSkipVerify=true',
+        '--serversTransport.maxIdleConnsPerHost=20',
+        '--serversTransport.forwardingTimeouts.idleConnTimeout=300s',
         std.format('--entryPoints.web.forwardedHeaders.trustedIPs=%s', $._config.network.kubernetes),
         std.format('--entryPoints.websecure.forwardedHeaders.trustedIPs=%s', $._config.network.kubernetes),
+        '--entryPoints.web.http.aliasHeadersStrategy=reject',
+        '--entryPoints.websecure.http.aliasHeadersStrategy=reject',
         '--log',
         '--log.level=INFO',
         '--log.format=json',
@@ -183,6 +188,7 @@
         kubernetesCRD: {
           enabled: true,
           allowCrossNamespace: true,
+          safeNaming: true,
         },
         kubernetesIngress: {
           enabled: true,
@@ -225,6 +231,7 @@
           'Remote-Email',
           'Remote-Groups',
         ],
+        maxResponseBodySize: 65536,
       },
     }),
     tls_store: {

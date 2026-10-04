@@ -22,6 +22,22 @@
                            'csi.storage.k8s.io/node-stage-secret-namespace': 'democratic-csi',
                          }),
   },
+  falco+: {
+    exception+:: {
+      democratic_csi: {
+        // democratic-csi `mount`/`mount --bind`
+        'incubating-democratic-csi-mount-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_mount_in_privileged_containers',
+            condition: std.format('or (container.image.repository=registry.%s/democratic-csi and container.name=csi-driver and proc.name=mount and proc.pname in (bash, node))', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   democratic_csi: {
     namespace: $.k.core.v1.namespace.new('democratic-csi'),
     network_policy_nfs_controller: $._custom.cilium_network_policy.new(

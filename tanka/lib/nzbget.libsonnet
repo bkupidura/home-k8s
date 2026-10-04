@@ -14,6 +14,21 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      nzbget: {
+        'incubating-nzbget-entrypoint-setuid-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_non_sudo_setuid_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/nzbget and evt.arg.uid=user and proc.name in (entrypoint.sh, sh, id, uname))', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {

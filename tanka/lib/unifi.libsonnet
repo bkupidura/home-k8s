@@ -13,6 +13,40 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      unifi: {
+        'unifi-java-setcap-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'known_drop_and_execute_activities',
+            condition: std.format('or (container.image.repository=registry.%s/unifi and proc.name=java and proc.cmdline contains "-jar /usr/lib/unifi/lib/ace.jar")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        // unifi runs `dpkg --print-architecture`
+        'incubating-unifi-dpkg-arch-check-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_package_manager_in_container',
+            condition: std.format('or (container.image.repository=registry.%s/unifi and proc.cmdline="dpkg --print-architecture")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        'incubating-unifi-gosu-setuid-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_non_sudo_setuid_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/unifi and proc.name=gosu and evt.arg.uid=unifi and proc.cmdline contains "-jar /usr/lib/unifi/lib/ace.jar")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   unifi: {
     restore:: $._config.restore,
     network_policy: $._custom.cilium_network_policy.new(
