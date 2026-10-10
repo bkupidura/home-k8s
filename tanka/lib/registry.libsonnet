@@ -35,7 +35,7 @@
          + p.metadata.withNamespace('home-infra')
          + p.spec.withAccessModes(['ReadWriteOnce'])
          + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
-         + p.spec.resources.withRequests({ storage: '20Gi' }),
+         + p.spec.resources.withRequests({ storage: '30Gi' }),
     service: s.new(
                'registry',
                { 'app.kubernetes.io/name': 'registry' },

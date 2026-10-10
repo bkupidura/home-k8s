@@ -62,7 +62,7 @@
           },
           {
             alert: 'CiliumPolicyDeny',
-            expr: 'sum(increase_pure(hubble_drop_total{reason=~"POLICY_(DENY|DENIED)"}[5m])) by (source_namespace, source_pod, destination_namespace, destination_pod) > 2',
+            expr: 'sum(increase_pure(hubble_drop_total{reason=~"POLICY_(DENY|DENIED)"}[5m])) by (source_namespace, source_pod, destination_namespace, destination_pod) > 3',
             labels: { service: 'cilium', severity: 'warning' },
             annotations: { summary: 'Cilium policy is denying traffic from {{ $labels.source_namespace }}/{{ $labels.source_pod }} to {{ $labels.destination_namespace }}/{{ $labels.destination_pod }}' },
           },

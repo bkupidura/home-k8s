@@ -23,6 +23,22 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      paperless: {
+        // paperless apt-installs OCR package
+        'incubating-paperless-tesseract-lang-apt-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_package_manager_in_container',
+            condition: std.format('or (container.image.repository=registry.%s/paperless-ngx and proc.cmdline in ("dpkg --status tesseract-ocr-pol", "apt-get --quiet update", "apt-cache --quiet show tesseract-ocr-pol", "apt-get --quiet --assume-yes install tesseract-ocr-pol"))', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   authelia+: {
     access_control+:: [
       {
@@ -92,7 +108,7 @@
             { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
           ],
           toPorts: [
-            { ports: [{ port: '443', protocol: 'TCP' }] },
+            { ports: [{ port: '443', protocol: 'TCP' }, { port: '80', protocol: 'TCP' }] },
           ],
         },
       ],

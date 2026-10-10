@@ -48,6 +48,16 @@
             },
           },
         ]),
+        // freshrss entrypoint installs its feed-refresh crontab from stdin
+        'incubating-freshrss-crontab-schedule-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_cron_jobs',
+            condition: std.format('or (container.image.repository=registry.%s/freshrss and proc.cmdline="crontab -")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
       },
     },
   },

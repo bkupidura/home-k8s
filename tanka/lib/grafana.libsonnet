@@ -21,6 +21,22 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      grafana: {
+        // grafana drops to grafana user
+        'incubating-grafana-entrypoint-setuid-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_non_sudo_setuid_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/grafana and evt.arg.uid=grafana and proc.pname=run.sh)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   grafana: {
     network_policy: $._custom.cilium_network_policy.new(
       'grafana',
@@ -103,6 +119,7 @@
                   database: { type: 'mysql', host: 'mariadb.home-infra', name: 'grafana', user: 'grafana' },
                   auth: { disable_login_form: true, oauth_allow_insecure_email_lookup: true },
                   log: { level: 'info' },
+                  plugins: { preinstall_auto_update: false },
                   'auth.generic_oauth': {
                     allow_sign_up: true,
                     api_url: std.format('https://auth.%s/api/oidc/userinfo', std.extVar('secrets').domain),

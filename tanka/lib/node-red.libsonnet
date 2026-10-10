@@ -87,8 +87,8 @@
           ],
         },
         {
-          toFQDNs: [
-            { matchName: 'api.bulksms.com' },
+          toCIDRSet: [
+            { cidr: '0.0.0.0/0', except: $._config.cilium_network_local },
           ],
           toPorts: [
             { ports: [{ port: '443', protocol: 'TCP' }] },
