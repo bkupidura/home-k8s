@@ -179,6 +179,14 @@
         },
         {
           fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'perses', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8428', protocol: 'TCP' }] },
+          ],
+        },
+        {
+          fromEndpoints: [
             { matchLabels: { 'app.kubernetes.io/name': 'victoria-metrics-single', 'io.kubernetes.pod.namespace': 'monitoring' } },
           ],
           toPorts: [

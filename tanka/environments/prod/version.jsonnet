@@ -149,6 +149,15 @@
       ],
       image: std.format('registry.%s/home-assistant:2026.9.4', std.extVar('secrets').domain),
     },
+    perses: {
+      cache: [
+        {
+          source: 'persesdev/perses:v0.54.0',
+          destination: std.format('registry.%s/perses:v0.54.0', std.extVar('secrets').domain),
+        },
+      ],
+      image: std.format('registry.%s/perses:v0.54.0', std.extVar('secrets').domain),
+    },
     node_red: {
       cache: [
         {

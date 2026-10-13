@@ -172,8 +172,8 @@
                           //DISABLE_ADMIN_TOKEN: 'true',
                           DOMAIN: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         })
-                        + c.resources.withRequests({ memory: '128Mi', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '128Mi', cpu: '50m' })
+                        + c.resources.withRequests({ memory: '200M', cpu: '50m' })
+                        + c.resources.withLimits({ memory: '200M', cpu: '50m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)
                         + c.securityContext.capabilities.withAdd(['NET_BIND_SERVICE'])

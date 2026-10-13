@@ -194,6 +194,14 @@
             { ports: [{ port: '9428', protocol: 'TCP' }] },
           ],
         },
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'perses', 'io.kubernetes.pod.namespace': 'monitoring' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9428', protocol: 'TCP' }] },
+          ],
+        },
       ],
       egress=[],
     ),

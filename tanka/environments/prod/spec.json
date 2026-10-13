@@ -6,6 +6,7 @@
   },
   "spec": {
      "apiServer": "https://10.0.100.31:6443",
-     "injectLabels": true
+     "injectLabels": true,
+     "applyStrategy": "server"
   }
 }

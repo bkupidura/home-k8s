@@ -28,6 +28,7 @@
 (import 'blocky.libsonnet') +
 (import 'broker-ha.libsonnet') +
 (import 'grafana.libsonnet') +
+(import 'perses.libsonnet') +
 (import 'unifi.libsonnet') +
 (import 'home-assistant.libsonnet') +
 (import 'node-red.libsonnet') +

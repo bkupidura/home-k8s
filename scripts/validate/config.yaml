@@ -260,9 +260,6 @@ validators:
                     - ENC[AES256_GCM,data:CyzP4Z5Mzk0p7kLRtBLltZBhkV1W3QEoCSGnknCRJPsREUNCqfbDXek=,iv:9zAhkSuWo8Rqz0yzpM1hVCx1QfAkmTsn9XFYMJYDyKU=,tag:go7/wlgNd7Yob0hYgSSRNg==,type:str]
                     - ENC[AES256_GCM,data:lHJPBL55Sf+9nsI24Y+dxO3nyn2OJtUiBtYWOkrcSlL/R2L2gvU=,iv:2a5PbSkzuMN79/yEVpa5h1KF9Di8Iin9Cqv+FW8VQlg=,tag:uCscI5RHqOiFl974QnUQ2Q==,type:str]
                     - ENC[AES256_GCM,data:g3E/FnUa03Qv+HkNOdx5+i4Rb6EM79M=,iv:KrPFOn+WBdGhKKCuUVhyUmScfAvR8DGWHC1Q6RoZaB0=,tag:GFNyKNRcjcPp1ekxaaAUJw==,type:str]
-            liveness_probe_present:
-                skip:
-                    - ENC[AES256_GCM,data:d5QsT2l5pgIWGxOq9yySLPGPeD9M50Q=,iv:I7a1Zr7/yU7jgqMpAglH0SZj9wo5QLoiLBCqLBM2Mzs=,tag:aqLVr1bbBj7wRtlBDl+/tw==,type:str]
         with_pvc_or_hostpath: null
         without_pvc_or_hostpath: null
         with_multiple_replicas: null
@@ -283,7 +280,7 @@ sops:
             T0xIaU1VUjA4dXNZcm83Tk8vK043QlUKQreA5skPV0Ut9LzVYNleSMSk8sJRqk6I
             sOIQqvTdrwluaXCXOqZI+8GhCIfb1mK+h97aBywXRumtEyP3OPuO2g==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-10-01T17:09:56Z"
-    mac: ENC[AES256_GCM,data:mM6XHD3wT6xfPQVnVbCZD4ckaNm/Ucb9Vkt2mL2c39GCTQabbGheNGBZmn8rpvRHZXjPEhKtokWBvLwgeSERHh5S9H/e74DPYCDp+6UG9OmALg8nw0NuVg7j+NC4DutOVJOJhZUuTyUXUFz0NDRsWbpbQJce+OtinT+jPLTuOuE=,iv:iCjJdi9DHsaXYoTQfLNSeNqKXEgN6E9YpWxCb9qljpA=,tag:UmNBKqk9vDeBw/YfIg++0w==,type:str]
+    lastmodified: "2026-10-11T07:52:14Z"
+    mac: ENC[AES256_GCM,data:auGKbU0Qf6XPy08520AvSVQv003fUxabHMP+JAvCrvmO9A8XNzJqY6J2UZUXCbi6R6FKr5jcyVVdfJoyaQdComWmHPCke/D7fjN+gghCIhDIDpeKAAbPD3enzw7AdH23SB4vzWcsM0UBcRXdsczMiCtBVQzcK/Zd4VDZO8G1T3c=,iv:qjSlrMgqozQoSI61QxKI5vvKzJc+AdNZIzStMC2sfQk=,tag:dNhJfNCwhAvGOM2YKjPTYA==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.11.0
