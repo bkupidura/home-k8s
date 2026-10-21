@@ -301,11 +301,11 @@
     nextcloud: {
       cache: [
         {
-          source: 'nextcloud:34.0.4-apache',
-          destination: std.format('registry.%s/nextcloud:34.0.4-apache', std.extVar('secrets').domain),
+          source: 'nextcloud:35.0.2-apache',
+          destination: std.format('registry.%s/nextcloud:35.0.2-apache', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/nextcloud:34.0.4-apache', std.extVar('secrets').domain),
+      image: std.format('registry.%s/nextcloud:35.0.2-apache', std.extVar('secrets').domain),
     },
     valkey: {
       cache: [
@@ -324,11 +324,11 @@
     freshrss: {
       cache: [
         {
-          source: 'freshrss/freshrss:1.29.1',
-          destination: std.format('registry.%s/freshrss:1.29.1', std.extVar('secrets').domain),
+          source: 'freshrss/freshrss:1.30.3',
+          destination: std.format('registry.%s/freshrss:1.30.3', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/freshrss:1.29.1', std.extVar('secrets').domain),
+      image: std.format('registry.%s/freshrss:1.30.3', std.extVar('secrets').domain),
     },
     registry: {
       image: 'registry:3.1.2',

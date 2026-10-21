@@ -122,6 +122,15 @@
             },
           },
         ]),
+        'incubating-containerd-snapshot-shell-config-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_shell_config_modifiers',
+            condition: 'or (container.id=host and proc.name=containerd and fd.name contains "/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/" and (fd.name endswith "/.bash_logout" or fd.name endswith "/.bashrc" or fd.name endswith "/.profile"))',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
         'incubating-container-init-unshare-exception.yaml': std.manifestYamlDoc([
           {
             rule: 'Change namespace privileges via unshare',

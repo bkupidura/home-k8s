@@ -251,8 +251,8 @@
                           v1.volumeMount.new('perses-plugins', '/etc/perses/plugins'),
                           v1.volumeMount.new('perses-data', '/perses/data'),
                         ])
-                        + c.resources.withRequests({ memory: '64M', cpu: '50m' })
-                        + c.resources.withLimits({ memory: '192M', cpu: '200m' })
+                        + c.resources.withRequests({ memory: '100M', cpu: '100m' })
+                        + c.resources.withLimits({ memory: '200M', cpu: '200m' })
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.capabilities.withDrop('all')
                         + c.securityContext.withReadOnlyRootFilesystem(true)
