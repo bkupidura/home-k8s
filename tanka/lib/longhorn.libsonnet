@@ -4,7 +4,7 @@
     policy+: {
       traefik+: {
         egress+:: [
-          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'longhorn', app: 'longhorn-ui', 'io.kubernetes.pod.namespace': 'longhorn-system' } }], toPorts: [{ ports: [{ port: '80', protocol: 'TCP' }] }] },
+          { toEndpoints: [{ matchLabels: { 'app.kubernetes.io/name': 'longhorn', app: 'longhorn-ui', 'io.kubernetes.pod.namespace': 'longhorn-system' } }], toPorts: [{ ports: [{ port: '8000', protocol: 'TCP' }] }] },
         ],
       },
       'victoria-metrics-single'+: {
@@ -217,6 +217,14 @@
             { ports: [{ port: '9500', protocol: 'TCP' }] },
           ],
         },
+        {
+          fromEndpoints: [
+            { matchLabels: { app: 'longhorn-ui', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9500', protocol: 'TCP' }] },
+          ],
+        },
       ],
       egress=[
         {
@@ -247,6 +255,39 @@
           ],
           toPorts: [
             { ports: [{ port: '9502', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+    ),
+    network_policy_ui: $._custom.cilium_network_policy.new(
+      'longhorn-ui',
+      'longhorn-system',
+      { matchLabels: { app: 'longhorn-ui' } },
+      ingress=[
+        {
+          fromEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'traefik', 'io.kubernetes.pod.namespace': 'traefik-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '8000', protocol: 'TCP' }] },
+          ],
+        },
+      ],
+      egress=[
+        {
+          toEndpoints: [
+            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '53', protocol: 'ANY' }], rules: { dns: [{ matchPattern: '*' }] } },
+          ],
+        },
+        {
+          toEndpoints: [
+            { matchLabels: { app: 'longhorn-manager', 'io.kubernetes.pod.namespace': 'longhorn-system' } },
+          ],
+          toPorts: [
+            { ports: [{ port: '9500', protocol: 'TCP' }] },
           ],
         },
       ],
