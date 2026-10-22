@@ -73,12 +73,6 @@
             { ports: [{ port: '443', protocol: 'TCP' }] },
           ],
         },
-        {
-          fromEntities: ['world'],
-          icmps: [
-            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
-          ],
-        },
       ],
       egress=[
         {

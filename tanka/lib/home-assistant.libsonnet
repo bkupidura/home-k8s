@@ -90,14 +90,6 @@
         },
         {
           toEndpoints: [
-            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
-          ],
-          icmps: [
-            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
-          ],
-        },
-        {
-          toEndpoints: [
             { matchLabels: { 'app.kubernetes.io/name': 'mariadb', 'io.kubernetes.pod.namespace': 'home-infra' } },
           ],
           toPorts: [

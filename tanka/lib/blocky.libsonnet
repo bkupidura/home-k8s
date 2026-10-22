@@ -19,7 +19,7 @@
         rules: [
           {
             alert: 'BlockyFailedDownload',
-            expr: 'delta(blocky_failed_downloads_total[10m]) > 0',
+            expr: 'delta(blocky_failed_downloads_total[10m]) > 5',
             labels: { service: 'blocky', severity: 'info' },
             annotations: {
               summary: 'Failed downloads increasing on {{ $labels.pod }}',
@@ -83,14 +83,6 @@
             { ports: [{ port: '4000', protocol: 'TCP' }] },
           ],
         },
-        {
-          fromEndpoints: [
-            { matchLabels: { 'app.kubernetes.io/name': 'coredns', 'io.kubernetes.pod.namespace': 'kube-system' } },
-          ],
-          icmps: [
-            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
-          ],
-        },
       ],
       egress=[
         {
@@ -99,12 +91,6 @@
           ],
           toPorts: [
             { ports: [{ port: '53', protocol: 'ANY' }] },
-          ],
-        },
-        {
-          toCIDR: [std.format('%s/32', $.coredns.kubelet_cluster_dns)],
-          icmps: [
-            { fields: [{ family: 'IPv4', type: 'DestinationUnreachable' }] },
           ],
         },
         {
