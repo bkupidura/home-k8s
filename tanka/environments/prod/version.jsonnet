@@ -131,15 +131,6 @@
       ],
       image: std.format('registry.%s/esphome:2026.9.1', std.extVar('secrets').domain),
     },
-    grafana: {
-      cache: [
-        {
-          source: 'grafana/grafana:13.2.3',
-          destination: std.format('registry.%s/grafana:13.2.3', std.extVar('secrets').domain),
-        },
-      ],
-      image: std.format('registry.%s/grafana:13.2.3', std.extVar('secrets').domain),
-    },
     home_assistant: {
       cache: [
         {

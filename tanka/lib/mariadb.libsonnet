@@ -247,9 +247,6 @@
               CREATE USER 'authelia'@'!!' IDENTIFIED BY '%(authelia_password)s';
               GRANT ALL PRIVILEGES ON authelia.* TO 'authelia'@'!!';
               FLUSH PRIVILEGES;
-              CREATE DATABASE grafana CHARACTER SET utf8mb4;
-              CREATE USER 'grafana'@'!!' IDENTIFIED BY '%(grafana_password)s';
-              GRANT ALL PRIVILEGES ON grafana.* TO 'grafana'@'!!';
               FLUSH PRIVILEGES;
               CREATE DATABASE paperless CHARACTER SET utf8mb4;
               CREATE USER 'paperless'@'!!' IDENTIFIED BY '%(paperless_password)s';
