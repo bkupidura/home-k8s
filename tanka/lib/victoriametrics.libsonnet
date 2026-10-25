@@ -131,6 +131,15 @@
             },
           },
         ]),
+        'kube-state-metrics-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: std.format('or container.image.repository in (registry.%s/kube-state-metrics)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
       },
     },
   },

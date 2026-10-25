@@ -85,6 +85,14 @@
             { ports: [{ port: '443', protocol: 'TCP' }] },
           ],
         },
+        {
+          toFQDNs: [
+            { matchName: std.extVar('secrets').smtp.server },
+          ],
+          toPorts: [
+            { ports: [{ port: std.toString(std.extVar('secrets').smtp.port), protocol: 'TCP' }] },
+          ],
+        },
       ],
     ),
     pvc: p.new('nextcloud')
@@ -165,6 +173,7 @@
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withVolumeMounts([
                           v1.volumeMount.new('nextcloud', '/var/www/html', false),
+                          v1.volumeMount.new('tmp', '/tmp', false),
                         ])
                         + c.securityContext.withAllowPrivilegeEscalation(false)
                         + c.securityContext.withReadOnlyRootFilesystem(true)

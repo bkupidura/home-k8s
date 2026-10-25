@@ -196,6 +196,15 @@
             },
           },
         ]),
+        'incubating-multus-cni-setns-exception.yaml': std.manifestYamlDoc([
+          {
+            rule: 'Change thread namespace',
+            condition: 'and not (container.id=host and proc.exepath in (/opt/cni/bin/dhcp, /opt/cni/bin/macvlan))',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
       },
       s6_overlay: {
         'incubating-s6-overlay-init-exception.yaml': std.manifestYamlDoc([

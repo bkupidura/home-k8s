@@ -44,11 +44,11 @@
             },
           },
         ]),
-        // longhorn-instance-manager dups stdio into socket
+        // longhorn-instance-manager dup stdio into their serving socket
         'longhorn-instance-manager-redirect-stdout-exception.yaml': std.manifestYamlDoc([
           {
             macro: 'user_known_stand_streams_redirect_activities',
-            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.cmdline startswith "longhorn-instan --debug daemon --listen :8500")',
+            condition: 'or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.cmdline startswith "longhorn-instan --debug daemon --listen :8500") or (container.image.repository=docker.io/longhornio/longhorn-instance-manager and proc.name=longhorn and proc.exepath contains "/engine-binaries/")',
             override: {
               condition: 'append',
             },

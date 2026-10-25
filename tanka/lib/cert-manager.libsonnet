@@ -10,6 +10,21 @@
       },
     },
   },
+  falco+: {
+    exception+:: {
+      cert_manager: {
+        'cert-manager-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: 'or container.image.repository=quay.io/jetstack/cert-manager-controller',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   monitoring+: {
     rules+:: [
       {
