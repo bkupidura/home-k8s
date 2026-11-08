@@ -35,7 +35,7 @@
                                                     '/bin/sh',
                                                     '-ec',
                                                     std.join('\n', [
-                                                      'restic forget --keep-within 7d --keep-daily 30 --keep-weekly 24 --keep-monthly 12 --prune',
+                                                      'restic forget --keep-within 7d --keep-daily 30 --keep-weekly 12 --keep-monthly 6 --prune',
                                                       'restic check --read-data-subset 10%',
                                                     ]),
                                                   ])

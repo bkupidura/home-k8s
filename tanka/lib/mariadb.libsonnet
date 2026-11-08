@@ -252,6 +252,10 @@
               CREATE USER 'paperless'@'!!' IDENTIFIED BY '%(paperless_password)s';
               GRANT ALL PRIVILEGES ON paperless.* TO 'paperless'@'!!';
               FLUSH PRIVILEGES;
+              CREATE DATABASE kitsune CHARACTER SET utf8mb4;
+              CREATE USER 'kitsune'@'!!' IDENTIFIED BY '%(kitsune_password)s';
+              GRANT ALL PRIVILEGES ON kitsune.* TO 'kitsune'@'!!';
+              FLUSH PRIVILEGES;
             ||| % std.extVar('secrets').mariadb.init_script, '!!', '%')),
           })
           + v1.secret.metadata.withNamespace('home-infra'),

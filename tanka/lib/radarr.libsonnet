@@ -164,7 +164,7 @@
                 + d.pvcVolumeMount('radarr-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
                 + d.emptyVolumeMount('run', '/run', volumeMixin=v1.volume.emptyDir.withSizeLimit('20M'))
-                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('20M'))
+                + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('40M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr'),
   },

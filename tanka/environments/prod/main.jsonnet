@@ -50,6 +50,7 @@
 (import 'immich.libsonnet') +
 (import 'dmh.libsonnet') +
 (import 'mealie.libsonnet') +
+(import 'kitsune.libsonnet') +
 (import 'debugpod.libsonnet') +
 (import 'truenas.libsonnet') +
 (import 'main-dev.libsonnet') +

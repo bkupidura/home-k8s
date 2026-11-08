@@ -163,6 +163,13 @@
                         url: std.format('https://vaultwarden.%s', std.extVar('secrets').domain),
                         target: '_blank',
                       },
+                      {
+                        name: 'Kitsune',
+                        icon: 'fa-solid fa-people-group',
+                        subtitle: 'Fake identities',
+                        url: std.format('https://kitsune.%s', std.extVar('secrets').domain),
+                        target: '_blank',
+                      },
                     ],
                   },
                   {
