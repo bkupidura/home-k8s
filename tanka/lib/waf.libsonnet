@@ -61,6 +61,30 @@
       },
     ],
   },
+  falco+: {
+    exception+:: {
+      waf: {
+        'waf-modsecurity-wordexp-shell-exception.yaml': std.manifestYamlDoc([
+          {
+            rule: 'Run shell untrusted',
+            condition: std.format('and not (container.image.repository=registry.%s/waf-modsecurity and proc.pname=nginx and proc.exepath=/bin/busybox and proc.name=sh and proc.cmdline startswith \'sh -c eval "printf %%s\\\\\\\\\\\\\\\\0 x $1 $2" sh \' and proc.cmdline endswith " 2>/dev/null")', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+        'incubating-waf-modsecurity-setuid-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_non_sudo_setuid_conditions',
+            condition: std.format('or (container.image.repository=registry.%s/waf-modsecurity and evt.arg.uid=nginx and proc.exepath=/bin/busybox)', std.extVar('secrets').domain),
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   waf: {
     network_policy: $._custom.cilium_network_policy.new(
       'waf',

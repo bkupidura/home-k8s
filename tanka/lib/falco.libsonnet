@@ -144,8 +144,8 @@
       host: {
         'incubating-systemd-reexec-user-mgmt-exception.yaml': std.manifestYamlDoc([
           {
-            rule: 'User mgmt binaries',
-            condition: 'and not (proc.name=systemd and proc.cmdline startswith "systemd --system --deserialize=") and not (proc.name=adduser and proc.pname=rsyslog.postins)',
+            macro: 'user_known_user_management_activities',
+            condition: 'or (container.id=host and proc.name=systemd and proc.cmdline startswith "systemd --system --deserialize=")',
             override: {
               condition: 'append',
             },
@@ -160,10 +160,17 @@
             },
           },
         ]),
-        'incubating-unattended-upgrades-setuid-chmod-exception.yaml': std.manifestYamlDoc([
+        'incubating-dpkg-host-maintenance-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'user_known_user_management_activities',
+            condition: 'or (container.id=host and proc.aname=dpkg and proc.name in (adduser, useradd, addgroup, groupadd))',
+            override: {
+              condition: 'append',
+            },
+          },
           {
             macro: 'user_known_set_setuid_or_setgid_bit_conditions',
-            condition: 'or (container.id=host and proc.name=dpkg and proc.pname=unattended-upgr)',
+            condition: 'or (container.id=host and proc.name=dpkg) or (container.id=host and proc.aname=dpkg and proc.name=chmod and evt.arg.filename=/usr/bin/ssh-agent)',
             override: {
               condition: 'append',
             },
@@ -173,15 +180,6 @@
           {
             macro: 'somebody_becoming_themselves',
             condition: 'or (user.name=dhcpcd and evt.arg.uid=dhcpcd)',
-            override: {
-              condition: 'append',
-            },
-          },
-        ]),
-        'incubating-openssh-client-postinst-setgid-exception.yaml': std.manifestYamlDoc([
-          {
-            macro: 'user_known_set_setuid_or_setgid_bit_conditions',
-            condition: 'or (container.id=host and proc.name=chmod and proc.pname="openssh-client." and proc.cmdline="chmod 2755 /usr/bin/ssh-agent")',
             override: {
               condition: 'append',
             },
