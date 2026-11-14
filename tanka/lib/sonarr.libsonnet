@@ -74,6 +74,43 @@
       '\n',
       ['cd /data', 'restic --verbose restore latest --target .']
     )], 'sonarr-config'),
+    cronjob_cleanup: $._custom.cronjob.new('sonarr-cleanup', 'arr', '30 05 * * *', [
+                       c.new('cleanup', $._version.ubuntu.image)
+                       + c.withImagePullPolicy('IfNotPresent')
+                       + c.withEnvMap({
+                         TV_ROOT: '/downloads/TV',
+                         DRY_RUN: 'false',
+                       })
+                       + c.withVolumeMounts([
+                         v1.volumeMount.new('media', '/downloads', false),
+                       ])
+                       + c.resources.withRequests({ memory: '32Mi', cpu: '20m' })
+                       + c.resources.withLimits({ memory: '64Mi', cpu: '100m' })
+                       + c.securityContext.withAllowPrivilegeEscalation(false)
+                       + c.securityContext.withReadOnlyRootFilesystem(true)
+                       + c.securityContext.withRunAsNonRoot(true)
+                       + c.securityContext.withRunAsUser(3000)
+                       + c.securityContext.withRunAsGroup(3000)
+                       + c.securityContext.capabilities.withDrop('all')
+                       + c.withCommand(['/bin/sh', '-ec', std.join('\n', [
+                         'TV_ROOT="${TV_ROOT:-/downloads/TV}"',
+                         'DRY_RUN="${DRY_RUN:-true}"',
+                         '[ -d "$TV_ROOT" ] || { echo "TV root $TV_ROOT not found" >&2; exit 1; }',
+                         'has_video() { find "$1" -type f 2>/dev/null | grep -qiE "\\.(mkv|mp4|avi|m4v|ts|wmv|mov|flv|webm|mpg|mpeg|m2ts)$"; }',
+                         'for series in "$TV_ROOT"/*/; do',
+                         '  [ -d "$series" ] || continue',
+                         '  series="${series%/}"',
+                         '  has_video "$series" && continue',
+                         '  [ -n "$(find "$series" -mmin -1440 2>/dev/null | head -n1)" ] && continue',
+                         '  if [ "$DRY_RUN" = "true" ]; then',
+                         '    echo "[dry-run] would delete: $series"',
+                         '  else',
+                         '    rm -rf -- "$series" && echo "deleted: $series"',
+                         '  fi',
+                         'done',
+                       ])]),
+                     ])
+                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withVolumes([$.k.core.v1.volume.fromPersistentVolumeClaim('media', 'media')]),
     network_policy: $._custom.cilium_network_policy.new(
       'sonarr',
       'arr',
