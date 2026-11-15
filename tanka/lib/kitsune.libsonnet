@@ -211,7 +211,7 @@
     deployment: d.new('kitsune',
                       1,
                       [
-                        c.new('kitsune', std.format('registry.%s/kitsune:0.4c', std.extVar('secrets').domain))
+                        c.new('kitsune', $._version.kitsune.image)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts([
                           v1.containerPort.newNamed(8080, 'http'),

@@ -296,6 +296,7 @@
                                  REDIS_USERNAME: 'immich',
                                  IMMICH_TELEMETRY_INCLUDE: 'all',
                                  IMMICH_PORT: '2283',
+                                 VIPS_CONCURRENCY: '2',
                                })
                                + c.withEnvFrom([v1.envFromSource.secretRef.withName('immich-secrets')])
                                + c.securityContext.withAllowPrivilegeEscalation(false)

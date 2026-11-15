@@ -83,7 +83,7 @@
           },
           {
             alert: 'CiliumPolicyDenyICMP',
-            expr: 'sum(increase_pure(hubble_drop_total{reason=~"POLICY_(DENY|DENIED)",protocol="ICMPv4"}[5m])) by (source_namespace, source_pod, destination_namespace, destination_pod) > 20',
+            expr: 'sum(increase_pure(hubble_drop_total{reason=~"POLICY_(DENY|DENIED)",protocol="ICMPv4"}[5m])) by (source_namespace, source_pod, destination_namespace, destination_pod) > 30',
             labels: { service: 'cilium', severity: 'warning' },
             annotations: { summary: 'Cilium policy is denying traffic from {{ $labels.source_namespace }}/{{ $labels.source_pod }} to {{ $labels.destination_namespace }}/{{ $labels.destination_pod }}' },
           },

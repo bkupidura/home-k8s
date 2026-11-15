@@ -322,7 +322,7 @@
       ],
       egress=[],
     ),
-    helm: $._custom.helm.new('falco', 'falco', 'https://falcosecurity.github.io/charts', '9.1.0', 'falco', {
+    helm: $._custom.helm.new('falco', 'falco', 'https://falcosecurity.github.io/charts', $._version.falco.chart, 'falco', {
       falco: {
         rules_files: [
           '/etc/falco/falco_rules.yaml',
