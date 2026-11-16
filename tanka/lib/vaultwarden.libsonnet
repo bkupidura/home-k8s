@@ -193,6 +193,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('self-hosted')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

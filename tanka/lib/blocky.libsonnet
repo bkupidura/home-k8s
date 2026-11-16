@@ -195,6 +195,7 @@
                   'prometheus.io/port': '4000',
                   'fluentbit.io/parser': 'json-rfc3339',
                 })
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

@@ -128,6 +128,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr')
                 + d.spec.template.spec.withNodeSelector({ video_processing: 'true' })
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

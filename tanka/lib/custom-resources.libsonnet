@@ -32,7 +32,8 @@
                                                                      + $.k.batch.v1.cronJob.spec.withSuccessfulJobsHistoryLimit(1)
                                                                      + $.k.batch.v1.cronJob.spec.withConcurrencyPolicy('Forbid')
                                                                      + (if std.length(initContainers) > 0 then $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withInitContainers(initContainers) else {})
-                                                                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withRestartPolicy('OnFailure'),
+                                                                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.withRestartPolicy('OnFailure')
+                                                                     + $.k.batch.v1.cronJob.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault'),
     },
     cronjob_backup: {
       new(name, namespace, schedule, password_secret, ssh_secret, command, pvc): $._custom.cronjob.new(name + '-backup', namespace, schedule, [

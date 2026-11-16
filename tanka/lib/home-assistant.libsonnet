@@ -228,6 +228,7 @@
                     { key: 'app.kubernetes.io/name', operator: 'In', values: ['zigbee2mqtt', 'node-red'] }
                   )
                 )
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

@@ -204,6 +204,7 @@
                 + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('arr')
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

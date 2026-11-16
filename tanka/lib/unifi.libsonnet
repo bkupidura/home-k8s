@@ -164,6 +164,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(30)
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

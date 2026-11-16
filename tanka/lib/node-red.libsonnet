@@ -166,6 +166,7 @@
                     { key: 'app.kubernetes.io/name', operator: 'In', values: ['zigbee2mqtt', 'home-assistant'] }
                   )
                 )
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

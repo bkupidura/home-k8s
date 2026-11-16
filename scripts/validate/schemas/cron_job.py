@@ -55,6 +55,33 @@ class Validator(ValidatorBase):
                         ),
                     },
                     {
+                        "name": "seccomp_profile_runtime_default",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "jobTemplate": {
+                                        "spec": {
+                                            "template": {
+                                                "spec": {
+                                                    "securityContext": {
+                                                        "seccompProfile": {
+                                                            "type": And(
+                                                                str,
+                                                                lambda x: x
+                                                                == "RuntimeDefault",
+                                                            ),
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
                         "name": "restartpolicy_onfailure",
                         "schema": Schema(
                             {

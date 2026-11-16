@@ -89,6 +89,7 @@
       for parser in std.objectFields($.logging.parsers)
     ],
     helm: $._custom.helm.new('fluent-bit', 'fluent-bit', 'https://fluent.github.io/helm-charts', $._version.fluentbit.chart, 'monitoring', {
+      podSecurityContext: { seccompProfile: { type: 'RuntimeDefault' } },
       config: {
         filters: |||
           [FILTER]
@@ -231,6 +232,10 @@
         podAnnotations: {
           'fluentbit.io/parser': 'victoria-json',
         },
+        podSecurityContext: {
+          enabled: true,
+          seccompProfile: { type: 'RuntimeDefault' },
+        },
         securityContext: {
           enabled: true,
           allowPrivilegeEscalation: false,
@@ -334,6 +339,10 @@
         },
         podAnnotations: {
           'fluentbit.io/parser': 'victoria-json',
+        },
+        podSecurityContext: {
+          enabled: true,
+          seccompProfile: { type: 'RuntimeDefault' },
         },
         securityContext: {
           enabled: true,

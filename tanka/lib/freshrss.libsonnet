@@ -196,6 +196,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.metadata.withAnnotations({ 'fluentbit.io/parser': 'nginx' })
                 + d.metadata.withNamespace('self-hosted')
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

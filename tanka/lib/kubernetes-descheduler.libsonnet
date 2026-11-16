@@ -15,6 +15,7 @@
       ],
     ),
     helm: $._custom.helm.new('descheduler', 'descheduler', 'https://kubernetes-sigs.github.io/descheduler/', $._version.kubernetes_descheduler.chart, 'kube-system', {
+      podSecurityContext: { seccompProfile: { type: 'RuntimeDefault' } },
       kind: 'Deployment',
       deschedulingInterval: '10m',
       resources: {

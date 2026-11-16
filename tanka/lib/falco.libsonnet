@@ -411,6 +411,9 @@
           'prometheus.io/scrape': 'true',
           'prometheus.io/port': '2801',
         },
+        podSecurityContext: {
+          seccompProfile: { type: 'RuntimeDefault' },
+        },
         securityContext: {
           readOnlyRootFilesystem: true,
           capabilities: { drop: ['ALL'] },

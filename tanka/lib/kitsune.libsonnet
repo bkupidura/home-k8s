@@ -244,6 +244,7 @@
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.configVolumeMount('kitsune-config', '/config/', {})
                 + d.spec.strategy.withType('RollingUpdate')
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false)
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',

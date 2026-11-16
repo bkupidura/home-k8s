@@ -35,6 +35,7 @@
           { key: 'app.kubernetes.io/name', operator: 'In', values: ['debugpod'] }
         )
       )
+      + d.spec.template.spec.securityContext.seccompProfile.withType('Unconfined')
       + d.spec.template.spec.withAutomountServiceAccountToken(false)
     else null,
   },

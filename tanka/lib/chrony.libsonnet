@@ -89,6 +89,7 @@
                ])
                + d.emptyVolumeMount('chrony-lib', '/var/lib/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
                + d.emptyVolumeMount('chrony-run', '/var/run/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('1M'))
+               + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

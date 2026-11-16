@@ -403,6 +403,7 @@
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '9104',
                 })
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

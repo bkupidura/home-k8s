@@ -147,6 +147,7 @@
                 + d.spec.template.spec.withNodeSelector({ zigbee_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')
                 + d.spec.template.spec.withTerminationGracePeriodSeconds(60)
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

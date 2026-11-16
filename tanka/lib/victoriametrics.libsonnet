@@ -343,6 +343,10 @@
         podAnnotations: {
           'fluentbit.io/parser': 'victoria-json',
         },
+        podSecurityContext: {
+          enabled: true,
+          seccompProfile: { type: 'RuntimeDefault' },
+        },
         securityContext: {
           enabled: true,
           allowPrivilegeEscalation: false,
@@ -377,6 +381,10 @@
         },
         podAnnotations: {
           'fluentbit.io/parser': 'victoria-json',
+        },
+        podSecurityContext: {
+          enabled: true,
+          seccompProfile: { type: 'RuntimeDefault' },
         },
         securityContext: {
           enabled: true,
@@ -737,6 +745,7 @@
     }),
     helm_server: $._custom.helm.new('victoria-metrics-single', 'victoria-metrics-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.server.chart, 'monitoring', valuesSecretObj=self.helm_server_values_secret),
     helm_blackbox_exporter: $._custom.helm.new('prometheus-blackbox-exporter', 'prometheus-blackbox-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.blackbox_exporter.chart, 'monitoring', {
+      podSecurityContext: { seccompProfile: { type: 'RuntimeDefault' } },
       image: {
         registry: $._version.blackbox_exporter.registry,
         repository: $._version.blackbox_exporter.repository,
@@ -863,6 +872,7 @@
       },
       podSecurityContext: {
         fsGroup: 65534,
+        seccompProfile: { type: 'RuntimeDefault' },
       },
       config: {
         global: {},
@@ -995,6 +1005,7 @@
       },
     }),
     helm_node_exporter: $._custom.helm.new('prometheus-node-exporter', 'prometheus-node-exporter', 'https://prometheus-community.github.io/helm-charts', $._version.node_exporter.chart, 'monitoring', {
+      securityContext: { seccompProfile: { type: 'RuntimeDefault' } },
       image: {
         registry: $._version.node_exporter.registry,
         repository: $._version.node_exporter.repository,
@@ -1170,6 +1181,7 @@
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '8080',
                 })
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
                 + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

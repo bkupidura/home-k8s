@@ -352,10 +352,8 @@ class Validator(ValidatorBase):
                                             "containers": [
                                                 Schema(
                                                     {
-                                                        Optional("securityContext"): {
-                                                            Optional(
-                                                                "allowPrivilegeEscalation"
-                                                            ): And(
+                                                        "securityContext": {
+                                                            "allowPrivilegeEscalation": And(
                                                                 bool,
                                                                 lambda x: x is False,
                                                             ),
@@ -408,6 +406,28 @@ class Validator(ValidatorBase):
                                             "automountServiceAccountToken": And(
                                                 bool, lambda x: x is False
                                             ),
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
+                        "name": "seccomp_profile_runtime_default",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "securityContext": {
+                                                "seccompProfile": {
+                                                    "type": And(
+                                                        str,
+                                                        lambda x: x == "RuntimeDefault",
+                                                    ),
+                                                },
+                                            },
                                         }
                                     },
                                 },

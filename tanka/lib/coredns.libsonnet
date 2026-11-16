@@ -260,6 +260,7 @@
                   )
                 )
                 + d.metadata.withNamespace('kube-system')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault'),
   },
 }
