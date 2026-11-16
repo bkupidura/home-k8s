@@ -211,6 +211,7 @@
                 + p.spec.withStorageClassName(std.get($.storage.class_with_encryption.metadata, 'name'))
                 + p.spec.resources.withRequests({ storage: '10Gi' }),
     helm_server: $._custom.helm.new('victoria-logs-single', 'victoria-logs-single', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.logs.chart, 'monitoring', {
+      serviceAccount: { create: true, automountToken: false },
       server: {
         image: {
           registry: $._version.victoria_metrics.logs.registry,
@@ -293,6 +294,7 @@
       ],
     ),
     helm_alert: $._custom.helm.new('victoria-logs-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
+      serviceAccount: { automountToken: false },
       server: {
         enabled: true,
         image: {

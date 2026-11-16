@@ -222,6 +222,7 @@
                 + d.emptyVolumeMount('tmp', '/tmp', volumeMixin=v1.volume.emptyDir.withSizeLimit('100M'))
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.securityContext.withFsGroup(911)
-                + d.metadata.withNamespace('self-hosted'),
+                + d.metadata.withNamespace('self-hosted')
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

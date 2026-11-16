@@ -224,6 +224,7 @@
                 + d.spec.template.spec.withVolumesMixin([
                   v1.volume.fromSecret(cert.secret, cert.secret)
                   for cert in $.waf.certs_sorted
-                ]),
+                ])
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

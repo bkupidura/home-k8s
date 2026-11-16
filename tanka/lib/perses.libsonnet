@@ -286,6 +286,7 @@
                 ])
                 + d.spec.strategy.withType('RollingUpdate')
                 + d.metadata.withNamespace('monitoring')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

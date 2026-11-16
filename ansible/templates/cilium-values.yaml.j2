@@ -16,6 +16,9 @@ bgpControlPlane:
   enabled: true
 envoy:
   enabled: true
+serviceAccounts:
+  envoy:
+    automount: false
 image:
   repository: quay.io/cilium/cilium
   tag: v{{ cilium.version }}

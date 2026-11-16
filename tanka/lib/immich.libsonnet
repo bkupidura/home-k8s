@@ -325,7 +325,8 @@
                        + d.pvcVolumeMount('immich-data', '/usr/src/app/upload', false, {})
                        + d.spec.strategy.withType('Recreate')
                        + d.metadata.withNamespace('self-hosted')
-                       + d.spec.template.spec.withTerminationGracePeriodSeconds(10),
+                       + d.spec.template.spec.withTerminationGracePeriodSeconds(10)
+                       + d.spec.template.spec.withAutomountServiceAccountToken(false),
     deployment_postgres: d.new('immich-postgres',
                                1,
                                [
@@ -384,6 +385,7 @@
                          ])
                          + d.spec.strategy.withType('Recreate')
                          + d.metadata.withNamespace('self-hosted')
-                         + d.spec.template.spec.withTerminationGracePeriodSeconds(20),
+                         + d.spec.template.spec.withTerminationGracePeriodSeconds(20)
+                         + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

@@ -90,6 +90,7 @@
                 + d.spec.template.spec.withNodeSelector({ nfc_controller: 'true' })
                 + d.metadata.withAnnotations({ 'reloader.stakater.com/auto': 'true' })
                 + d.metadata.withNamespace('smart-home')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

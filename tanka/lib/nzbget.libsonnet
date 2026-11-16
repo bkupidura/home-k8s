@@ -143,6 +143,7 @@
                 + d.pvcVolumeMount('nzbget-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/downloads', false, {})
                 + d.spec.strategy.withType('Recreate')
-                + d.metadata.withNamespace('arr'),
+                + d.metadata.withNamespace('arr')
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

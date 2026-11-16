@@ -227,6 +227,7 @@
                   + v1.weightedPodAffinityTerm.podAffinityTerm.labelSelector.withMatchExpressions(
                     { key: 'app.kubernetes.io/name', operator: 'In', values: ['zigbee2mqtt', 'node-red'] }
                   )
-                ),
+                )
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

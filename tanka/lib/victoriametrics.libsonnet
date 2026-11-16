@@ -302,6 +302,7 @@
       ],
     ),
     helm_alert: $._custom.helm.new('victoria-metrics-alert', 'victoria-metrics-alert', 'https://victoriametrics.github.io/helm-charts/', $._version.victoria_metrics.alert.chart, 'monitoring', {
+      serviceAccount: { automountToken: false },
       server: {
         enabled: true,
         image: {
@@ -819,6 +820,7 @@
       ],
     ),
     helm_alertmanager_values_secret: $._custom.helm.valuesSecret('alertmanager-values', {
+      automountServiceAccountToken: false,
       image: {
         repository: std.splitLimitR($._version.alertmanager.image, ':', 1)[0],
         tag: std.splitLimitR($._version.alertmanager.image, ':', 1)[1],
@@ -1167,6 +1169,7 @@
                 + d.spec.template.metadata.withAnnotations({
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '8080',
-                }),
+                })
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

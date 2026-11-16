@@ -246,6 +246,7 @@
                   'prometheus.io/scrape': 'true',
                   'prometheus.io/port': '9959',
                   'fluentbit.io/parser': 'json-rfc3339',
-                }),
+                })
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

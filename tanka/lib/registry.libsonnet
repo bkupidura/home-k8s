@@ -101,6 +101,7 @@
                 + d.pvcVolumeMount('registry', '/var/lib/registry', false, {})
                 + d.spec.strategy.withType('Recreate')
                 + d.metadata.withNamespace('home-infra')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

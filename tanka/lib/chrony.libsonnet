@@ -88,6 +88,7 @@
                  v1.volume.fromHostPath('etc-timezone', '/etc/timezone') + v1.volume.hostPath.withType('File'),
                ])
                + d.emptyVolumeMount('chrony-lib', '/var/lib/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('10M'))
-               + d.emptyVolumeMount('chrony-run', '/var/run/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('1M')),
+               + d.emptyVolumeMount('chrony-run', '/var/run/chrony', volumeMixin=v1.volume.emptyDir.withSizeLimit('1M'))
+               + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

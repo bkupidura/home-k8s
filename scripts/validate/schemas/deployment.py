@@ -399,6 +399,23 @@ class Validator(ValidatorBase):
                         ),
                     },
                     {
+                        "name": "automount_service_account_token_false",
+                        "schema": Schema(
+                            {
+                                "spec": {
+                                    "template": {
+                                        "spec": {
+                                            "automountServiceAccountToken": And(
+                                                bool, lambda x: x is False
+                                            ),
+                                        }
+                                    },
+                                },
+                            },
+                            ignore_extra_keys=True,
+                        ),
+                    },
+                    {
                         "name": "resources_cpu_present",
                         "schema": Schema(
                             {

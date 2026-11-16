@@ -96,6 +96,7 @@
                + d.spec.template.metadata.withAnnotations({
                  'prometheus.io/scrape': 'true',
                  'prometheus.io/port': '8080',
-               }),
+               })
+               + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

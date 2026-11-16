@@ -53,6 +53,7 @@
                 + d.spec.strategy.withType('Recreate')
                 + d.spec.template.spec.withNodeSelector({ modem_controller: 'true' })
                 + d.metadata.withNamespace('smart-home')
-                + d.spec.template.spec.withTerminationGracePeriodSeconds(5),
+                + d.spec.template.spec.withTerminationGracePeriodSeconds(5)
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }

@@ -225,6 +225,7 @@
                   'prometheus.io/port': '9199',
                   'prometheus.io/path': '/ups_metrics',
                   'prometheus.io/param_ups': 'apc',
-                }),
+                })
+                + d.spec.template.spec.withAutomountServiceAccountToken(false),
   },
 }
