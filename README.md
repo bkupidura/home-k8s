@@ -41,7 +41,6 @@ Trigger every `*-restore` CronJob.:
 ./scripts/prepare_backup_cmnds.sh restore | bash
 ```
 
-
 ## Show ansible variables
 
 `./scripts/run_ansible.sh -s all`

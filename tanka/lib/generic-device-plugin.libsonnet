@@ -60,7 +60,7 @@
                          std.manifestYamlDoc({
                            name: 'ups',
                            groups: [
-                             { paths: [{ path: '/dev/usb-ups', mountPath: '/dev/bus/usb/001/003' }] },
+                             { usb: [{ vendor: '051d', product: '0002' }] },
                            ],
                          }),
                          '--device',
@@ -74,7 +74,7 @@
                          std.manifestYamlDoc({
                            name: 'nfc-reader',
                            groups: [
-                             { paths: [{ path: '/dev/usb-nfc-reader', mountPath: '/dev/bus/usb/001/005' }] },
+                             { usb: [{ vendor: '072f', product: '2200' }] },
                            ],
                          }),
                        ])

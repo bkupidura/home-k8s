@@ -454,7 +454,7 @@
       chart: '9.2.2',
     },
     kitsune: {
-      image: std.format('registry.%s/kitsune:0.4d', std.extVar('secrets').domain),
+      image: std.format('registry.%s/kitsune:0.4e', std.extVar('secrets').domain),
     },
   },
 }
