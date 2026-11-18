@@ -30,6 +30,24 @@
       },
     },
   },
+  logging+: {
+    rules+:: [
+      {
+        name: 'bazarr',
+        interval: '1m',
+        rules: [
+          {
+            alert: 'BazarrBackupError',
+            expr: '_time:5m kubernetes__container_name: "bazarr" and i("unable to backup database file") | stats by (kubernetes__pod_name) count() as log_count| filter log_count :> 0',
+            labels: { service: 'bazarr', severity: 'warning' },
+            annotations: {
+              summary: 'Bazarr backup failed on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
+        ],
+      },
+    ],
+  },
   authelia+: {
     access_control+:: [
       {

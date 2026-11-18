@@ -41,6 +41,14 @@
               summary: 'Sonarr database corrupted on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
+          {
+            alert: 'SonarrBackupError',
+            expr: '_time:5m kubernetes__container_name: "sonarr" and i("error occurred while executing task backup") | stats by (kubernetes__pod_name) count() as log_count| filter log_count :> 0',
+            labels: { service: 'sonarr', severity: 'warning' },
+            annotations: {
+              summary: 'Sonarr backup failed on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
         ],
       },
     ],
@@ -191,11 +199,13 @@
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(15)
                         + c.readinessProbe.withTimeoutSeconds(3)
+                        + c.readinessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: std.format('sonarr.%s', std.extVar('secrets').domain) }])
                         + c.livenessProbe.httpGet.withPath('/')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(30)
                         + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(5),
+                        + c.livenessProbe.withTimeoutSeconds(5)
+                        + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: std.format('sonarr.%s', std.extVar('secrets').domain) }]),
                       ],
                       { 'app.kubernetes.io/name': 'sonarr' })
                 + d.pvcVolumeMount('sonarr-config', '/config', false, {})

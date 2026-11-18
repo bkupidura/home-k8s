@@ -41,6 +41,14 @@
               summary: 'Radarr database corrupted on {{ index $labels "kubernetes__pod_name" }}',
             },
           },
+          {
+            alert: 'RadarrBackupError',
+            expr: '_time:5m kubernetes__container_name: "radarr" and i("error occurred while executing task backup") | stats by (kubernetes__pod_name) count() as log_count| filter log_count :> 0',
+            labels: { service: 'radarr', severity: 'warning' },
+            annotations: {
+              summary: 'Radarr backup failed on {{ index $labels "kubernetes__pod_name" }}',
+            },
+          },
         ],
       },
     ],
@@ -154,11 +162,13 @@
                         + c.readinessProbe.withInitialDelaySeconds(10)
                         + c.readinessProbe.withPeriodSeconds(15)
                         + c.readinessProbe.withTimeoutSeconds(3)
+                        + c.readinessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: std.format('radarr.%s', std.extVar('secrets').domain) }])
                         + c.livenessProbe.httpGet.withPath('/ping')
                         + c.livenessProbe.httpGet.withPort('http')
                         + c.livenessProbe.withInitialDelaySeconds(60)
                         + c.livenessProbe.withPeriodSeconds(15)
-                        + c.livenessProbe.withTimeoutSeconds(5),
+                        + c.livenessProbe.withTimeoutSeconds(5)
+                        + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: std.format('radarr.%s', std.extVar('secrets').domain) }]),
                       ],
                       { 'app.kubernetes.io/name': 'radarr' })
                 + d.pvcVolumeMount('radarr-config', '/config', false, {})
