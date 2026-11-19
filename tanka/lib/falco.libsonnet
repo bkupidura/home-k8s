@@ -208,7 +208,7 @@
         'incubating-s6-overlay-init-exception.yaml': std.manifestYamlDoc([
           {
             macro: 'user_known_set_setuid_or_setgid_bit_conditions',
-            condition: 'or (proc.name=s6-supervise and proc.pname=s6-svscan and proc.cmdline startswith "s6-supervise " and evt.arg.filename endswith "/event") or (proc.name=s6-rc-init and proc.pname=rc.init and proc.cmdline="s6-rc-init -c /run/s6/db /run/service" and evt.arg.filename startswith "/run/s6-rc/servicedirs/" and evt.arg.filename endswith "/event")',
+            condition: 'or (proc.name=s6-supervise and proc.pname=s6-svscan and proc.cmdline startswith "s6-supervise " and evt.arg.filename endswith "/event") or (proc.name=s6-rc-init and proc.pname=rc.init and proc.cmdline="s6-rc-init -c /run/s6/db /run/service" and evt.arg.filename startswith "/run/s6-rc" and evt.arg.filename contains "/servicedirs/" and evt.arg.filename endswith "/event")',
             override: {
               condition: 'append',
             },

@@ -38,7 +38,7 @@
         'democratic-csi-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
           {
             macro: 'k8s_containers',
-            condition: 'or (container.image.repository=registry.k8s.io/sig-storage/csi-resizer and proc.name=csi-resizer)',
+            condition: 'or (container.image.repository=registry.k8s.io/sig-storage/csi-resizer and proc.name=csi-resizer) or (container.image.repository=registry.k8s.io/sig-storage/csi-snapshotter and proc.name=csi-snapshotter) or (container.image.repository=registry.k8s.io/sig-storage/csi-attacher and proc.name=csi-attacher)',
             override: {
               condition: 'append',
             },

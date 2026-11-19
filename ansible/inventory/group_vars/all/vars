@@ -11,8 +11,8 @@ os:
     - user: ansible
       key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC8yktF6/N1ho0QYQX0uFT9EX2fv6VCJyz58o3knrpIu bartosz@banshee.local"
 k3s:
-  version: "v1.36.4+k3s1"
-  cni_url: "https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz"
+  version: "v1.37.2+k3s1"
+  cni_url: "https://github.com/containernetworking/plugins/releases/download/v1.10.0/cni-plugins-linux-amd64-v1.10.0.tgz"
   service:
     create:
       custom-cni-dhcp:
@@ -44,8 +44,8 @@ k3s:
     - "node-status-max-images=-1"
     - "--secrets-encryption"
 cilium:
-  cli_version: "v0.20.0"
-  version: "1.20.1"
+  cli_version: "v0.20.3"
+  version: "1.20.5"
   pod_cidr: "10.42.0.0/16"
   bgp:
     local_asn: 64500

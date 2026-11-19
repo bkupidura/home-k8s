@@ -76,7 +76,7 @@
         'incubating-waf-modsecurity-setuid-exception.yaml': std.manifestYamlDoc([
           {
             macro: 'user_known_non_sudo_setuid_conditions',
-            condition: std.format('or (container.image.repository=registry.%s/waf-modsecurity and evt.arg.uid=nginx and proc.exepath=/bin/busybox)', std.extVar('secrets').domain),
+            condition: std.format('or (container.image.repository=registry.%s/waf-modsecurity and container.name=waf-init and evt.arg.uid=nginx and proc.exepath=/bin/busybox)', std.extVar('secrets').domain),
             override: {
               condition: 'append',
             },
@@ -117,11 +117,24 @@
         },
       ],
     ),
+    zone_snippet:: |||
+      limit_req_zone $binary_remote_addr zone=req_%(zone)s:1m rate=%(req_rate)s;
+      limit_conn_zone $binary_remote_addr zone=conn_%(zone)s:1m;
+    |||,
+    zones:: [
+      $.waf.zone_snippet % { zone: server_name, req_rate: std.get(std.extVar('secrets').waf.server[server_name], 'req_rate', '15r/s') }
+      for server_name in std.objectFields(std.extVar('secrets').waf.server)
+    ],
     nginx_snippet:: |||
       server {
           listen 443 ssl;
           http2 on;
           server_name %(domain)s;
+          limit_req zone=req_%(zone)s burst=%(req_burst)s nodelay;
+          limit_conn conn_%(zone)s %(conn_limit)s;
+          client_header_timeout %(client_header_timeout)s;
+          client_body_timeout %(client_body_timeout)s;
+          send_timeout %(send_timeout)s;
           resolver %(resolver)s valid=30s;
           set $upstream https://%(upstream)s;
           ssl_certificate %(cert_dir)s/tls.crt;
@@ -134,7 +147,7 @@
             %(server_rules)s
           ';
           location / {
-            client_max_body_size 0;
+            client_max_body_size %(client_max_body_size)s;
             proxy_set_header Host $host;
             proxy_set_header Proxy "";
             proxy_set_header Upgrade $http_upgrade;
@@ -154,7 +167,7 @@
       }
     |||,
     nginx_config:: [
-      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: 'traefik.traefik-system.svc.cluster.local', resolver: $.coredns.kubelet_cluster_dns, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s'), cert_dir: std.extVar('secrets').waf.server[server_name].cert_dir }
+      $.waf.nginx_snippet % { domain: std.extVar('secrets').waf.server[server_name].domain, upstream: 'traefik.traefik-system.svc.cluster.local', resolver: $.coredns.kubelet_cluster_dns, server_rules: std.join('\n', std.extVar('secrets').waf.server[server_name].rules), proxy_connect_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_connect_timeout', '5s'), proxy_read_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_read_timeout', '30s'), proxy_send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'proxy_send_timeout', '30s'), cert_dir: std.extVar('secrets').waf.server[server_name].cert_dir, req_burst: std.get(std.extVar('secrets').waf.server[server_name], 'req_burst', '60'), conn_limit: std.get(std.extVar('secrets').waf.server[server_name], 'conn_limit', '50'), client_max_body_size: std.get(std.extVar('secrets').waf.server[server_name], 'client_max_body_size', '1m'), zone: server_name, client_header_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'client_header_timeout', '5s'), client_body_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'client_body_timeout', '15s'), send_timeout: std.get(std.extVar('secrets').waf.server[server_name], 'send_timeout', '15s') }
       for server_name in std.objectFields(std.extVar('secrets').waf.server)
     ],
     certs:: [
@@ -177,7 +190,7 @@
              + s.spec.withExternalTrafficPolicy('Local')
              + s.spec.withPublishNotReadyAddresses(false),
     config: v1.configMap.new('waf-config', {
-              'waf.conf': std.join('\n', $.waf.nginx_config),
+              'waf.conf': std.join('\n', $.waf.zones + $.waf.nginx_config),
             })
             + v1.configMap.metadata.withNamespace('home-infra'),
     deployment: d.new('waf',
@@ -186,15 +199,7 @@
                         c.new('waf', $._version.waf.image)
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts([v1.containerPort.newNamed(80, 'http'), v1.containerPort.newNamed(443, 'https')])
-                        + c.withEnvMap({
-                          TZ: $._config.tz,
-                          PARANOIA: '4',
-                          ANOMALY_INBOUND: '5',
-                          ANOMALY_OUTBOUND: '4',
-                          MODSEC_REQ_BODY_LIMIT: '20971520',
-                          MODSEC_REQ_BODY_LIMIT_ACTION: 'ProcessPartial',
-                          ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE REPORT PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
-                        })
+                        + c.withEnvMap({ TZ: $._config.tz })
                         + c.withVolumeMountsMixin([
                           v1.volumeMount.new(cert.secret, cert.dir)
                           for cert in $.waf.certs_sorted
@@ -226,6 +231,35 @@
                   for cert in $.waf.certs_sorted
                 ])
                 + d.spec.template.spec.securityContext.seccompProfile.withType('RuntimeDefault')
-                + d.spec.template.spec.withAutomountServiceAccountToken(false),
+                + d.spec.template.spec.withAutomountServiceAccountToken(false)
+                + d.metadata.withAnnotationsMixin({ 'reloader.stakater.com/auto': 'true' })
+                + d.spec.template.spec.withInitContainers([
+                  c.new('waf-init', $._version.waf.image)
+                  + c.withImagePullPolicy('IfNotPresent')
+                  + c.withCommand(['/init.sh'])
+                  + c.withEnvMap({
+                    TZ: $._config.tz,
+                    PARANOIA: '4',
+                    ANOMALY_INBOUND: '5',
+                    ANOMALY_OUTBOUND: '4',
+                    MODSEC_REQ_BODY_LIMIT: '20971520',
+                    MODSEC_REQ_BODY_LIMIT_ACTION: 'ProcessPartial',
+                    ALLOWED_METHODS: 'GET HEAD POST OPTIONS DELETE REPORT PROPFIND CHECKOUT COPY DELETE LOCK MERGE MKACTIVITY MKCOL MOVE PROPPATCH PUT UNLOCK',
+                  })
+                  + c.withVolumeMountsMixin([
+                    v1.volumeMount.new('etc-nginx', '/etc/nginx'),
+                    v1.volumeMount.new('etc-modsecurity', '/etc/modsecurity.d'),
+                    v1.volumeMount.new('tmp', '/tmp'),
+                    v1.volumeMount.new('waf-config', '/nginx/conf.d'),
+                  ] + [
+                    v1.volumeMount.new(cert.secret, cert.dir)
+                    for cert in $.waf.certs_sorted
+                  ])
+                  + c.resources.withRequests({ memory: '64Mi', cpu: '50m' })
+                  + c.resources.withLimits({ memory: '64Mi', cpu: '50m' })
+                  + c.securityContext.withAllowPrivilegeEscalation(false)
+                  + c.securityContext.withReadOnlyRootFilesystem(true)
+                  + c.securityContext.capabilities.withDrop('all'),
+                ]),
   },
 }

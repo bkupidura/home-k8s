@@ -353,7 +353,7 @@
                                  + c.securityContext.capabilities.withDrop('all')
                                  + (if $.immich.update == false then
                                       c.resources.withRequests({ cpu: '300m', memory: '200M' })
-                                      + c.resources.withLimits({ cpu: '600m', memory: '300M' })
+                                      + c.resources.withLimits({ cpu: '600m', memory: '400M' })
                                       + c.readinessProbe.exec.withCommand(['/usr/local/bin/healthcheck.sh'])
                                       + c.readinessProbe.withInitialDelaySeconds(20)
                                       + c.readinessProbe.withPeriodSeconds(15)

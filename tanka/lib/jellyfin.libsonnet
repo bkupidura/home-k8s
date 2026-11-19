@@ -88,6 +88,7 @@
                         c.new('jellyfin', $._version.jellyfin.image)
                         + c.withVolumeMounts([
                           v1.volumeMount.new('jellyfin-cache', '/cache', false),
+                          v1.volumeMount.new('tmp', '/tmp', false),
                         ])
                         + c.withImagePullPolicy('IfNotPresent')
                         + c.withPorts([
@@ -122,6 +123,7 @@
                       { 'app.kubernetes.io/name': 'jellyfin' })
                 + d.spec.template.spec.withVolumes([
                   v1.volume.fromEmptyDir('jellyfin-cache', emptyDir={ sizeLimit: '15Gi' }),
+                  v1.volume.fromEmptyDir('tmp', emptyDir={ sizeLimit: '2Gi' }),
                 ])
                 + d.pvcVolumeMount('jellyfin-config', '/config', false, {})
                 + d.pvcVolumeMount('media', '/media', false, {})

@@ -157,6 +157,7 @@
                           PAPERLESS_DBNAME: 'paperless',
                           PAPERLESS_DBUSER: 'paperless',
                           PAPERLESS_URL: std.format('https://paperless.%s', std.extVar('secrets').domain),
+                          PAPERLESS_ALLOWED_HOSTS: std.format('paperless.%s', std.extVar('secrets').domain),
                           PAPERLESS_OCR_LANGUAGE: 'pol+eng',
                           PAPERLESS_OCR_LANGUAGES: 'pol',
                           PAPERLESS_FILENAME_FORMAT: '{{ document_type }}/{{ created_year }}/{{ created_month }}/{{ title }}',
@@ -189,6 +190,7 @@
                              + c.readinessProbe.withTimeoutSeconds(1)
                              + c.livenessProbe.httpGet.withPath('/')
                              + c.livenessProbe.httpGet.withPort('http')
+                             + c.livenessProbe.httpGet.withHttpHeaders([{ name: 'Host', value: std.format('paperless.%s', std.extVar('secrets').domain) }])
                              + c.livenessProbe.withInitialDelaySeconds(300)
                              + c.livenessProbe.withPeriodSeconds(10)
                              + c.livenessProbe.withTimeoutSeconds(3)

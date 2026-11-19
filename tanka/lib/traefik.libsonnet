@@ -1,4 +1,19 @@
 {
+  falco+: {
+    exception+:: {
+      traefik: {
+        'traefik-trusted-k8s-api-exception.yaml': std.manifestYamlDoc([
+          {
+            macro: 'k8s_containers',
+            condition: 'or (container.image.repository=docker.io/library/traefik and proc.name=traefik)',
+            override: {
+              condition: 'append',
+            },
+          },
+        ]),
+      },
+    },
+  },
   cilium+: {
     policy+: {
       'victoria-metrics-single'+: {
