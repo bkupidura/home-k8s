@@ -9,6 +9,7 @@ brew install jsonnet-bundler
 brew install esolitos/ipa/sshpass
 brew install sops
 brew install pint
+brew install trivy
 ```
 
 ## Cluster deployment from scratch

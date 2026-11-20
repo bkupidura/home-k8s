@@ -101,11 +101,11 @@
     broker_ha: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/broker-ha:0.1.23',
-          destination: std.format('registry.%s/broker-ha:0.1.23', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/broker-ha:0.1.24',
+          destination: std.format('registry.%s/broker-ha:0.1.24', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/broker-ha:0.1.23', std.extVar('secrets').domain),
+      image: std.format('registry.%s/broker-ha:0.1.24', std.extVar('secrets').domain),
     },
     zigbee2mqtt: {
       cache: [
@@ -161,11 +161,11 @@
     recorder: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/recorder:2.0.11',
-          destination: std.format('registry.%s/recorder:2.0.11', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/recorder:2.0.12',
+          destination: std.format('registry.%s/recorder:2.0.12', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/recorder:2.0.11', std.extVar('secrets').domain),
+      image: std.format('registry.%s/recorder:2.0.12', std.extVar('secrets').domain),
     },
     sms_gammu: {
       cache: [
@@ -417,20 +417,20 @@
     dmh: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/dead-man-hand:0.4.1',
-          destination: std.format('registry.%s/dead-man-hand:0.4.1', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/dead-man-hand:0.4.2',
+          destination: std.format('registry.%s/dead-man-hand:0.4.2', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/dead-man-hand:0.4.1', std.extVar('secrets').domain),
+      image: std.format('registry.%s/dead-man-hand:0.4.2', std.extVar('secrets').domain),
     },
     nfc2mqtt: {
       cache: [
         {
-          source: 'ghcr.io/bkupidura/nfc2mqtt:0.1.7',
-          destination: std.format('registry.%s/nfc2mqtt:0.1.7', std.extVar('secrets').domain),
+          source: 'ghcr.io/bkupidura/nfc2mqtt:0.1.8',
+          destination: std.format('registry.%s/nfc2mqtt:0.1.8', std.extVar('secrets').domain),
         },
       ],
-      image: std.format('registry.%s/nfc2mqtt:0.1.7', std.extVar('secrets').domain),
+      image: std.format('registry.%s/nfc2mqtt:0.1.8', std.extVar('secrets').domain),
     },
     mealie: {
       cache: [
@@ -454,7 +454,7 @@
       chart: '9.2.2',
     },
     kitsune: {
-      image: std.format('registry.%s/kitsune:0.4e', std.extVar('secrets').domain),
+      image: std.format('registry.%s/kitsune:0.4f', std.extVar('secrets').domain),
     },
   },
 }
